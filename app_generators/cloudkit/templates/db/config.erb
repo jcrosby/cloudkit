@@ -1,0 +1,22 @@
+development:
+  adapter: mysql
+  encoding: utf8
+  database: <%= name %>_development
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+test:
+  adapter: mysql
+  encoding: utf8
+  database: <%= name %>_test
+  username: root
+  password:
+  socket: /tmp/mysql.sock
+
+production:
+  adapter: mysql
+  encoding: utf8
+  database: <%= name %>_production
+  username: root
+  password:

@@ -1,0 +1,64 @@
+require 'yaml'
+require 'erb'
+require 'active_record'
+
+def migrate(env, version=nil)
+  ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
+  ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
+  ActiveRecord::Base.establish_connection(env)
+  ActiveRecord::Migration.verbose = true
+  ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
+  File.open(File.dirname(__FILE__) + '/db/schema.rb', 'w') do |file|
+    ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
+  end
+end
+
+def reset_db(env)
+  migrate(env, 0)
+  migrate(env)
+end
+
+desc "start thin in development mode"
+task :start do
+  `thin --rackup config.ru start`
+end
+
+namespace :db do
+  desc "migrate the database"
+  task :migrate do
+    migrate('development')
+  end
+  
+  desc "reset the development database"
+  task :reset do
+    reset_db('development')
+  end
+end
+
+namespace :test do
+  namespace :db do
+    desc "migrate the test database"
+    task :migrate do
+      migrate('test')
+    end
+    
+    desc "reset the test database"
+    task :reset do
+      reset_db('test')
+    end
+  end
+end
+
+namespace :production do
+  namespace :db do
+    desc "migrate the production database"
+    task :migrate do
+      migrate('production')
+    end
+    
+    desc "reset the production database"
+    task :reset do
+      reset_db('production')
+    end
+  end
+end

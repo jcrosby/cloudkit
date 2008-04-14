@@ -1,0 +1,20 @@
+<h1>Register a new application</h1>
+<form action='/oauth_clients' method='POST'>
+  <div class="field">
+	  <label for='oauth_client_name'>Name*</label><br/>
+	  <input type='text' name='name'/>
+  </div>
+  <div class="field">
+	  <label for='oauth_client_url'>Main Application URL*</label><br/>
+	  <input type='text' name='url'/>
+  </div>
+  <div class="field">
+	  <label for='oauth_client_callback_url'>Callback URL*</label><br/>
+	  <input type='text' name='callback_url'/>
+  </div>
+  <div class="field">
+	  <label for='oauth_client_support_url'>Support URL</label><br/>
+	  <input type='text' name='support_url'/>
+  </div>
+  <input type='submit' value='Register'/>
+</form>

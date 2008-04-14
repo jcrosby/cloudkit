@@ -1,0 +1,11 @@
+<h1>Authorize access to your account</h1>
+<p>Would you like to authorize <a href="<%= @token.client_application.url %>"><%= @token.client_application.name %></a> (<a href="<%= @token.client_application.url%>"><%= @token.client_application.url %></a>) to access your account?</p>
+<form action='/oauth/authorize' method='POST'>
+<input type='hidden' name='oauth_token' value='<%= @token.token %>'/>
+<p>
+	<input type='checkbox' name='authorize' value='1' CHECKED/> authorize access
+</p>
+<p>
+	<input type='submit'/>
+</p>
+</form>
