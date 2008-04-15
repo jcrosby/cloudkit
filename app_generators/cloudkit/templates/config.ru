@@ -11,5 +11,6 @@ use Rack::Session::Pool, :key => 'rack.session',
   :expire_after => 2592000
   
 require 'app'
+require 'resources'
 
 run Sinatra.application

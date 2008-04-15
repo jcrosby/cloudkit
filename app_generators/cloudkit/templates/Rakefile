@@ -1,6 +1,7 @@
 require 'yaml'
 require 'erb'
 require 'active_record'
+require 'fileutils'
 
 def migrate(env, version=nil)
   ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
@@ -18,18 +19,18 @@ def reset_db(env)
   migrate(env)
 end
 
-desc "start thin in development mode"
+desc 'start thin in development mode'
 task :start do
-  `thin --rackup config.ru start`
+  sh 'thin --rackup config.ru start'
 end
 
 namespace :db do
-  desc "migrate the database"
+  desc 'migrate the database'
   task :migrate do
     migrate('development')
   end
   
-  desc "reset the development database"
+  desc 'reset the development database'
   task :reset do
     reset_db('development')
   end
@@ -37,12 +38,12 @@ end
 
 namespace :test do
   namespace :db do
-    desc "migrate the test database"
+    desc 'migrate the test database'
     task :migrate do
       migrate('test')
     end
     
-    desc "reset the test database"
+    desc 'reset the test database'
     task :reset do
       reset_db('test')
     end
@@ -51,14 +52,31 @@ end
 
 namespace :production do
   namespace :db do
-    desc "migrate the production database"
+    desc 'migrate the production database'
     task :migrate do
       migrate('production')
     end
     
-    desc "reset the production database"
+    desc 'reset the production database'
     task :reset do
       reset_db('production')
     end
+  end
+end
+
+namespace :gwt do
+  desc 'compile Java to JavaScript'
+  task :compile do
+    sh 'clients/gwt/UI-compile'
+  end
+  
+  desc 'run GWT client in hosted mode'
+  task :hosted do
+    sh 'clients/gwt/UI-shell'
+  end
+  
+  desc 'clean compiled javascript'
+  task :clean do
+    rm_rf 'public/gwt/ui.UI'
   end
 end

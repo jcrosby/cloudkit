@@ -21,9 +21,6 @@ class CloudkitGenerator < RubiGen::Base
       m.directory ''
       BASEDIRS.each { |path| m.directory path }
 
-      # Create stubs
-      # m.template "template.rb",  "some_file_after_erb.rb"
-      # m.file     "file",         "some_file_copied"
       m.directory 'clients'
       m.file 'app.rb', 'app.rb'
       m.file 'config.ru', 'config.ru'
@@ -31,6 +28,8 @@ class CloudkitGenerator < RubiGen::Base
       m.directory 'public/js'
       m.directory 'public/css'
       m.directory 'public/images'
+      m.directory 'resources'
+      m.file 'resources.rb', 'resources.rb'
       m.directory 'views'
       m.file 'Rakefile', 'Rakefile'
       m.file 'README', 'README'

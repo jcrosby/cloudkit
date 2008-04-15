@@ -1,0 +1,26 @@
+class <%= name.camelcase %> < ActiveRecord::Base
+end
+
+helpers do
+  include CloudKit::Auth::Helper
+end
+
+before do
+  login_or_oauth_required
+end
+
+get '/<%= name.underscore.pluralize %>' do
+end
+
+get '/<%= name.underscore.pluralize %>/:id' do
+end
+
+post '/<%= name.underscore.pluralize %>' do
+end
+
+put '/<%= name.underscore.pluralize %>/:id' do
+end
+
+delete '/<%= name.underscore.pluralize %>/:id' do
+end
+

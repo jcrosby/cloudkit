@@ -27,14 +27,12 @@ class TestCloudkitGenerator < Test::Unit::TestCase
   
   def test_generator_without_options
     run_generator('cloudkit', [APP_ROOT], sources)
-    assert_directory_exists 'clients'
-    assert_directory_exists 'db'
-    assert_directory_exists 'db/migrate'
-    assert_directory_exists 'public/js'
-    assert_directory_exists 'public/css'
-    assert_directory_exists 'public/images'
-    assert_directory_exists 'views'
-    %w(app.rb config.ru Rakefile README db/config.yml db/migrate/001_create_schema.rb views/layout.erb views/new_session.erb views/oauth_auth.erb views/oauth_auth_failure.erb views/oauth_auth_success.erb views/oauth_clients_edit.erb views/oauth_clients_index.erb views/oauth_clients_new.erb views/oauth_clients_show.erb views/ui.erb).each do |f|
+    
+    %w(clients db/migrate public/js public/css public/images resources views).each do |d|
+      assert_directory_exists d
+    end
+    
+    %w(app.rb config.ru Rakefile README db/config.yml db/migrate/001_create_schema.rb resources.rb views/layout.erb views/new_session.erb views/oauth_auth.erb views/oauth_auth_failure.erb views/oauth_auth_success.erb views/oauth_clients_edit.erb views/oauth_clients_index.erb views/oauth_clients_new.erb views/oauth_clients_show.erb views/ui.erb).each do |f|
       assert_generated_file f
     end
   end

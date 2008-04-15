@@ -15,7 +15,7 @@ helpers do
 end
 
 get '/' do
-  'Insert amazing content here. <a href="/sessions/new">login</a>'
+  '<h1>Welcome to your new CloudKit app.</h1><a href="/sessions/new">Sign up or Login</a>'
 end
 
 get '/sessions/new' do
@@ -65,6 +65,7 @@ get '/open_id_complete' do
 end
 
 get '/ui' do
+  login_or_oauth_required
   erb :ui
 end
 

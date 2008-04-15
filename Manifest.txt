@@ -11,6 +11,7 @@ app_generators/cloudkit/templates/app.rb
 app_generators/cloudkit/templates/config.ru
 app_generators/cloudkit/templates/db/config.erb
 app_generators/cloudkit/templates/db/migrate/001_create_schema.rb
+app_generators/cloudkit/templates/resources.rb
 app_generators/cloudkit/templates/views/layout.erb
 app_generators/cloudkit/templates/views/new_session.erb
 app_generators/cloudkit/templates/views/oauth_auth.erb
@@ -34,6 +35,10 @@ generators/gwt_client/templates/lib/gwtx.jar
 generators/gwt_client/templates/src/ui/UI.gwt.xml
 generators/gwt_client/templates/src/ui/client/AppEntryPoint.java
 generators/gwt_client/templates/ui.erb
+generators/gwt_resource/USAGE
+generators/gwt_resource/gwt_resource_generator.rb
+generators/gwt_resource/templates/resource.erb
+generators/gwt_resource/templates/resource_migration.erb
 lib/cloudkit.rb
 lib/cloudkit/auth.rb
 lib/cloudkit/auth/access_token.rb
@@ -61,6 +66,7 @@ test/test_cloudkit.rb
 test/test_cloudkit_generator.rb
 test/test_generator_helper.rb
 test/test_gwt_client_generator.rb
+test/test_gwt_resource_generator.rb
 test/test_helper.rb
 website/index.html
 website/index.txt
