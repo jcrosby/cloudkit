@@ -25,6 +25,12 @@ app_generators/cloudkit/templates/views/ui.erb
 bin/cloudkit
 config/hoe.rb
 config/requirements.rb
+generators/air_client/USAGE
+generators/air_client/air_client_generator.rb
+generators/air_client/templates/AIRAliases.js
+generators/air_client/templates/app.erb
+generators/air_client/templates/app.xml.erb
+generators/air_client/templates/servicemonitor.swf
 generators/gwt_client/USAGE
 generators/gwt_client/gwt_client_generator.rb
 generators/gwt_client/templates/UI-compile.erb
@@ -62,6 +68,7 @@ setup.rb
 tasks/deployment.rake
 tasks/environment.rake
 tasks/website.rake
+test/test_air_client_generator.rb
 test/test_cloudkit.rb
 test/test_cloudkit_generator.rb
 test/test_generator_helper.rb

@@ -80,3 +80,17 @@ namespace :gwt do
     rm_rf 'public/gwt/ui.UI'
   end
 end
+
+namespace :air do
+  desc 'run AIR client in debug mode'
+  task :debug do
+    rm_rf 'clients/air/build'
+    mkdir 'clients/air/build'
+    cp_r 'public/.', 'clients/air/build'
+    cp 'clients/air/app.xml', 'clients/air/build'
+    cp 'clients/air/app.html', 'clients/air/build'
+    cp 'clients/air/AIRAliases.js', 'clients/air/build/gwt/ui.UI'
+    cp 'clients/air/servicemonitor.swf', 'clients/air/build/servicemonitor.swf'
+    sh 'adl clients/air/build/app.xml'
+  end
+end
