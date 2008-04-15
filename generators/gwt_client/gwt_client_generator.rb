@@ -14,6 +14,7 @@ class GwtClientGenerator < RubiGen::Base
   def manifest
     record do |m|
       m.directory 'clients/gwt/lib'
+      m.directory 'clients/gwt/lib'
       m.file 'lib/gwt-cloudkit.jar', 'clients/gwt/lib/gwt-cloudkit.jar'
       m.file 'lib/gwt-rest.jar', 'clients/gwt/lib/gwt-rest.jar'
       m.file 'lib/gwtx.jar', 'clients/gwt/lib/gwtx.jar'

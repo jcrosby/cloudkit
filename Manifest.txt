@@ -31,8 +31,8 @@ generators/gwt_client/templates/UI-shell.erb
 generators/gwt_client/templates/lib/gwt-cloudkit.jar
 generators/gwt_client/templates/lib/gwt-rest.jar
 generators/gwt_client/templates/lib/gwtx.jar
-generators/gwt_client/templates/src/UI.gwt.xml
-generators/gwt_client/templates/src/client/AppEntryPoint.java
+generators/gwt_client/templates/src/ui/UI.gwt.xml
+generators/gwt_client/templates/src/ui/client/AppEntryPoint.java
 generators/gwt_client/templates/ui.erb
 lib/cloudkit.rb
 lib/cloudkit/auth.rb

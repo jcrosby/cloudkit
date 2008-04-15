@@ -15,7 +15,7 @@ public class AppEntryPoint implements EntryPoint {
 
         button.addClickListener(new ClickListener() {
             public void onClick(Widget sender) {
-                if (label.getText().equals(""))
+                if (label.getText().equals("")) {
                     label.setText("Your GWT setup works. Replace the EntryPoint code when ready.");
                 } else {
                     label.setText("");
@@ -23,7 +23,7 @@ public class AppEntryPoint implements EntryPoint {
             }
         });
         
-        RootPanel.add(button);
-        RootPanel.add(label);
+        RootPanel.get().add(button);
+        RootPanel.get().add(label);
     }
 }
