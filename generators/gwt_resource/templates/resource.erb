@@ -5,22 +5,23 @@ helpers do
   include CloudKit::Auth::Helper
 end
 
-before do
+get '/<%= name.underscore.pluralize %>' do
   login_or_oauth_required
 end
 
-get '/<%= name.underscore.pluralize %>' do
-end
-
 get '/<%= name.underscore.pluralize %>/:id' do
+  login_or_oauth_required
 end
 
 post '/<%= name.underscore.pluralize %>' do
+  login_or_oauth_required
 end
 
 put '/<%= name.underscore.pluralize %>/:id' do
+  login_or_oauth_required
 end
 
 delete '/<%= name.underscore.pluralize %>/:id' do
+  login_or_oauth_required
 end
 
