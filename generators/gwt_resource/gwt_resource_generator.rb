@@ -14,8 +14,10 @@ class GwtResourceGenerator < RubiGen::Base
   def manifest
     record do |m|
       m.directory 'resources'
+      m.directory 'clients/gwt/src/ui/client/resource'
       m.template 'resource.erb', "resources/#{name.underscore.pluralize}.rb"
       m.migration_template 'resource_migration.erb', 'db/migrate', :migration_file_name => 'create_' + name.underscore.pluralize
+      m.template 'gwt_resource.erb', "clients/gwt/src/ui/client/resource/#{name.camelize}.java"
     end
   end
 

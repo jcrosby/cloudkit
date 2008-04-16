@@ -1,0 +1,139 @@
+package ui.client.resource;
+
+import com.kaboomerang.gwt.rest.client.resource.Resource;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONNumber;
+<%- if properties.values.detect { |n| n == 'Date' || n == 'DateOnly' } -%>
+import com.google.gwt.i18n.client.DateTimeFormat;
+import java.util.Date;
+<%- end -%>
+import java.util.Iterator;
+import java.util.HashMap;
+import java.beans.PropertyChangeListener; 
+import java.beans.PropertyChangeSupport;
+
+/*
+ * Generated Base Class. Do not edit.
+ *
+ * Place custom code in <%= gwt_resource_name %>.java
+ *
+ * Each migration will overwrite this file.
+ *
+ */
+
+public class <%= gwt_resource_name %>Base implements Resource {
+    protected PropertyChangeSupport changes = new PropertyChangeSupport(this);
+<%- if properties.values.detect { |n| n == 'Date' } -%>
+    protected DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat("yyyy/MM/dd HH:mm:ss ZZZZ");
+<%- end -%>
+<%- if properties.values.detect { |n| n == 'DateOnly' } -%>
+    protected DateTimeFormat dateOnlyFormat = DateTimeFormat.getFormat("yyyy/MM/dd");
+<%- end -%>
+<%- properties.keys.each do |k| -%>
+    protected <%= properties[k].sub('Only', '') %> <%= k %>;
+<%- end -%>
+    
+    public <%= gwt_resource_name %>Base() {}
+    
+    public void populateFromRepresentation(String representation) {
+        JSONObject json = (JSONObject) JSONParser.parse(representation);
+        Iterator i;
+        
+        for (i = json.keySet().iterator(); i.hasNext();) {
+            String key = (String) i.next();
+            
+<%- first = true -%>
+<%- properties.keys.each do |k| -%>
+  <%- if first -%>
+            if<%- first = false
+      else -%>
+ else if<%- end -%> ("<%= k.underscore %>".equals(key)) {
+     <%- if properties[k] == 'int' -%>
+                this.<%= k %> = new Double(json.get(key).isNumber().getValue()).intValue();
+     <%- elsif properties[k] == 'boolean' -%>
+                this.<%= k %> = json.get(key).isBoolean().booleanValue();
+     <%- elsif properties[k] == 'double' -%>
+                this.<%= k %> = json.get(key).isNumber().getValue();
+     <%- elsif properties[k] == 'DateOnly' -%>
+                JSONString js = json.get(key).isString();
+                if (js != null) {
+                    this.<%= k %> = dateOnlyFormat.parse(js.stringValue());
+                }
+     <%- elsif properties[k] == 'Date' -%>
+               JSONString js = json.get(key).isString();
+               if (js != null) {
+                   this.<%= k %> = dateTimeFormat.parse(js.stringValue());
+               }
+     <%- else -%>
+                JSONString js = json.get(key).isString();
+                if (js != null) {
+                    this.<%= k %> = js.stringValue();
+                } else {
+                    this.<%= k %> = "";
+                }
+     <%- end -%>
+            }<%- end -%>
+            
+        }
+    }
+    
+    public String toRepresentation() {
+        return "{" +
+<%- property_count = 1 -%>
+<%- properties.keys.each do |k| -%>
+            "\"<%= k.underscore %>\": " +
+  <%- if properties[k] == 'int' -%>
+            <%= k %> +
+  <%- elsif properties[k] == 'double' -%>
+            new JSONNumber(<%= k %>).toString() +
+  <%- elsif properties[k] == 'boolean' -%>
+            (<%= k %> ? "true" : "false") +
+  <%- elsif properties[k] == 'Date' -%>
+            new JSONString(dateTimeFormat.format(<%= k %>)).toString() +
+  <%- elsif properties[k] == 'DateOnly' -%>
+            new JSONString(dateOnlyFormat.format(<%= k %>)).toString() +
+  <%- else -%>
+            new JSONString(<%= k %>).toString() +
+  <%- end -%>
+  <%- if property_count != properties.size -%>
+            ", " +
+    <%- property_count += 1 -%>
+  <%- end -%>
+<%- end -%>
+            "}";
+    }
+    
+    // Accessors
+
+<%- properties.keys.each do |k| -%>
+    public <%= properties[k].sub('Only', '') %> <%- if properties[k] == 'boolean' -%>is<%- else -%>get<%- end -%><%= k.camelize %>() {
+        return <%= k %>;
+    }
+    
+    public void set<%= k.camelize %>(<%= properties[k].sub('Only', '') %> <%= k %>) {
+        <%= properties[k].sub('Only', '') %> old = this.<%= k %>;
+        this.<%= k %> = <%= k %>;
+        changes.firePropertyChange("<%= k %>", old, <%= k %>);
+    }
+    
+<%- end -%>
+    // Property Change Support
+    
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        changes.addPropertyChangeListener(l);
+    }
+
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener l) {
+        changes.addPropertyChangeListener(propertyName, l);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        changes.removePropertyChangeListener(l);
+    }
+
+    public void removePropertyChangeListener(String propertyName, PropertyChangeListener l) {
+        changes.removePropertyChangeListener(propertyName, l);
+    }
+}

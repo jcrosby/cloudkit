@@ -43,6 +43,7 @@ generators/gwt_client/templates/src/ui/client/AppEntryPoint.java
 generators/gwt_client/templates/ui.erb
 generators/gwt_resource/USAGE
 generators/gwt_resource/gwt_resource_generator.rb
+generators/gwt_resource/templates/gwt_resource.erb
 generators/gwt_resource/templates/resource.erb
 generators/gwt_resource/templates/resource_migration.erb
 lib/cloudkit.rb
@@ -58,6 +59,9 @@ lib/cloudkit/auth/oauth_token.rb
 lib/cloudkit/auth/rack_request.rb
 lib/cloudkit/auth/request_token.rb
 lib/cloudkit/auth/user.rb
+lib/cloudkit/gwt.rb
+lib/cloudkit/gwt/migrator.rb
+lib/cloudkit/gwt/templates/resource_base_template.erb
 lib/cloudkit/version.rb
 log/debug.log
 script/console

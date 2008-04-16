@@ -1,0 +1,1 @@
+require 'gwt/migrator'

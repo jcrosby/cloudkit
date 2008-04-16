@@ -16,6 +16,7 @@ class TestGwtResourceGenerator < Test::Unit::TestCase
     run_generator('gwt_resource', [name], sources)
     assert_generated_file "resources/action_items.rb"
     assert_generated_file "db/migrate/001_create_action_items.rb"
+    assert_generated_file "clients/gwt/src/ui/client/resource/ActionItem.java"
   end
   
   private
