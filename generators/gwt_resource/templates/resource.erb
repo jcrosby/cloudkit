@@ -7,21 +7,28 @@ end
 
 get '/<%= name.underscore.pluralize %>' do
   login_or_oauth_required
+  <%= name.camelcase %>.find(:all).to_json
 end
 
 get '/<%= name.underscore.pluralize %>/:id' do
   login_or_oauth_required
+  <%= name.camelcase %>.find(params['id']).to_json
 end
 
 post '/<%= name.underscore.pluralize %>' do
   login_or_oauth_required
+  <%= name.camelcase %>.create(JSON.parse(request.body.string))
+  throw :halt, [201, nil]
 end
 
 put '/<%= name.underscore.pluralize %>/:id' do
   login_or_oauth_required
+  json = request.body.string.split('&')[0]
+  <%= name.camelcase %>.find(params['id']).update_attributes!(JSON.parse(json))
 end
 
 delete '/<%= name.underscore.pluralize %>/:id' do
   login_or_oauth_required
+  <%= name.camelcase %>.destroy(params['id'])
 end
 

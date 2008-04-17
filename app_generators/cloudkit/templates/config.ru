@@ -1,5 +1,10 @@
 $:.unshift '.'
 require 'sinatra'
+require 'json'
+require 'yaml'
+require 'erb'
+require 'active_record'
+require 'cloudkit'
 
 Sinatra::Application.default_options.merge!(
   :run => false,

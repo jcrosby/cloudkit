@@ -7,7 +7,7 @@ require 'cloudkit'
 def migrate(env, version=nil)
   ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
   ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
-  connection = ActiveRecord::Base.establish_connection(env)
+  ActiveRecord::Base.establish_connection(env)
   ActiveRecord::Migration.verbose = true
   ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
   File.open(File.dirname(__FILE__) + '/db/schema.rb', 'w') do |file|
