@@ -1,14 +1,8 @@
-require 'yaml'
-require 'erb'
-require 'active_record'
-
 configure do
   ActiveRecord::Base.logger = Logger.new('log/' + Sinatra::Application.default_options[:env].to_s + '.log')
   ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
   ActiveRecord::Base.establish_connection(Sinatra::Application.default_options[:env])
 end
-
-require 'cloudkit'
 
 helpers do
   include CloudKit::Auth::Helper
