@@ -16,6 +16,7 @@ class TestGwtClientGenerator < Test::Unit::TestCase
     run_generator('gwt_client', [name], sources)
     assert_directory_exists 'clients/gwt/lib'
     assert_directory_exists 'clients/gwt/src/ui/client/resource'
+    assert_directory_exists 'clients/gwt/src/ui/client/migration'
     %w(clients/gwt/UI-compile clients/gwt/UI-shell clients/gwt/lib/gwt-rest.jar clients/gwt/lib/gwtx.jar clients/gwt/lib/gwt-cloudkit.jar clients/gwt/src/ui/UI.gwt.xml clients/gwt/src/ui/client/AppEntryPoint.java).each do |f|
       assert_generated_file f
     end
@@ -26,8 +27,7 @@ class TestGwtClientGenerator < Test::Unit::TestCase
   
   private
   def sources
-    [RubiGen::PathSource.new(:test, File.join(File.dirname(__FILE__),"..", generator_path))
-    ]
+    [RubiGen::PathSource.new(:test, File.join(File.dirname(__FILE__),"..", generator_path))]
   end
   
   def generator_path

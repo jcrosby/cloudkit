@@ -61,6 +61,9 @@ lib/cloudkit/auth/request_token.rb
 lib/cloudkit/auth/user.rb
 lib/cloudkit/gwt.rb
 lib/cloudkit/gwt/migrator.rb
+lib/cloudkit/gwt/sqlite_mirror.rb
+lib/cloudkit/gwt/templates/migration_collection_template.erb
+lib/cloudkit/gwt/templates/migration_template.erb
 lib/cloudkit/gwt/templates/resource_base_template.erb
 lib/cloudkit/version.rb
 log/debug.log

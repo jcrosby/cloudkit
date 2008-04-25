@@ -1,10 +1,6 @@
 class <%= name.camelcase %> < ActiveRecord::Base
 end
 
-helpers do
-  include CloudKit::Auth::Helper
-end
-
 get '/<%= name.underscore.pluralize %>' do
   login_or_oauth_required
   <%= name.camelcase %>.find(:all).to_json

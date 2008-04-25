@@ -14,6 +14,13 @@ def migrate(env, version=nil)
     ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
   end
   CloudKit::GWT::Migrator.new(ActiveRecord::Base.connection, File.expand_path(File.dirname(__FILE__))).migrate
+  rm_rf('tmp/air_sqlite.log')
+  rm_rf('tmp/air_log.db')
+  ActiveRecord::Base.logger = Logger.new('tmp/desktop_sqlite.log')
+  ActiveRecord::Migration.verbose = false
+  ActiveRecord::Base.establish_connection('desktop_log')
+  ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
+  CloudKit::GWT::SQLiteMirror.new(File.expand_path(File.dirname(__FILE__)) + '/tmp/desktop_sqlite.log').mirror(File.expand_path(File.dirname(__FILE__)) + '/clients/gwt')
 end
 
 def reset_db(env)

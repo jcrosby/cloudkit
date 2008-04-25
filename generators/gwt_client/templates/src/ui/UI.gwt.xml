@@ -11,6 +11,8 @@
   <!-- Inherit property change support -->
   <inherits name='com.googlecode.gwtx.Java'/>
   
+  <inherits name='com.kaboomerang.gwt.cloudkit.CloudKit'/>
+  
   <!-- Specify the app entry point class.  -->
   <entry-point class='ui.client.AppEntryPoint'/> 
 </module>

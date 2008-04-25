@@ -6,6 +6,11 @@ development:
   password:
   socket: /tmp/mysql.sock
 
+desktop_log:
+  adapter: sqlite3
+  database: tmp/desktop_log.db
+  timeout: 5000
+
 test:
   adapter: mysql
   encoding: utf8
