@@ -14,6 +14,7 @@ class AirClientGenerator < RubiGen::Base
   def manifest
     record do |m|
       m.directory 'clients/air/build'
+      m.directory 'public/air'
       m.template 'app.erb', 'clients/air/app.html'
       m.template 'app.xml.erb', 'clients/air/app.xml'
       m.file 'AIRAliases.js', 'clients/air/AIRAliases.js'

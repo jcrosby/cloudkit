@@ -3,6 +3,7 @@ require 'erb'
 require 'active_record'
 require 'fileutils'
 require 'cloudkit'
+require 'rexml/document'
 
 def migrate(env, version=nil)
   ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
@@ -91,8 +92,8 @@ namespace :gwt do
 end
 
 namespace :air do
-  desc 'run AIR client in debug mode'
-  task :debug do
+  desc 'assemble AIR assets in a clean directory'
+  task :assemble do
     rm_rf 'clients/air/build'
     mkdir 'clients/air/build'
     cp_r 'public/.', 'clients/air/build'
@@ -100,6 +101,28 @@ namespace :air do
     cp 'clients/air/app.html', 'clients/air/build'
     cp 'clients/air/AIRAliases.js', 'clients/air/build/gwt/ui.UI'
     cp 'clients/air/servicemonitor.swf', 'clients/air/build/servicemonitor.swf'
+  end
+  
+  desc 'run AIR client in debug mode'
+  task :debug => :assemble do
     sh 'adl clients/air/build/app.xml'
+  end
+  
+  desc 'generate a self-signed certificate for development and testing'
+  task :certificate do
+    name = REXML::XPath.first(REXML::Document.new(File.open('clients/air/app.xml', 'r').read), '//name').children[0]
+    puts 'Pick a password: '
+    pass = STDIN.gets.chomp!
+    sh "adt -certificate -cn #{name}SelfSign 2048-RSA clients/air/#{name}.p12 #{pass}"
+    puts 'Your certificate has been generated and stored in clients/air'
+  end
+  
+  desc 'package AIR app for distribution'
+  task :package => :assemble do
+    puts 'Packaging...you will be prompted for your certificate password...'
+    doc = REXML::Document.new(File.open('clients/air/app.xml', 'r').read)
+    name = REXML::XPath.first(doc, '//name').children[0]
+    version = REXML::XPath.first(doc, '//version').children[0]
+    sh "adt -package -storetype pkcs12 -keystore clients/air/#{name}.p12 public/air/#{name}_#{version}.air clients/air/build/app.xml -C clients/air/build/ ."
   end
 end

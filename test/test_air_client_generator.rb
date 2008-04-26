@@ -15,6 +15,7 @@ class TestAirClientGenerator < Test::Unit::TestCase
     name = "myapp"
     run_generator('air_client', [name], sources)
     assert_directory_exists 'clients/air/build'
+    assert_directory_exists 'public/air'
     %w(clients/air/app.html clients/air/app.xml clients/air/AIRAliases.js clients/air/servicemonitor.swf).each do |f|
       assert_generated_file f
     end
