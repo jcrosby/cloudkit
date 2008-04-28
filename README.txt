@@ -1,26 +1,56 @@
 = cloudkit
 
-* FIX (url)
+http://kaboomerang.com
+http://github.com/jcrosby/cloudkit/tree/master
 
 == DESCRIPTION:
 
-FIX (describe your package)
+CloudKit provides a framework for building synchronized Open Web applications that run in and out of the browser, online and offline, using technologies like OpenID, OAuth, HTML, JavaScript, CSS, and REST web services.
 
-== FEATURES/PROBLEMS:
+== FEATURES:
 
-* FIX (list of features or problems)
+* App generator with OpenID and OAuth support built in
+* Runs on the fast and furious Sinatra/Thin combo
+* Generates GWT clients that use GWT-REST instead of GWT-RPC
+* Generates synchronized model objects (RESTful resource -> GWT JavaScript model)
+* Generates desktop apps via Adobe AIR
+* Generates desktop SQLite migrations automatically
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+Build an app that supports OpenID and OAuth:
+
+> cloudkit myapp
+
+Create a database and run the app:
+
+> mysqladmin -uroot create myapp_development
+> cd myapp
+> rake db:migrate
+> rake start
+
+Create a GWT client:
+
+> script/generate gwt_client --gwt-home=/usr/local/lib/gwt
+> rake gwt:compile
+
+Run your client as a desktop app:
+
+> script/generate air_client
+> rake air:debug
+
+Add a RESTful resource that is mirrored in your GWT/AIR clients, including desktop SQLite migrations:
+
+> script/generate gwt_resource ActionItem
+> rake db:migrate
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* Gems: sinatra, ruby-openid, oauth, json, activerecord, sqlite3-ruby
 
 == INSTALL:
 
-* FIX (sudo gem install, anything else)
+rake local_deploy (until the gem is released officially)
 
 == LICENSE:
 
