@@ -1,4 +1,3 @@
-require 'digest/sha1'
 module CloudKit
   module Auth
     class User < ActiveRecord::Base

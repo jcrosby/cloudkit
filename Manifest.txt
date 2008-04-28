@@ -56,7 +56,6 @@ lib/cloudkit/auth/helper.rb
 lib/cloudkit/auth/nonce.rb
 lib/cloudkit/auth/oauth_nonce.rb
 lib/cloudkit/auth/oauth_token.rb
-lib/cloudkit/auth/rack_request.rb
 lib/cloudkit/auth/request_token.rb
 lib/cloudkit/auth/user.rb
 lib/cloudkit/gwt.rb

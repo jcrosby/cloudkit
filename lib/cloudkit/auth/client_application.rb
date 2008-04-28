@@ -1,5 +1,3 @@
-require 'oauth'
-require 'oauth/server'
 module CloudKit
   module Auth
     class ClientApplication < ActiveRecord::Base
