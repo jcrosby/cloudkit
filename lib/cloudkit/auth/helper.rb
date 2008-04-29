@@ -39,7 +39,8 @@ module CloudKit
       end
 
       def access_denied
-        stop ['Access Denied', 403]
+        store_location
+        redirect '/sessions/new'
       end
 
       def login_from_session
@@ -114,6 +115,15 @@ module CloudKit
 
       def invalid_oauth_response(code=401, message="Invalid OAuth Request")
         stop [message, code]
+      end
+      
+      def store_location
+        session['return_to'] = request.url
+      end
+      
+      def redirect_back_or_default(default)
+        redirect (session['return_to'] || default)
+        session['return_to'] = nil
       end
 
       private

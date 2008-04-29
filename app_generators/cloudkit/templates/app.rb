@@ -20,7 +20,6 @@ post '/sessions' do
   begin
     response = openid_consumer.begin params['openid_url']
   rescue => e
-    puts "error was #{e}"
     session['error'] = e
     erb :new_session
     return
@@ -47,7 +46,7 @@ get '/open_id_complete' do
         response.set_cookie('auth_token', {:value => current_user.remember_token , :expires => current_user.remember_token_expires_at})
       end
       session['notice'] = 'You have been logged in.'
-      redirect '/ui'
+      redirect_back_or_default('/ui')
     else
       session['error'] = 'Could not log on with your OpenID'
       redirect '/sessions/new'
@@ -76,7 +75,6 @@ end
 
 post '/oauth_clients' do
   @client_application = current_user.client_applications.build(:name => params['name'], :url => params['url'], :callback_url => params['callback_url'], :support_url => params['support_url'])
-  puts "client application is #{@client_application.inspect}"
   if @client_application.save
     session['notice'] = 'Registered the information successfully'
     redirect "/oauth_clients/#{@client_application.id}"
