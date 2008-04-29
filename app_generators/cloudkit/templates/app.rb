@@ -118,7 +118,7 @@ post '/oauth/request_token' do
   if @token
     @token.to_query
   else
-    [nil, 401]
+    stop [nil, 401]
   end
 end
 
@@ -159,7 +159,7 @@ get '/oauth/access_token' do
   if @token
     @token.to_query
   else
-    [nil, 401]
+    stop [nil, 401]
   end
 end
 

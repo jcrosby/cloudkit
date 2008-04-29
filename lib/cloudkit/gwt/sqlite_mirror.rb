@@ -6,6 +6,7 @@ module CloudKit
       end
       
       def mirror(gwt_root)
+        return unless File.exist? gwt_root
         migrations = []
         statements = []
         

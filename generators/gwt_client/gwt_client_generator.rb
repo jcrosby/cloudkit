@@ -4,7 +4,6 @@ class GwtClientGenerator < RubiGen::Base
   
   def initialize(runtime_args, runtime_options = {})
     super
-    #usage if args.empty?
     extract_options
   end
 
@@ -49,7 +48,6 @@ EOS
     end
     
     def extract_options
-
       @gwt_home = options[:gwt_home]
     end
 end

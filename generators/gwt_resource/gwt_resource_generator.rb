@@ -3,11 +3,17 @@ class GwtResourceGenerator < RubiGen::Base
   default_options :author => nil
   
   attr_reader :name
+  attr_reader :attrs
   
   def initialize(runtime_args, runtime_options = {})
     super
     usage if args.empty?
     @name = args.shift
+    @attrs = []
+    args.each do |attribute|
+      name, type = attribute.split(':')
+      attrs << { name => type }
+    end
     extract_options
   end
 
@@ -16,7 +22,7 @@ class GwtResourceGenerator < RubiGen::Base
       m.directory 'resources'
       m.directory 'clients/gwt/src/ui/client/resource'
       m.template 'resource.erb', "resources/#{name.underscore.pluralize}.rb"
-      m.migration_template 'resource_migration.erb', 'db/migrate', :migration_file_name => 'create_' + name.underscore.pluralize
+      m.migration_template 'resource_migration.erb', 'db/migrate', :migration_file_name => 'create_' + name.underscore.pluralize, :assigns => { :attrs => @attrs }
       m.template 'gwt_resource.erb', "clients/gwt/src/ui/client/resource/#{name.camelize}.java"
     end
   end

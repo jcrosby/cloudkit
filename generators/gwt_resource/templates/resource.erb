@@ -14,7 +14,7 @@ end
 post '/<%= name.underscore.pluralize %>' do
   login_or_oauth_required
   <%= name.camelcase %>.create(JSON.parse(request.body.string))
-  throw :halt, [201, nil]
+  stop [nil, 201]
 end
 
 put '/<%= name.underscore.pluralize %>/:id' do

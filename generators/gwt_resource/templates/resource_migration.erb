@@ -1,7 +1,11 @@
 class Create<%= name.camelize.pluralize %> < ActiveRecord::Migration
   def self.up
     create_table :<%= name.underscore.pluralize %> do |t|
-
+<%- attrs.each do |a| -%>
+  <%- a.keys.each do |name| -%>
+      t.<%= a[name] %> :<%= name %>
+  <%- end -%>
+<%- end -%>
       t.timestamps
     end
   end

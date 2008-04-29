@@ -39,7 +39,7 @@ module CloudKit
       end
 
       def access_denied
-        throw :halt, [403, 'Access Denied']
+        stop ['Access Denied', 403]
       end
 
       def login_from_session
@@ -47,7 +47,7 @@ module CloudKit
       end
 
       def login_from_cookie
-        user = cookies['auth_token'] && User.find_by_remember_token(cookies['auth_token'])
+        user = request.cookies['auth_token'] && User.find_by_remember_token(request.cookies['auth_token'])
         if user && user.remember_token?
           response.set_cookie('auth_token', { :value => user.remember_token, :expires => user.remember_token_expires_at })
           self.current_user = user
@@ -113,7 +113,7 @@ module CloudKit
       end
 
       def invalid_oauth_response(code=401, message="Invalid OAuth Request")
-        throw :halt, [code, message]
+        stop [message, code]
       end
 
       private
