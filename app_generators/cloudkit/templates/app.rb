@@ -20,7 +20,7 @@ post '/sessions' do
   begin
     response = openid_consumer.begin params['openid_url']
   rescue => e
-    session['error'] = e
+    flash['error'] = e
     erb :new_session
     return
   end
@@ -34,7 +34,7 @@ get '/open_id_complete' do
   begin
     idp_response = openid_consumer.complete params, base_url + 'open_id_complete'
   rescue => e
-    session['error'] = e
+    flash['error'] = e
     erb :new_session
     return
   end
@@ -45,14 +45,14 @@ get '/open_id_complete' do
         current_user.remember_me unless current_user.remember_token?
         response.set_cookie('auth_token', {:value => current_user.remember_token , :expires => current_user.remember_token_expires_at})
       end
-      session['notice'] = 'You have been logged in.'
+      flash['notice'] = 'You have been logged in.'
       redirect_back_or_default('/ui')
     else
-      session['error'] = 'Could not log on with your OpenID'
+      flash['error'] = 'Could not log on with your OpenID'
       redirect '/sessions/new'
     end
   else
-    session['error'] = 'Could not log on with your OpenID'
+    flash['error'] = 'Could not log on with your OpenID'
     redirect '/sessions/new'
   end
 end
@@ -76,7 +76,7 @@ end
 post '/oauth_clients' do
   @client_application = current_user.client_applications.build(:name => params['name'], :url => params['url'], :callback_url => params['callback_url'], :support_url => params['support_url'])
   if @client_application.save
-    session['notice'] = 'Registered the information successfully'
+    flash['notice'] = 'Registered the information successfully'
     redirect "/oauth_clients/#{@client_application.id}"
   else
     erb :oauth_clients_new
@@ -86,7 +86,7 @@ end
 put '/oauth_clients/:id' do
   @client_application = current_user.client_applications.find(params['id'])
   if @client_application.update_attributes(params['client_application'])
-    session['notice'] = 'Updated the client information successfully'
+    flash['notice'] = 'Updated the client information successfully'
     redirect "/oauth_clients/#{@client_application.id}"
   else
     erb :oauth_clients_edit
@@ -106,7 +106,7 @@ end
 delete '/oauth_client/:id' do
   @client_application = current_user.client_applications.find(params['id'])
   @client_application.destroy
-  session['notice'] = 'Destroyed the client application registration'
+  flash['notice'] = 'Destroyed the client application registration'
   redirect '/oauth_clients'
 end
 
