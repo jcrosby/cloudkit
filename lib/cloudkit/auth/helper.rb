@@ -146,6 +146,26 @@ module CloudKit
           valid
         end
       end
+      
+      def flash
+        session['flash'] ||= FlashSession.new
+      end
+      
+      class FlashSession
+        def initialize
+          @values = {}
+        end
+
+        def []=(k, v)
+          @values[k] = v
+        end
+
+        def [](k)
+          v = @values[k]
+          @values[k] = nil
+          v
+        end
+      end
     end
   end
 end
