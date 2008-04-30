@@ -30,6 +30,14 @@ post '/sessions' do
   redirect redirect_url
 end
 
+delete '/sessions' do
+  current_user.forget_me if logged_in?
+  response.delete_cookie 'auth_token'
+  session['user_id'] = nil
+  flash['notice'] = 'You have been logged out.'
+  redirect '/'
+end
+
 get '/open_id_complete' do
   begin
     idp_response = openid_consumer.complete params, base_url + 'open_id_complete'
