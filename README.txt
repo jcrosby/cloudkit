@@ -54,7 +54,12 @@ rake local_deploy (until the gem is released officially)
 
 == LICENSE:
 
-(The MIT License)
+GWTx - Apache License 2.0 - http://www.apache.org/licenses/LICENSE-2.0
+Gwittir - LGPL http://www.gnu.org/licenses/lgpl.html
+
+Everything else:
+
+The MIT License
 
 Copyright (c) 2008 Jon Crosby
 
