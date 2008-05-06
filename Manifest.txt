@@ -48,6 +48,10 @@ generators/gwt_resource/templates/gwt_resource.erb
 generators/gwt_resource/templates/resource.erb
 generators/gwt_resource/templates/resource_migration.erb
 lib/cloudkit.rb
+lib/cloudkit/air.rb
+lib/cloudkit/air/application_descriptor.rb
+lib/cloudkit/air/publisher.rb
+lib/cloudkit/air/templates/version_template.erb
 lib/cloudkit/auth.rb
 lib/cloudkit/auth/access_token.rb
 lib/cloudkit/auth/association.rb
