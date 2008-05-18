@@ -18,6 +18,7 @@ class AirClientGenerator < RubiGen::Base
       m.template 'app.xml.erb', 'clients/air/app.xml'
       m.file 'AIRAliases.js', 'clients/air/AIRAliases.js'
       m.file 'servicemonitor.swf', 'clients/air/servicemonitor.swf'
+      m.readme 'README'
     end
   end
 

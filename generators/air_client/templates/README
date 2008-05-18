@@ -1,0 +1,23 @@
+
+*******************************************************************************
+
+ Your AIR client has been generated.
+ 
+*******************************************************************************
+ 
+ To test immediately:
+ 
+ > rake air:debug
+ 
+ You can also package this client for publication and deployment.
+ A code signing certificate is required for this. Generate a development
+ certificate like this:
+ 
+ > rake air:certificate
+ 
+ Then, package and publish the app:
+ 
+ > rake air:package
+ 
+*******************************************************************************
+

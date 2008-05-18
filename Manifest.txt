@@ -28,6 +28,7 @@ config/requirements.rb
 generators/air_client/USAGE
 generators/air_client/air_client_generator.rb
 generators/air_client/templates/AIRAliases.js
+generators/air_client/templates/README
 generators/air_client/templates/app.erb
 generators/air_client/templates/app.xml.erb
 generators/air_client/templates/servicemonitor.swf
@@ -78,6 +79,7 @@ script/txt2html
 setup.rb
 tasks/deployment.rake
 tasks/environment.rake
+tasks/misc.rake
 tasks/website.rake
 test/test_air_client_generator.rb
 test/test_cloudkit.rb
