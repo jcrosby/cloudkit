@@ -119,8 +119,12 @@ namespace :air do
   
   desc 'package AIR app for distribution'
   task :package => :assemble do
-    puts 'Packaging...you will be prompted for your certificate password...'
     air_config = CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
+    if !File.exist?(File.expand_path(File.dirname(__FILE__)) + "/clients/air/#{air_config.name}.p12")
+      puts 'A code signing certificate is required prior to packaging an AIR application'
+      Rake::Task['air:certificate'].invoke
+    end
+    puts 'Packaging...you will be prompted for your certificate password...'
     sh "adt -package -storetype pkcs12 -keystore clients/air/#{air_config.name}.p12 public/air/#{air_config.name}_#{air_config.version}.air clients/air/build/app.xml -C clients/air/build/ ."
     CloudKit::AIR::Publisher.publish(air_config)
   end
