@@ -41,12 +41,14 @@ Run your client as a desktop app:
 
 Add a RESTful resource that is mirrored in your GWT/AIR clients, including desktop SQLite migrations:
 
-> script/generate gwt_resource ActionItem
+> script/generate gwt_resource ActionItem name:string
 > rake db:migrate
 
 == REQUIREMENTS:
 
 * Gems: sinatra, ruby-openid, oauth, json, activerecord, sqlite3-ruby
+* GWT
+* Adobe AIR
 
 == INSTALL:
 

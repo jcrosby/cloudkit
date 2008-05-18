@@ -96,6 +96,7 @@ namespace :air do
     rm_rf 'clients/air/build'
     mkdir 'clients/air/build'
     cp_r 'public/.', 'clients/air/build'
+    rm_rf 'clients/air/build/air'
     cp 'clients/air/app.xml', 'clients/air/build'
     cp 'clients/air/app.html', 'clients/air/build'
     cp 'clients/air/AIRAliases.js', 'clients/air/build/gwt/ui.UI'
