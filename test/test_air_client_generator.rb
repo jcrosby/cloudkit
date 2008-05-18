@@ -12,7 +12,7 @@ class TestAirClientGenerator < Test::Unit::TestCase
   end
   
   def test_generator_without_options
-    name = "myapp"
+    name = "MyApp"
     run_generator('air_client', [name], sources)
     assert_directory_exists 'clients/air/build'
     assert_directory_exists 'public/air'
@@ -23,8 +23,7 @@ class TestAirClientGenerator < Test::Unit::TestCase
   
   private
   def sources
-    [RubiGen::PathSource.new(:test, File.join(File.dirname(__FILE__),"..", generator_path))
-    ]
+    [RubiGen::PathSource.new(:test, File.join(File.dirname(__FILE__),"..", generator_path))]
   end
   
   def generator_path

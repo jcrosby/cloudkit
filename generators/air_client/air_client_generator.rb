@@ -1,8 +1,13 @@
 class AirClientGenerator < RubiGen::Base
+  attr_reader :name
+  default_options :app_id => nil
   
   def initialize(runtime_args, runtime_options = {})
     super
+    @name = args.shift
     extract_options
+    @name ||= 'AppName'
+    options[:app_id] ||= "com.yourcompany.#{@name}"
   end
 
   def manifest
@@ -26,8 +31,10 @@ EOS
     end
 
     def add_options!(opts)
+      opts.on("-i", "--app-id=\"com.yourcompany.AppName\"", String, "Reverse DNS-style unique ID for your app", "Default: com.yourcompany.AppName") { |options[:app_id]| }
     end
     
     def extract_options
+      @app_id = options[:app_id]
     end
 end
