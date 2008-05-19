@@ -4,46 +4,22 @@ require 'active_record'
 require 'fileutils'
 require 'cloudkit'
 
-def migrate(env, version=nil)
-  ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
-  ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
-  ActiveRecord::Base.establish_connection(env)
-  ActiveRecord::Migration.verbose = true
-  ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
-  File.open(File.dirname(__FILE__) + '/db/schema.rb', 'w') do |file|
-    ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
-  end
-  CloudKit::GWT::Migrator.new(ActiveRecord::Base.connection, File.expand_path(File.dirname(__FILE__))).migrate
-  rm_rf('tmp/desktop_sqlite.log')
-  rm_rf('tmp/desktop_log.db')
-  ActiveRecord::Base.logger = Logger.new('tmp/desktop_sqlite.log')
-  ActiveRecord::Migration.verbose = false
-  ActiveRecord::Base.establish_connection('desktop_log')
-  ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
-  CloudKit::GWT::SQLiteMirror.new(File.expand_path(File.dirname(__FILE__)) + '/tmp/desktop_sqlite.log').mirror(File.expand_path(File.dirname(__FILE__)) + '/clients/gwt')
-end
-
-def star_bar
-  2.times { puts }
-  puts "*" * 80
-  2.times { puts }
-end
-
-def reset_db(env)
-  migrate(env, 0)
-  migrate(env)
-end
-
-def load_air_config
-  CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
-end
-
 desc 'start thin in development mode'
 task :start do
   sh 'thin --rackup config.ru start'
 end
 
 namespace :db do
+  desc 'create the development database'
+  task :create do
+    create_database('development')
+  end
+  
+  desc 'drop the development database'
+  task :drop do
+    drop_database('development')
+  end
+  
   desc 'migrate the database'
   task :migrate do
     migrate('development')
@@ -57,6 +33,16 @@ end
 
 namespace :test do
   namespace :db do
+    desc 'create the test database'
+    task :create do
+      create_database('test')
+    end
+    
+    desc 'drop the test database'
+    task :drop do
+      drop_database('test')
+    end
+    
     desc 'migrate the test database'
     task :migrate do
       migrate('test')
@@ -172,5 +158,87 @@ namespace :air do
       CloudKit::AIR::Publisher.publish_major(air_config)
       Rake::Task['air:package'].invoke
     end
+  end
+end
+
+def migrate(env, version=nil)
+  ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
+  ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
+  ActiveRecord::Base.establish_connection(env)
+  ActiveRecord::Migration.verbose = true
+  ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
+  File.open(File.dirname(__FILE__) + '/db/schema.rb', 'w') do |file|
+    ActiveRecord::SchemaDumper.dump(ActiveRecord::Base.connection, file)
+  end
+  CloudKit::GWT::Migrator.new(ActiveRecord::Base.connection, File.expand_path(File.dirname(__FILE__))).migrate
+  rm_rf('tmp/desktop_sqlite.log')
+  rm_rf('tmp/desktop_log.db')
+  ActiveRecord::Base.logger = Logger.new('tmp/desktop_sqlite.log')
+  ActiveRecord::Migration.verbose = false
+  ActiveRecord::Base.establish_connection('desktop_log')
+  ActiveRecord::Migrator.migrate(File.dirname(__FILE__) + '/db/migrate', version)
+  CloudKit::GWT::SQLiteMirror.new(File.expand_path(File.dirname(__FILE__)) + '/tmp/desktop_sqlite.log').mirror(File.expand_path(File.dirname(__FILE__)) + '/clients/gwt')
+end
+
+def star_bar
+  2.times { puts }
+  puts "*" * 80
+  2.times { puts }
+end
+
+def reset_db(env)
+  migrate(env, 0)
+  migrate(env)
+end
+
+def load_air_config
+  CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
+end
+
+# adapted from Rails
+def create_database(env)
+  begin
+    ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
+    ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
+    config = ActiveRecord::Base.configurations[env]
+    ActiveRecord::Base.establish_connection(env)
+    ActiveRecord::Base.connection
+  rescue
+    case config['adapter']
+    when 'mysql'
+      @charset   = ENV['CHARSET']   || 'utf8'
+      @collation = ENV['COLLATION'] || 'utf8_general_ci'
+      begin
+        ActiveRecord::Base.establish_connection(config.merge({'database' => nil}))
+        ActiveRecord::Base.connection.create_database(config['database'], {:charset => @charset, :collation => @collation})
+        ActiveRecord::Base.establish_connection(config)
+      rescue
+        $stderr.puts "Couldn't create database for #{config.inspect}"
+      end
+    when 'postgresql'
+      `createdb "#{config['database']}" -E utf8`
+    when 'sqlite'
+      `sqlite "#{config['database']}"`
+    when 'sqlite3'
+      `sqlite3 "#{config['database']}"`
+    end
+  else
+    p "#{config['database']} already exists"
+  end
+end
+
+# adapted from Rails
+def drop_database(env)
+  ActiveRecord::Base.logger = Logger.new('log/' + env + '.log')
+  ActiveRecord::Base.configurations = YAML::load(ERB.new(IO.read(File.dirname(__FILE__) + '/db/config.yml')).result)
+  config = ActiveRecord::Base.configurations[env]
+  ActiveRecord::Base.establish_connection(env)
+  case config['adapter']
+  when 'mysql'
+    ActiveRecord::Base.connection.drop_database config['database']
+  when /^sqlite/
+    FileUtils.rm_f(File.join(File.dirname(__FILE__), config['database']))
+  when 'postgresql'
+    `dropdb "#{config['database']}"`
   end
 end
