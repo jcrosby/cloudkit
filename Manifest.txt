@@ -34,6 +34,7 @@ generators/air_client/templates/app.xml.erb
 generators/air_client/templates/servicemonitor.swf
 generators/gwt_client/USAGE
 generators/gwt_client/gwt_client_generator.rb
+generators/gwt_client/templates/README
 generators/gwt_client/templates/UI-compile.erb
 generators/gwt_client/templates/UI-shell.erb
 generators/gwt_client/templates/lib/gwittir-core-0.3.jar

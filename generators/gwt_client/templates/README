@@ -1,0 +1,42 @@
+
+*******************************************************************************
+
+ Your GWT client has been generated.
+ 
+*******************************************************************************
+ 
+ Here's your checklist:
+ 
+ 1) Run your migrations to synchronize the state of your GWT models and
+    your REST resources:
+ 
+    > rake db:migrate
+ 
+ 2) Compile down to JavaScript:
+ 
+    > rake gwt:compile
+ 
+ 3) Test:
+ 
+    > rake start
+    ... visit http://localhost:3000/ui in your browser.
+    
+ Other things you can do:
+ 
+ * Generate a new GWT model that stays in sync with your server-side schema.
+   For example, an "action item" with a "name" property:
+ 
+    > script/generate gwt_resource ActionItem name:string
+    > rake db:migrate
+    
+ * Generate a desktop version of your application using Adobe AIR.
+   For example, to generate an app called ToDoList with a unique ID
+   of com.yourcompany.ToDoList:
+ 
+    > script/generate air_client ToDoList --app-id=com.yourcompany.ToDoList
+    > rake air:debug
+      or
+    > rake air:package
+ 
+*******************************************************************************
+

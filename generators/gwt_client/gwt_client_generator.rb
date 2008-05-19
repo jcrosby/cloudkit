@@ -22,6 +22,7 @@ class GwtClientGenerator < RubiGen::Base
       m.file 'src/ui/client/AppEntryPoint.java', 'clients/gwt/src/ui/client/AppEntryPoint.java'
       m.directory 'views'
       m.file 'ui.erb', 'views/ui.erb'
+      m.readme 'README'
     end
   end
   
