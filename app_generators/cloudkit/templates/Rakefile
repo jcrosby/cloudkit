@@ -23,9 +23,19 @@ def migrate(env, version=nil)
   CloudKit::GWT::SQLiteMirror.new(File.expand_path(File.dirname(__FILE__)) + '/tmp/desktop_sqlite.log').mirror(File.expand_path(File.dirname(__FILE__)) + '/clients/gwt')
 end
 
+def star_bar
+  2.times { puts }
+  puts "*" * 80
+  2.times { puts }
+end
+
 def reset_db(env)
   migrate(env, 0)
   migrate(env)
+end
+
+def load_air_config
+  CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
 end
 
 desc 'start thin in development mode'
@@ -110,7 +120,7 @@ namespace :air do
   
   desc 'generate a self-signed certificate for development and testing'
   task :certificate do
-    air_config = CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
+    air_config = load_air_config
     puts
     print 'Pick a password for your certificate: '
     pass = STDIN.gets.chomp!
@@ -125,7 +135,7 @@ namespace :air do
   
   desc 'package AIR app for distribution'
   task :package => :assemble do
-    air_config = CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
+    air_config = load_air_config
     if !File.exist?(File.expand_path(File.dirname(__FILE__)) + "/clients/air/#{air_config.name}.p12")
       star_bar
       puts 'A code signing certificate is required prior to packaging an AIR application.'
@@ -139,5 +149,28 @@ namespace :air do
     star_bar
     puts "Your AIR application has been packaged for download or auto-update here:\n\n"
     puts "***** public/air/#{air_config.name}_#{air_config.version}.air *****\n\n"
+  end
+  
+  namespace :package do
+    desc 'publish a patch for the most current release'
+    task :patch do
+      air_config = load_air_config
+      CloudKit::AIR::Publisher.publish_patch(air_config)
+      Rake::Task['air:package'].invoke
+    end
+    
+    desc 'publish a minor version update for the most current major version'
+    task :minor do
+      air_config = load_air_config
+      CloudKit::AIR::Publisher.publish_minor(air_config)
+      Rake::Task['air:package'].invoke
+    end
+    
+    desc 'publish a new major version of the application'
+    task :major do
+      air_config = load_air_config
+      CloudKit::AIR::Publisher.publish_major(air_config)
+      Rake::Task['air:package'].invoke
+    end
   end
 end
