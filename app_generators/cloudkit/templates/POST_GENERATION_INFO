@@ -1,0 +1,51 @@
+
+*******************************************************************************
+
+ Your new CloudKit app has been generated.
+ 
+*******************************************************************************
+
+ CloudKit is a toolkit for building Open Web applications.
+ 
+ To quote the GitHub landing page, CloudKit is a
+   
+   "RESTful, cross-platform, cross-browser, online/offline, hybrid web/desktop,
+    multi-client data synchronization platform"
+ 
+ Here's your checklist to get things started:
+ 
+ 1) Create your database, migrate the schema and start the app:
+ 
+    > mysqladmin -uroot create <your_app_name>_development
+    > cd <your_app_name>
+    > rake db:migrate
+    > rake start
+    ... visit http://localhost:3000 to see the scaffolding.
+    
+    At this point, you have a working app that supports OpenID sign ups and
+    logins, OAuth API authorization, and code generators for rapid development.
+    
+    To test OAuth access, follow the link after logging in to create an
+    authorized client app. Then use something like Endpointr:
+    
+    http://github.com/jcrosby/endpointr/tree/master
+    
+    to hit the standard OAuth API access points:
+    
+    http://localhost:3000/oauth/request_token (Request Token)
+    http://localhost:3000/oauth/authorize (Authorization URL)
+    http://localhost:3000/oauth/access_token (Access Token)
+    http://localhost:3000/oauth/echo?word=hello (Protected Resource Example)
+ 
+ 2) To generate a contextually aware UI for your app, make sure you have
+    GWT installed, then:
+ 
+    > script/generate gwt_client --gwt-home=/usr/local/lib/gwt
+    
+    Follow the directions after generating your GWT app to generate a
+    desktop version that uses CloudKit's contextual awareness to change
+    behavior based on web service availability (online/offline), desktop
+    version updates, schema migrations, etc.
+ 
+*******************************************************************************
+

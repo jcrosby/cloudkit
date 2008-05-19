@@ -48,6 +48,8 @@ class CloudkitGenerator < RubiGen::Base
       
       m.dependency "install_rubigen_scripts", [destination_root, 'cloudkit'], 
         :shebang => options[:shebang], :collision => :force
+        
+      m.readme 'POST_GENERATION_INFO'
     end
   end
 
