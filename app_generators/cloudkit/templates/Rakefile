@@ -111,21 +111,33 @@ namespace :air do
   desc 'generate a self-signed certificate for development and testing'
   task :certificate do
     air_config = CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
-    puts 'Pick a password: '
+    puts
+    print 'Pick a password for your certificate: '
     pass = STDIN.gets.chomp!
+    puts
     sh "adt -certificate -cn #{air_config.name}SelfSign 2048-RSA clients/air/#{air_config.name}.p12 #{pass}"
-    puts 'Your certificate has been generated and stored in clients/air'
+    puts
+    puts "Your development/testing certificate has been generated and stored as:\n\n"
+    puts "***** clients/air/#{air_config.name}.p12 *****\n\n"
+    puts "In order for client app auto-updates to work, each version must use the same\ncertificate and application ID (from app.xml)."
+    star_bar
   end
   
   desc 'package AIR app for distribution'
   task :package => :assemble do
     air_config = CloudKit::AIR::ApplicationDescriptor.new(File.expand_path(File.dirname(__FILE__)) + '/clients/air/app.xml')
     if !File.exist?(File.expand_path(File.dirname(__FILE__)) + "/clients/air/#{air_config.name}.p12")
-      puts 'A code signing certificate is required prior to packaging an AIR application'
+      star_bar
+      puts 'A code signing certificate is required prior to packaging an AIR application.'
       Rake::Task['air:certificate'].invoke
     end
-    puts 'Packaging...you will be prompted for your certificate password...'
+    puts "\nPackaging...\n\n"
+    puts 'You will be prompted for your certificate password...'
+    puts
     sh "adt -package -storetype pkcs12 -keystore clients/air/#{air_config.name}.p12 public/air/#{air_config.name}_#{air_config.version}.air clients/air/build/app.xml -C clients/air/build/ ."
     CloudKit::AIR::Publisher.publish(air_config)
+    star_bar
+    puts "Your AIR application has been packaged for download or auto-update here:\n\n"
+    puts "***** public/air/#{air_config.name}_#{air_config.version}.air *****\n\n"
   end
 end
