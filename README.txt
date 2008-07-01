@@ -24,8 +24,8 @@ Build an app that supports OpenID and OAuth:
 
 Create a database and run the app:
 
-> mysqladmin -uroot create myapp_development
 > cd myapp
+> rake db:create
 > rake db:migrate
 > rake start
 
@@ -47,8 +47,8 @@ Add a RESTful resource that is mirrored in your GWT/AIR clients, including deskt
 == REQUIREMENTS:
 
 * Gems: sinatra, ruby-openid, oauth, json, activerecord, sqlite3-ruby
-* GWT
-* Adobe AIR
+* GWT 1.5rc1 or greater
+* Adobe AIR SDK
 
 == INSTALL:
 
@@ -56,7 +56,6 @@ rake local_deploy (until the gem is released officially)
 
 == LICENSE:
 
-GWTx - Apache License 2.0 - http://www.apache.org/licenses/LICENSE-2.0
 Gwittir - LGPL http://www.gnu.org/licenses/lgpl.html
 
 Everything else:

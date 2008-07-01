@@ -1,20 +1,25 @@
-<h2>Register a new application</h2>
+<h2>Register an OAuth Client Application</h2>
 <form action='/oauth_clients' method='POST'>
-  <div class="field">
-	  <label for='oauth_client_name'>Name*</label><br/>
-	  <input type='text' name='name'/>
-  </div>
-  <div class="field">
-	  <label for='oauth_client_url'>Main Application URL*</label><br/>
-	  <input type='text' name='url'/>
-  </div>
-  <div class="field">
-	  <label for='oauth_client_callback_url'>Callback URL*</label><br/>
-	  <input type='text' name='callback_url'/>
-  </div>
-  <div class="field">
-	  <label for='oauth_client_support_url'>Support URL</label><br/>
-	  <input type='text' name='support_url'/>
-  </div>
-  <input type='submit' value='Register'/>
+  <table>
+    <tr>
+      <td align="right"><label>Name: *</label></td>
+      <td><input type='text' name='name' size="40"/></td>
+    </tr>
+    <tr>
+      <td align="right"><label>Main Application URL: *</label></td>
+      <td><input type='text' name='url' size="40"/></td>
+    </tr>
+    <tr>
+      <td align="right"><label>Callback URL: *</label></td>
+      <td><input type='text' name='callback_url' size="40"/></td>
+    </tr>
+    <tr>
+      <td align="right"><label>Support URL</label></td>
+      <td><input type='text' name='support_url' size="40"/></td>
+    </tr>
+    <tr>
+      <td>&nbsp;</td>
+      <td><input type='submit' value='Register'/>&nbsp;<a href="/oauth_clients" class="cancel-link">Cancel</a></td>
+    </tr>
+  </table>
 </form>

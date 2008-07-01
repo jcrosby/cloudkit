@@ -1,40 +1,47 @@
 <div class="notice"><%= flash['notice'] %></div>
 <h2>OAuth Client Applications</h2>
 <% unless @tokens.empty? %>
-<p>The following tokens have been issued to applications in your name</p>
-<table>
-	<tr><th>Application</th><th>Issued</th><th>&nbsp;</th></tr>
-	<% @tokens.each do |token| %>
-		<tr>
-			<td><a href="<%= token.client_application.url %>"><%= token.client_application.name %></a></td>
-			<td><%= token.authorized_at %></td>
-			<td>REVOKE PLACEHOLDER
-				<%# form_tag(:action => url(:oauth)):controller => 'oauth', :action => 'revoke' do %>
-				<%#= hidden_field_tag 'token', token.token %>
-				<%#= submit_button 'Revoke!' %>
-				<%# end %>
-			</td>
-		</tr>
-	<% end %>
-	
+<p>The following tokens have been issued to applications in your name:</p>
+<table class="oauth-token-list">
+  <tr>
+    <th>Application</th>
+    <th>Issued</th>
+    <th>&nbsp;</th>
+  </tr>
+  <% @tokens.each do |token| %>
+    <tr>
+      <td><a href="<%= token.client_application.url %>"><%= token.client_application.name %></a></td>
+      <td><%= token.authorized_at %></td>
+      <td>
+        <form action="/oauth/tokens/<%= token.id %>" method="POST">
+          <input type="hidden" name="_method" value="DELETE"/>
+          <input type="submit" value="Revoke"/>
+        </form>
+      </td>
+    </tr>
+  <% end %>
 </table>
-<% end %>
-<h3>Application Developers</h3>
-<% if @client_applications.empty? %>
-	<p>
-		Do you have an application you would like to register for use with us using the <a href="http://oauth.net">OAuth</a> standard?
-	</p>
-	<p>
-		You must register your web application before it can make OAuth requests to this service.
-	</p>
 <% else %>
-	<p>
-		You have the following client applications registered:
-	</p>
-	<% @client_applications.each do |client| %>
-		<div>
-			<a href="/oauth_clients/<%= client.id %>"><%= client.name %></a>
-		</div>
-	<% end %>
+  <p>There are no active OAuth tokens connected with your account.</p>
 <% end %>
-<h3><a href="/oauth_clients/new">Register your application</a></h3>
+
+<h3>For Application Developers:</h3>
+<div class="prompt">
+  <a href="/oauth_clients/new">Register an application</a></h3>
+</div>
+
+<% unless @client_applications.empty? %>
+  <div>
+    Registered OAuth client applications:
+  </div>
+  <table class="oauth-client-list">
+  <% @client_applications.each do |client| %>
+    <tr>
+      <td><%= client.name %></td>
+      <td><a href="/oauth_clients/<%= client.id %>">View</a></td>
+      <td><a href="/oauth_clients/<%= client.id %>/edit">Edit</a></td>
+    </tr>
+  <% end %>
+  </table>
+<% end %>
+

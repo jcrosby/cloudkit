@@ -12,6 +12,8 @@ app_generators/cloudkit/templates/app.rb
 app_generators/cloudkit/templates/config.ru
 app_generators/cloudkit/templates/db/config.erb
 app_generators/cloudkit/templates/db/migrate/001_create_schema.rb
+app_generators/cloudkit/templates/public/css/default.css
+app_generators/cloudkit/templates/public/images/openid-login-bg.gif
 app_generators/cloudkit/templates/resources.rb
 app_generators/cloudkit/templates/views/layout.erb
 app_generators/cloudkit/templates/views/new_session.erb
@@ -23,6 +25,7 @@ app_generators/cloudkit/templates/views/oauth_clients_index.erb
 app_generators/cloudkit/templates/views/oauth_clients_new.erb
 app_generators/cloudkit/templates/views/oauth_clients_show.erb
 app_generators/cloudkit/templates/views/ui.erb
+app_generators/cloudkit/templates/views/welcome.erb
 bin/cloudkit
 config/hoe.rb
 config/requirements.rb
@@ -38,10 +41,9 @@ generators/gwt_client/gwt_client_generator.rb
 generators/gwt_client/templates/README
 generators/gwt_client/templates/UI-compile.erb
 generators/gwt_client/templates/UI-shell.erb
-generators/gwt_client/templates/lib/gwittir-core-0.3.jar
+generators/gwt_client/templates/lib/gwittir-core-0.4.4.jar
 generators/gwt_client/templates/lib/gwt-cloudkit.jar
 generators/gwt_client/templates/lib/gwt-rest.jar
-generators/gwt_client/templates/lib/gwtx.jar
 generators/gwt_client/templates/src/ui/UI.gwt.xml
 generators/gwt_client/templates/src/ui/client/AppEntryPoint.java
 generators/gwt_client/templates/ui.erb
@@ -83,6 +85,7 @@ tasks/deployment.rake
 tasks/environment.rake
 tasks/misc.rake
 tasks/website.rake
+test/fixtures/desktop_sqlite.log
 test/test_air_client_generator.rb
 test/test_cloudkit.rb
 test/test_cloudkit_generator.rb

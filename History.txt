@@ -1,4 +1,4 @@
-== 0.8.0 2008-05-12
+== 0.8.0 2008-MM-DD
 
 * 1 major enhancement:
-  * Initial release
+  * Initial release to RubyForge

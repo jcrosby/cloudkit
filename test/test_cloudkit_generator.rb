@@ -32,7 +32,7 @@ class TestCloudkitGenerator < Test::Unit::TestCase
       assert_directory_exists d
     end
     
-    %w(app.rb config.ru Rakefile README db/config.yml db/migrate/001_create_schema.rb resources.rb views/layout.erb views/new_session.erb views/oauth_auth.erb views/oauth_auth_failure.erb views/oauth_auth_success.erb views/oauth_clients_edit.erb views/oauth_clients_index.erb views/oauth_clients_new.erb views/oauth_clients_show.erb views/ui.erb).each do |f|
+    %w(app.rb config.ru Rakefile README db/config.yml db/migrate/001_create_schema.rb resources.rb views/layout.erb views/new_session.erb views/oauth_auth.erb views/oauth_auth_failure.erb views/oauth_auth_success.erb views/oauth_clients_edit.erb views/oauth_clients_index.erb views/oauth_clients_new.erb views/oauth_clients_show.erb views/ui.erb views/welcome.erb public/css/default.css public/images/openid-login-bg.gif).each do |f|
       assert_generated_file f
     end
   end

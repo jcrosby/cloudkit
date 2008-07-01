@@ -16,8 +16,8 @@
  
  1) Create your database, migrate the schema and start the app:
  
-    > mysqladmin -uroot create <your_app_name>_development
     > cd <your_app_name>
+    > rake db:create
     > rake db:migrate
     > rake start
     ... visit http://localhost:3000 to see the scaffolding.

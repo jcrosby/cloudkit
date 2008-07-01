@@ -58,7 +58,15 @@ $hoe = Hoe.new(GEM_NAME, VERS) do |p|
   
   # == Optional
   p.changes = p.paragraphs_of("History.txt", 0..1).join("\n\n")
-  #p.extra_deps = []     # An array of rubygem dependencies [name, version], e.g. [ ['active_support', '>= 1.3.1'] ]
+  # An array of rubygem dependencies [name, version], e.g. [ ['active_support', '>= 1.3.1'] ]
+  p.extra_deps = [['sinatra', '>= 0.2.2'],
+                  ['thin', '>= 0.8.1'],
+                  ['activerecord', '>= 2.1.0'],
+                  ['oauth', '>= 0.2.4'],
+                  ['ruby-openid', '>= 2.0.4'],
+                  ['json', '>= 1.1.2'],
+                  ['rack', '>= 0.3.0'],
+                  ['sqlite3-ruby', '>= 1.2.1']] 
   
   #p.spec_extras = {}    # A hash of extra values to set in the gemspec.
   

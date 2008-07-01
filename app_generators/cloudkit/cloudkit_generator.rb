@@ -28,6 +28,8 @@ class CloudkitGenerator < RubiGen::Base
       m.directory 'public/js'
       m.directory 'public/css'
       m.directory 'public/images'
+      m.file 'public/css/default.css', 'public/css/default.css'
+      m.file 'public/images/openid-login-bg.gif', 'public/images/openid-login-bg.gif'
       m.directory 'resources'
       m.file 'resources.rb', 'resources.rb'
       m.directory 'views'
@@ -45,6 +47,7 @@ class CloudkitGenerator < RubiGen::Base
       m.file 'views/oauth_clients_new.erb', 'views/oauth_clients_new.erb'
       m.file 'views/oauth_clients_show.erb', 'views/oauth_clients_show.erb'
       m.file 'views/ui.erb', 'views/ui.erb'
+      m.file 'views/welcome.erb', 'views/welcome.erb'
       
       m.dependency "install_rubigen_scripts", [destination_root, 'cloudkit'], 
         :shebang => options[:shebang], :collision => :force

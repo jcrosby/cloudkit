@@ -1,0 +1,44 @@
+body {
+  font-family: "Helvetica-Neue", Helvetica, Arial, sans-serif;
+  margin: 15px;
+}
+#ui-placeholder p {
+  border-style: dotted;
+  padding: 25px;
+}
+div.prompt a {
+  background: #00dd00;
+  padding: 2px;
+  color: #fff;
+}
+#openid_url {
+  background: url(/images/openid-login-bg.gif) no-repeat #fff 5px;
+  padding-left: 25px;
+}
+.oauth-data {
+  font-family: Terminal, monospace;
+  font-size: 90%;
+  font-style: bold;
+}
+label {
+  font-weight: bold;
+}
+#oauth-client-list li {
+  list-style: none;
+}
+div.console-block {
+  font-family: Terminal, monospace;
+  font-size: 90%;
+  background-color: #000;
+  color: #fff;
+  padding: 10px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+div.tips {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.note {
+  font-size: 80%;
+}

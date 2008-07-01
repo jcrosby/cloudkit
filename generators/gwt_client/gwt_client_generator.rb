@@ -12,8 +12,7 @@ class GwtClientGenerator < RubiGen::Base
       m.directory 'clients/gwt/lib'
       m.file 'lib/gwt-cloudkit.jar', 'clients/gwt/lib/gwt-cloudkit.jar'
       m.file 'lib/gwt-rest.jar', 'clients/gwt/lib/gwt-rest.jar'
-      m.file 'lib/gwtx.jar', 'clients/gwt/lib/gwtx.jar'
-      m.file 'lib/gwittir-core-0.3.jar', 'clients/gwt/lib/gwittir-core-0.3.jar'
+      m.file 'lib/gwittir-core-0.4.4.jar', 'clients/gwt/lib/gwittir-core-0.4.4.jar'
       m.directory 'clients/gwt/src/ui/client/migration'
       m.directory 'clients/gwt/src/ui/client/resource'
       m.template 'UI-compile.erb', 'clients/gwt/UI-compile', :chmod => 0755

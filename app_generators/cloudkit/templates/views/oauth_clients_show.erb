@@ -1,20 +1,45 @@
-<h2>OAuth details for <%= @client_application.name %></h2>
-<p>
-	<b>Consumer Key:</b> <%= @client_application.key %>
-</p>
-<p>
-	<b>Consumer Secret:</b> <%= @client_application.secret %>
-</p>
-<p>
-	<b>Request Token URL</b> <%= trimmed_base_url %><%= @client_application.oauth_server.request_token_path %>
-</p>
-<p>
-	<b>Access Token URL</b> <%= trimmed_base_url %><%= @client_application.oauth_server.access_token_path %>
-</p>
-<p>
-	<b>Authorize URL</b> <%= trimmed_base_url %><%= @client_application.oauth_server.authorize_path %>
-</p>
+<h2>OAuth Details for <%= @client_application.name %></h2>
+<table>
+  <tr>
+    <td align="right"><label>Name:</label></td>
+    <td class="oauth-data"><%= @client_application.name %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Main Application URL:</label></td>
+    <td class="oauth-data"><%= @client_application.url %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Callback URL:</label></td>
+    <td class="oauth-data"><%= @client_application.callback_url %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Support URL:</label></td>
+    <td class="oauth-data"><%= @client_application.support_url %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Consumer Key:</label></td>
+    <td class="oauth-data"><%= @client_application.key %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Consumer Secret:</label></td>
+    <td class="oauth-data"><%= @client_application.secret %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Request Token URL:</label></td>
+    <td class="oauth-data"><%= trimmed_base_url %><%= @client_application.oauth_server.request_token_path %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Access Token URL:</label></td>
+    <td class="oauth-data"><%= trimmed_base_url %><%= @client_application.oauth_server.access_token_path %></td>
+  </tr>
+  <tr>
+    <td align="right"><label>Authorize URL:</label></td>
+    <td class="oauth-data"><%= trimmed_base_url %><%= @client_application.oauth_server.authorize_path %></td>
+  </tr>
+</table>
 
-<p>
-	We support HMAC-SHA1 (recommended) as well as plain text over SSL.
-</p>
+<p class="note"><strong>Note:</strong> Supported signature algorithms are HMAC-SHA1 and Plaintext over SSL.</p>
+
+<div class="prompt">
+  <a href="/oauth_clients">View All</a>
+</div>

@@ -9,7 +9,7 @@ helpers do
 end
 
 get '/' do
-  '<h1>Welcome to your new CloudKit app.</h1><a href="/sessions/new">Sign up or Login</a>'
+  erb :welcome
 end
 
 get '/sessions/new' do
@@ -71,18 +71,24 @@ get '/ui' do
 end
 
 get '/oauth_clients' do
+  login_required
   @client_applications = current_user.client_applications
   @tokens = current_user.tokens.find(:all, :conditions => 'oauth_tokens.invalidated_at is null and oauth_tokens.authorized_at is not null')
   erb :oauth_clients_index
 end
 
 get '/oauth_clients/new' do
+  login_required
   @client_application = CloudKit::Auth::ClientApplication.new
   erb :oauth_clients_new
 end
 
 post '/oauth_clients' do
-  @client_application = current_user.client_applications.build(:name => params['name'], :url => params['url'], :callback_url => params['callback_url'], :support_url => params['support_url'])
+  login_required
+  @client_application = current_user.client_applications.build(:name => params['name'],
+                                                               :url => params['url'],
+                                                               :callback_url => params['callback_url'],
+                                                               :support_url => params['support_url'])
   if @client_application.save
     flash['notice'] = 'Registered the information successfully'
     redirect "/oauth_clients/#{@client_application.id}"
@@ -92,8 +98,12 @@ post '/oauth_clients' do
 end
 
 put '/oauth_clients/:id' do
+  login_required
   @client_application = current_user.client_applications.find(params['id'])
-  if @client_application.update_attributes(params['client_application'])
+  if @client_application.update_attributes(:name => params['name'],
+                                           :url => params['url'],
+                                           :callback_url => params['callback_url'],
+                                           :support_url => params['support_url'])
     flash['notice'] = 'Updated the client information successfully'
     redirect "/oauth_clients/#{@client_application.id}"
   else
@@ -102,16 +112,19 @@ put '/oauth_clients/:id' do
 end
 
 get '/oauth_clients/:id' do
+  login_required
   @client_application = current_user.client_applications.find(params['id'])
   erb :oauth_clients_show
 end
 
-get '/oauth_clients/edit' do
+get '/oauth_clients/:id/edit' do
+  login_required
   @client_application = current_user.client_applications.find(params['id'])
   erb :oauth_clients_edit
 end
 
-delete '/oauth_client/:id' do
+delete '/oauth_clients/:id' do
+  login_required
   @client_application = current_user.client_applications.find(params['id'])
   @client_application.destroy
   flash['notice'] = 'Destroyed the client application registration'
@@ -167,6 +180,14 @@ get '/oauth/access_token' do
   else
     stop [nil, 401]
   end
+end
+
+delete '/oauth/tokens/:id' do
+  login_required
+  token = current_user.tokens.find(params['id'])
+  token.invalidate!
+  flash['notice'] = token.invalidated? ? 'The token has been revoked' : 'The token could not be revoked'
+  redirect '/oauth_clients'
 end
 
 get '/oauth/echo' do
