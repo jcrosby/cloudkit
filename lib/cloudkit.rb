@@ -12,3 +12,10 @@ require 'openid/util'
 require 'auth'
 require 'gwt'
 require 'air'
+
+require "qpid/client"
+require "qpid/queue"
+require "qpid/codec"
+require "qpid/connection"
+require "qpid/peer"
+require "qpid/spec"

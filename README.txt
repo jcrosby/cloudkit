@@ -57,6 +57,8 @@ rake local_deploy (until the gem is released officially)
 == LICENSE:
 
 Gwittir - LGPL http://www.gnu.org/licenses/lgpl.html
+qpid - Apache License, Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
+  (extracted from Cliff Moon's GitHub fork)
 
 Everything else:
 
