@@ -1,6 +1,0 @@
-#!/bin/sh
-APPDIR=`dirname $0`;
-VENDOR_LIBS="$APPDIR/lib/gwt-rest.jar:$APPDIR/lib/gwt-cloudkit.jar:$APPDIR/lib/gwittir-core-0.4.4.jar" # append custom entries here
-CUSTOM_ARGS="" # place custom compiler args here i.e. "-style DETAILED"
-GWT_ROOT="<%= options[:gwt_home] %>"
-java -XstartOnFirstThread -Xmx512M -cp "$APPDIR/src:$VENDOR_LIBS:$APPDIR/bin:$GWT_ROOT/gwt-user.jar:$GWT_ROOT/gwt-dev-<%= gwt_dev_platform %>.jar" com.google.gwt.dev.GWTCompiler $CUSTOM_ARGS -out "$APPDIR/../../public/gwt" "$@" ui.UI;

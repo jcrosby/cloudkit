@@ -1,5 +1,0 @@
-Welcome to CloudKit
-
-CloudKit provides a framework for building synchronized Open Web applications that run in and out of the browser, online and offline, using technologies like OpenID, OAuth, HTML, JavaScript, CSS, and REST web services.
-
-Server components run under the fast and furious Sinatra/Thin combo. Client apps run using the only available HTML wrapper with cross-platform client side SQL storage at this time, Adobe AIR. Open alternatives to AIR will be enthusiastically supported when they become available. With the recent implementation of HTML 5 Storage in WebKit, and the release of Mozilla Prism, alternatives are within reach.
