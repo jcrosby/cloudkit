@@ -1,3 +1,0 @@
-CloudKit
-
-Pre-merge readme placeholder...

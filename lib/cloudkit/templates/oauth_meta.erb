@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XRD>
+  <Type>http://oauth.net/discovery/1.0</Type>
+  <Service>
+    <Type>http://oauth.net/discovery/1.0/rel/provider</Type>
+    <URI><%= @request.scheme %>://<%= @request.env['HTTP_HOST'] %>/oauth</URI>
+  </Service>
+</XRD>

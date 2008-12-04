@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XRD>
+  <Type>http://oauth.net/discovery/1.0/type/provider</Type>
+  <Type>http://oauth.net/core/1.0/parameters/auth-header</Type>
+  <Type>http://oauth.net/core/1.0/parameters/uri-query</Type>
+  <Type>http://oauth.net/core/1.0/signature/HMAC-SHA1</Type>
+  <Service>
+    <Type>http://oauth.net/core/1.0/endpoint/request</Type>
+    <URI><%= @request.scheme %>://<%= @request.env['HTTP_HOST'] %>/oauth/request_tokens</URI>
+  </Service>
+  <Service>
+    <Type>http://oauth.net/core/1.0/endpoint/authorize</Type>
+    <URI><%= @request.scheme %>://<%= @request.env['HTTP_HOST'] %>/oauth/authorization</URI>
+  </Service>
+  <Service>
+    <Type>http://oauth.net/core/1.0/endpoint/access</Type>
+    <URI><%= @request.scheme %>://<%= @request.env['HTTP_HOST'] %>/oauth/access_tokens</URI>
+  </Service>
+  <Service>
+    <Type>http://oauth.net/discovery/1.0/consumer-identity/static</Type>
+    <LocalID>cloudkitconsumer</LocalID>
+  </Service>
+</XRD>
