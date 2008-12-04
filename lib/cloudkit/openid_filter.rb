@@ -9,10 +9,6 @@ module CloudKit
     end
 
     def call(env)
-      dup._call(env)
-    end
-
-    def _call(env)
       @@lock.synchronize do
         @@store = OpenIDStore.new(env[storage_uri_key])
         @users = UserStore.new(env[storage_uri_key])

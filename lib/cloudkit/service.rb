@@ -104,10 +104,6 @@ module CloudKit
     end
 
     def call(env)
-      dup._call(env)
-    end
-
-    def _call(env)
       @@lock.synchronize do
         @store = Store.new(
           :adapter     => SQLAdapter.new(env[storage_uri_key]),

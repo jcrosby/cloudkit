@@ -9,10 +9,6 @@ module CloudKit
     end
 
     def call(env)
-      dup._call(env)
-    end
-
-    def _call(env)
       @@lock.synchronize do
         @@store = OAuthStore.new(env[storage_uri_key])
       end unless @@store
