@@ -32,23 +32,30 @@ require 'cloudkit/service'
 require 'cloudkit/user_store'
 
 class Object
+
+  # Execute a method if it exists.
   def try(method) # via defunkt
     send method if respond_to? method
   end
 end
 
 class Hash
+
+  # For each key in 'other' that has a non-nil value, merge it into the current
+  # Hash.
   def filter_merge!(other={})
     other.each_pair{|k,v| self.merge!(k => v) if v}
     self
   end
 
+  # Change the key 'oldkey' to 'newkey'
   def rekey!(oldkey, newkey)
     if self[oldkey]
       self[newkey] = self.delete(oldkey)
     end
   end
 
+  # Return a new Hash, excluding the specified list of keys.
   def excluding(*keys)
     trimmed = self.dup
     keys.each{|k| trimmed.delete(k)}
@@ -57,6 +64,8 @@ class Hash
 end
 
 class Array
+
+  # Return a new Array, excluding the specified list of values.
   def excluding(*keys)
     trimmed = self.dup
     trimmed.reject{|v| keys.include?(v)}

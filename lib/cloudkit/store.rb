@@ -1,4 +1,5 @@
 module CloudKit
+
   # A functional storage interface with HTTP semantics and pluggable adapters.
   class Store
     include CloudKit::Util
@@ -7,15 +8,15 @@ module CloudKit
     # Initialize a new Store, creating its schema if needed. All resources in a
     # Store are automatically versioned.
     #
-    # Options:
-    # :adapter - Optional. An instance of Adapter. Defaults to in-memory SQLite.
-    # :collections - Array of resource collections to manage.
-    # :views - Optional. Array of views to be updated based on JSON content.
+    # ===Options
+    # - :adapter - Optional. An instance of Adapter. Defaults to in-memory SQLite.
+    # - :collections - Array of resource collections to manage.
+    # - :views - Optional. Array of views to be updated based on JSON content.
     #
-    # Example:
+    # ===Example
     #   store = CloudKit::Store.new(:collections => [:foos, :bars])
     #
-    # Example:
+    # ===Example
     #   adapter = CloudKit::SQLAdapter.new('mysql://user:pass@localhost/my_db')
     #   fruit_color_view = CloudKit::ExtractionView.new(
     #     :fruits_by_color_and_season,
@@ -27,6 +28,7 @@ module CloudKit
     #     :views       => [fruit_color_view])
     #
     # See also: Adapter, ExtractionView, Response
+    #
     def initialize(options)
       @db          = options[:adapter] || SQLAdapter.new
       @collections = options[:collections]
@@ -36,35 +38,36 @@ module CloudKit
 
     # Retrieve a resource or collection of resources based on a URI.
     #
-    # Parameters:
-    # uri - URI of the resource or collection to retrieve.
-    # options - See below.
+    # ===Parameters
+    # - uri - URI of the resource or collection to retrieve.
+    # - options - See below.
     #
-    # Options:
-    # :remote_user - Optional. Scopes the dataset if provided.
-    # :limit - Optional. Default is unlimited. Limit the number of records returned by a collection request.
-    # :offset - Optional. Start the list of resources in a collection at offset (0-based).
-    # :any - Optional. Not a literal ":any", but any key or keys defined as extrations from a view.
+    # ===Options
+    # - :remote_user - Optional. Scopes the dataset if provided.
+    # - :limit - Optional. Default is unlimited. Limit the number of records returned by a collection request.
+    # - :offset - Optional. Start the list of resources in a collection at offset (0-based).
+    # - :any - Optional. Not a literal ":any", but any key or keys defined as extrations from a view.
     #
-    # URI Types:
-    # /cloudkit-meta
-    # /{collection}
-    # /{collection}/{uuid}
-    # /{collection}/{uuid}/versions
-    # /{collection}/{uuid}/versions/{etag}
-    # /{view}
+    # ===URI Types
+    #   /cloudkit-meta
+    #   /{collection}
+    #   /{collection}/{uuid}
+    #   /{collection}/{uuid}/versions
+    #   /{collection}/{uuid}/versions/{etag}
+    #   /{view}
     #
-    # Examples:
-    # get('/cloudkit-meta')
-    # get('/foos')
-    # get('/foos', :remote_user => 'coltrane')
-    # get('/foos', :limit => 100, :offset => 200)
-    # get('/foos/123')
-    # get('/foos/123/versions')
-    # get('/foos/123/versions/abc')
-    # get('/shiny_foos', :color => 'green')
+    # ===Examples
+    #   get('/cloudkit-meta')
+    #   get('/foos')
+    #   get('/foos', :remote_user => 'coltrane')
+    #   get('/foos', :limit => 100, :offset => 200)
+    #   get('/foos/123')
+    #   get('/foos/123/versions')
+    #   get('/foos/123/versions/abc')
+    #   get('/shiny_foos', :color => 'green')
     #
-    # See also: REST API
+    # See also: {REST API}[http://getcloudkit.com/rest-api.html]
+    #
     def get(uri, options={})
       return invalid_entity_type               if !valid_collection_type?(collection_type(uri))
       return meta                              if meta_uri?(uri)
@@ -76,6 +79,10 @@ module CloudKit
       status_404
     end
 
+    # Retrieve the same items as the get method, minus the content/body. Using
+    # this method on a single resource URI performs a slight optimization due
+    # to the way CloudKit stores its ETags and Last-Modified information on
+    # write.
     def head(uri, options={})
       return invalid_entity_type unless @collections.include?(collection_type(uri))
       if resource_uri?(uri) || resource_version_uri?(uri)
@@ -95,6 +102,8 @@ module CloudKit
       end
     end
 
+    # Update or create a resource at the specified URI. If the resource already
+    # exists, an :etag option is required.
     def put(uri, options={})
       methods = methods_for_uri(uri)
       return status_405(methods) unless methods.include?('PUT')
@@ -105,6 +114,7 @@ module CloudKit
       create_resource(uri, options)
     end
 
+    # Create a resource in a given collection.
     def post(uri, options={})
       methods = methods_for_uri(uri)
       return status_405(methods) unless methods.include?('POST')
@@ -114,6 +124,7 @@ module CloudKit
       create_resource(uri, options)
     end
 
+    # Delete the resource specified by the URI. Requires the :etag option.
     def delete(uri, options={})
       methods = methods_for_uri(uri)
       return status_405(methods) unless methods.include?('DELETE')
@@ -144,11 +155,13 @@ module CloudKit
       status_404
     end
 
+    # Build a response containing the allowed methods for a given URI.
     def options(uri)
       methods = methods_for_uri(uri)
       allow(methods)
     end
 
+    # Return a list of allowed methods for a given URI. 
     def methods_for_uri(uri)
       if meta_uri?(uri)
         meta_methods
@@ -163,30 +176,37 @@ module CloudKit
       end
     end
 
+    # Return the list of methods allowed for the cloudkit-meta URI.
     def meta_methods
       @meta_methods ||= http_methods.excluding('POST', 'PUT', 'DELETE')
     end
 
+    # Return the list of methods allowed for a resource collection.
     def resource_collection_methods
       @resource_collection_methods ||= http_methods.excluding('PUT', 'DELETE')
     end
 
+    # Return the list of methods allowed on an individual resource.
     def resource_methods
       @resource_methods ||= http_methods.excluding('POST')
     end
 
+    # Return the list of methods allowed on a version history collection.
     def version_collection_methods
       @version_collection_methods ||= http_methods.excluding('POST', 'PUT', 'DELETE')
     end
 
+    # Return the list of methods allowed on a resource version.
     def resource_version_methods
       @resource_version_methods ||= http_methods.excluding('POST', 'PUT', 'DELETE')
     end
 
+    # Return true if this store implements a given HTTP method.
     def implements?(http_method)
       http_methods.include?(http_method.upcase)
     end
 
+    # Return the list of HTTP methods supported by this Store.
     def http_methods
       ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS']
     end
@@ -194,7 +214,7 @@ module CloudKit
     # Return the resource collection URI fragment.
     # Example: collection_uri_fragment('/foos/123') => '/foos
     def collection_uri_fragment(uri)
-      uri_components(uri)[0] rescue nil
+      "/#{uri_components(uri)[0]}" rescue nil
     end
 
     # Return the resource collection referenced by a URI.
@@ -250,6 +270,7 @@ module CloudKit
       return c.size == 1 && @views && @views.map{|v| v.name}.include?(c[0].to_sym)
     end
 
+    # Return an array containing the response for each URI in a list.
     def resolve_uris(uris)
       result = []
       uris.each do |uri|
@@ -258,21 +279,25 @@ module CloudKit
       result
     end
 
+    # Clear all contents of the store. Used mostly for testing.
     def reset!
       @db.schema.keys.each do |table|
         @db[table].delete
       end
     end
 
+    # Return the version number of this Store.
     def version; 1; end
 
     protected
 
+    # Return the list of collections managed by this Store.
     def meta
       json = JSON.generate(:uris => @collections.map{|t| "/#{t}"})
       response(200, json, build_etag(json))
     end
 
+    # Return a list of resource URIs for the given collection URI.
     def resource_collection(uri, options)
       result = @db[store_key].
         select(:uri, :last_modified).
@@ -283,6 +308,8 @@ module CloudKit
       bundle_collection_result(uri, options, result)
     end
 
+    # Return the resource for the given URI. Return 404 if not found or if
+    # protected and unauthorized, 410 if authorized but deleted.
     def resource(uri, options)
       result = @db[store_key].
         select(:content, :etag, :last_modified, :deleted).
@@ -295,6 +322,8 @@ module CloudKit
       status_404
     end
 
+    # Return a collection of URIs for all versions of a resource including the
+    #current version. Sorted by Last-Modified date in descending order.
     def version_collection(uri, options)
       found = @db[store_key].
         select(:uri).
@@ -309,6 +338,7 @@ module CloudKit
       bundle_collection_result(uri, options, result)
     end
 
+    # Return a specific version of a resource.
     def resource_version(uri, options)
       result = @db[store_key].
         select(:content, :etag, :last_modified).
@@ -318,6 +348,8 @@ module CloudKit
       response(200, result[:content], result[:etag], result[:last_modified])
     end
 
+    # Return a list of URIs for all resources matching the list of key value
+    # pairs provided in the options arg.
     def view(uri, options)
       result = @db[collection_type(uri)].
         select(:uri).
@@ -325,6 +357,7 @@ module CloudKit
       bundle_collection_result(uri, options, result)
     end
 
+    # Create a resource at the specified URI.
     def create_resource(uri, options)
       data = JSON.parse(options[:json]) rescue (return status_422)
       etag = UUID.generate
@@ -341,6 +374,7 @@ module CloudKit
       json_meta_response(201, uri, etag, last_modified)
     end
 
+    # Update the resource at the specified URI. Requires the :etag option.
     def update_resource(uri, options)
       data = JSON.parse(options[:json]) rescue (return status_422)
       original = @db[store_key].
@@ -369,6 +403,7 @@ module CloudKit
       status_404
     end
 
+    # Bundle a collection of results as a list of URIs for the response.
     def bundle_collection_result(uri, options, result)
       total  = result.count
       offset = options[:offset].try(:to_i) || 0
@@ -379,36 +414,46 @@ module CloudKit
       response(200, json, build_etag(json), last_modified)
     end
 
+    # Generate a JSON URI list.
     def uri_list(list, total, offset)
       JSON.generate(:total => total, :offset => offset, :uris => list)
     end
 
+    # Build an ETag for a collection. ETags are generated on write as an
+    # optimization for GETs. This method is used for collections of resources
+    # where the optimization is not practical.
     def build_etag(data)
       MD5::md5(data.to_s).hexdigest
     end
 
+    # Returns true if the collection type represents a view.
     def is_view?(collection_type)
       @views && @views.map{|v| v.name}.include?(collection_type)
     end
 
+    # Returns true if the collection type is valid for this Store.
     def valid_collection_type?(collection_type)
       @collections.include?(collection_type) ||
         is_view?(collection_type) ||
         collection_type.to_s == 'cloudkit-meta'
     end
 
+    # Delegates the mapping of data from a resource into a view.
     def map(uri, data)
       @views.each{|view| view.map(@db, collection_type(uri), uri, data)} if @views
     end
 
+    # Delegates removal of view data.
     def unmap(type, id)
       @views.each{|view| view.unmap(@db, type, id)} if @views
     end
 
+    # Return a HTTP date representing 'now.'
     def timestamp
       Time.now.httpdate
     end
 
+    # Return the adapter instance used by this Store.
     def db; @db; end
   end
 end

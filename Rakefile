@@ -20,12 +20,15 @@ task :rdoc do
     --include=lib/cloudkit.rb
     --include=lib/cloudkit/*.rb
     --include=lib/cloudkit/*/*.rb
+    --exclude=Rakefile
+    --exclude=TODO
     --exclude=templates/*
     --exclude=examples/*
     --exclude=test/*
     --exclude=doc/index.html
     --exclude=doc/curl.html
     --exclude=doc/rest-api.html
+    --exclude=doc/main.css
     --op=doc/api
   SH
 end

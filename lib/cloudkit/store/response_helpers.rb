@@ -1,3 +1,4 @@
+# A set of mixins for building CloudKit::Response objects.
 module CloudKit::ResponseHelpers
   def status_404
     json_error_response(404, 'not found')

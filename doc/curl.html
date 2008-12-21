@@ -90,11 +90,11 @@ Create a note using <a href="http://tools.ietf.org/html/rfc2616#section-9.5">POS
     HTTP/1.1 201 Created<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 157<br/>
+    Content-Length: 159<br/>
     Connection: keep-alive<br/><br/>
 
     {<br/>
-      "uri":"notes\/0dda06f0-b134-012b-a2d8-0017f2c62348",<br/>
+      "uri":"\/notes\/0dda06f0-b134-012b-a2d8-0017f2c62348",<br/>
       "ok":true,<br/>
       "etag":"0dda0de0-b134-012b-a2d8-0017f2c62348",<br/>
       "last_modified":"Sun, 21 Dec 2008 02:21:52 GMT"<br/>
@@ -111,11 +111,11 @@ List the currently available notes again:
     ETag: "dd30142ff023386d2515b41fb88447a5"<br/>
     Cache-Control: proxy-revalidate<br/>
     Content-Type: application/json<br/>
-    Content-Length: 77<br/>
+    Content-Length: 79<br/>
     Connection: keep-alive<br/><br/>
 
     {<br/>
-      "uris":["notes\/0dda06f0-b134-012b-a2d8-0017f2c62348"],<br/>
+      "uris":["\/notes\/0dda06f0-b134-012b-a2d8-0017f2c62348"],<br/>
       "total":1,<br/>
       "offset":0<br/>
     }

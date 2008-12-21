@@ -1,4 +1,13 @@
 module CloudKit
+  
+  # An OpenIDFilter provides OpenID authentication, listening for upstream
+  # OAuth authentication and bypassing if already authorized.
+  #
+  # Responds to the following URIs:
+  #   /login
+  #   /logout
+  #   /openid_complete
+  #
   class OpenIDFilter
     include Util
 

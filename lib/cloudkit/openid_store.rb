@@ -1,8 +1,12 @@
 require 'openid/store/interface'
 module CloudKit
+
+  # An OpenIDStore provides the interface expected by the ruby-openid gem,
+  # mapping it to a CloudKit::Store instance.
   class OpenIDStore < OpenID::Store::Interface
     @@store = nil
 
+    # Initialize an OpenIDStore and its required views.
     def initialize(uri=nil)
       unless @@store
         association_view = ExtractionView.new(
@@ -16,7 +20,7 @@ module CloudKit
       end
     end
 
-    def get_association(server_url, handle=nil)
+    def get_association(server_url, handle=nil) #:nodoc:
       options = {:server_url => server_url}
       options.merge!(:handle => Base64.encode64(handle)) if (handle && handle != '')
       result = @@store.get('/cloudkit_openid_server_handles', options)
@@ -36,7 +40,7 @@ module CloudKit
         a['assoc_type'])
     end
 
-    def remove_association(server_url, handle)
+    def remove_association(server_url, handle) #:nodoc:
       result = @@store.get(
         '/cloudkit_openid_server_handles',
         :server_url => server_url,
@@ -52,7 +56,7 @@ module CloudKit
       end
     end
 
-    def store_association(server_url, association)
+    def store_association(server_url, association) #:nodoc:
       remove_association(server_url, association.handle)
       json = JSON.generate(
         :server_url => server_url,
@@ -65,7 +69,7 @@ module CloudKit
       return (result.status == 201)
     end
 
-    def use_nonce(server_url, timestamp, salt)
+    def use_nonce(server_url, timestamp, salt) #:nodoc:
       return false if (timestamp - Time.now.to_i).abs > OpenID::Nonce.skew
 
       fragment = URI.escape([server_url, timestamp, salt].join('-'))
@@ -74,18 +78,21 @@ module CloudKit
       return (result.status == 201)
     end
 
-    def self.cleanup
+    def self.cleanup #:nodoc:
+      # TODO
     end
 
-    def self.cleanup_associations
+    def self.cleanup_associations #:nodoc:
+      # TODO
     end
 
-    def self.cleanup_nonces
+    def self.cleanup_nonces #:nodoc:
+      # TODO
     end
 
     protected
 
-    def resolve_associations(parsed_content)
+    def resolve_associations(parsed_content) #:nodoc:
       uri_list = parsed_content['uris']
       association_responses = @@store.resolve_uris(uri_list)
       return association_responses, association_responses.map{|a| a.parsed_content}

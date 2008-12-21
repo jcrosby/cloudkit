@@ -1,4 +1,6 @@
 module CloudKit
+
+  # A subclass of Rack::Request providing CloudKit-specific features.
   class Request < Rack::Request
     include CloudKit::Util
     alias_method :cloudkit_params, :params
@@ -7,16 +9,20 @@ module CloudKit
       super(env)
     end
 
+    # Return a merged set of both standard params and OAuth header params.
     def params
       @cloudkit_params ||= cloudkit_params.merge(oauth_header_params)
     end
 
+    # Return true if method, path, and required_params match.
     def match?(method, path, required_params=[])
       (request_method == method) &&
         path_info.match(path.gsub(':id', '*')) && # just enough to work for now
         param_match?(required_params)
     end
 
+    # Return true of the array of required params match the request params. If
+    # a hash in passed in for a param, its value is also used in the match.
     def param_match?(required_params)
       required_params.all? do |required_param|
         case required_param
@@ -33,6 +39,7 @@ module CloudKit
       end
     end
 
+    # Return OAuth header params in a hash.
     def oauth_header_params
       # This is a copy of the same method from the OAuth gem.
       # TODO: Refactor the OAuth gem so that this method is available via a
@@ -51,27 +58,36 @@ module CloudKit
       return {}
     end
 
+    # Unescape a value according to the OAuth spec.
     def unescape(value)
       URI.unescape(value.gsub('+', '%2B'))
     end
 
+    # Return the last path element in the request URI.
     def last_path_element
       path_element(-1)
     end
 
+    # Return a specific path element
     def path_element(index)
       path_info.split('/')[index] rescue nil
     end
 
+    # Return an array containing one entry for each piece of upstream
+    # middleware. This is in the same spirit as Via headers in HTTP, but does
+    # not use the header because the transition from one piece of middleware to
+    # the next does not use HTTP.
     def via
       @env[via_key].split(', ') rescue []
     end
 
+    # Return parsed contents of an If-Match header.
+    #
+    # Note: Only a single ETag is useful in the context of CloudKit, so a list
+    # is treated as one ETag; the result of using the wrong ETag or a list of
+    # ETags is the same in the context of PUT and DELETE where If-Match
+    # headers are required.
     def if_match
-      # Note: Only a single ETag is useful in the context of CloudKit, so a list
-      # is treated as one ETag; the result of using the wrong ETag or a list of
-      # ETags is the same in the context of PUT and DELETE where If-Match
-      # headers are required.
       etag = @env['HTTP_IF_MATCH']
       return nil unless etag
       etag.strip!
@@ -80,49 +96,62 @@ module CloudKit
       etag
     end
 
+    # Add a via entry to the Rack environment.
     def inject_via(key)
       items = via << key
       @env[via_key] = items.join(', ')
     end
 
+    # Return the current user URI.
     def current_user
       return nil unless @env[auth_key] && @env[auth_key] != ''
       @env[auth_key]
     end
 
+    # Set the current user URI.
     def current_user=(user)
       @env[auth_key] = user
     end
 
+    # Return true if authentication is being used.
     def using_auth?
       @env[auth_presence_key] != nil
     end
 
+    # Report to downstream middleware that authentication is in use.
     def announce_auth(via)
       inject_via(via)
       @env[auth_presence_key] = 1
     end
 
+    # Return the session associated with this request.
     def session
       @env['rack.session']
     end
 
+    # Return the login URL for this request. This is stashed in the Rack
+    # environment so the OpenID and OAuth middleware can cooperate during the
+    # token authorization step in the OAuth flow.
     def login_url
       @env[login_url_key] || '/login'
     end
 
+    # Set the login url for this request.
     def login_url=(url)
       @env[login_url_key] = url
     end
 
+    # Return the logout URL for this request.
     def logout_url
       @env[logout_url_key] || '/logout'
     end
 
+    # Set the logout URL for this request.
     def logout_url=(url)
       @env[logout_url_key] = url
     end
 
+    # Return the flash session for this request.
     def flash
       session[flash_key] ||= CloudKit::FlashSession.new
     end

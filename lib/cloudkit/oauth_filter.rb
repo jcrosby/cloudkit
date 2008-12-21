@@ -1,4 +1,23 @@
 module CloudKit
+  
+  # An OAuthFilter provides both OAuth 1.0 support, plus OAuth Discovery.
+  #
+  # Responds to the following URIs as part of the OAuth 1.0 "dance":
+  #
+  #   /oauth/request_tokens
+  #   /oauth/authorization
+  #   /oauth/authorized_request_tokens/{id}
+  #   /oauth/access_tokens
+  #
+  # Responds to the following URIs are part of OAuth Discovery:
+  #   /oauth
+  #   /oauth/meta
+  #
+  # See also:
+  # - {OAuth Core 1.0}[http://oauth.net/core/1.0]
+  # - {OAuth Discovery}[http://oauth.net/discovery]
+  # - Thread[http://groups.google.com/group/oauth/browse_thread/thread/29a1b550396f63cf] covering /oauth and /oauth/meta URIs.
+  #
   class OAuthFilter
     include Util
 

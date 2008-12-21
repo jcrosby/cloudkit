@@ -1,7 +1,10 @@
 module Rack #:nodoc:
-  class Builder #:nodoc:
+  class Builder
     alias_method :cloudkit_to_app, :to_app
 
+    # Extends Rack::Builder's to_app method to detect if the last piece of
+    # middleware in the stack is a CloudKit shortcut (contain or expose), adding
+    # adding a default developer page at the root and a 404 everywhere else.
     def to_app
       default_app = lambda do |env|
         if (env['PATH_INFO'] == '/')
@@ -14,6 +17,11 @@ module Rack #:nodoc:
       cloudkit_to_app
     end
 
+    # Setup resource collections hosted behind OAuth and OpenID auth filters.
+    #
+    # ===Example
+    #   contain :notes, :projects
+    #
     def contain(*args)
       @ins << lambda do |app|
         Rack::Session::Pool.new(
@@ -24,6 +32,11 @@ module Rack #:nodoc:
       @last_cloudkit_id = @ins.last.object_id
     end
 
+    # Setup resource collections without authentication.
+    #
+    # ===Example
+    #   expose :notes, :projects
+    #
     def expose(*args)
       @ins << lambda do |app|
         CloudKit::Service.new(app, :collections => args.to_a)
@@ -31,7 +44,7 @@ module Rack #:nodoc:
       @last_cloudkit_id = @ins.last.object_id
     end
 
-    def welcome
+    def welcome #:nodoc:
 doc = <<HTML
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

@@ -1,4 +1,7 @@
 module CloudKit
+
+  # A thin layer on top of CloudKit::Store providing consistent URIs and
+  # automatic schema upgrades if required for future releases.
   class UserStore
     @@store = nil
 
@@ -15,26 +18,27 @@ module CloudKit
       end
     end
 
-    def get(uri, options={})
+    def get(uri, options={}) #:nodoc:
       @@store.get(uri, options)
     end
 
-    def post(uri, options={})
+    def post(uri, options={}) #:nodoc:
       @@store.post(uri, options)
     end
 
-    def put(uri, options={})
+    def put(uri, options={}) #:nodoc:
       @@store.put(uri, options)
     end
 
-    def delete(uri, options={})
+    def delete(uri, options={}) #:nodoc:
       @@store.delete(uri, options)
     end
 
-    def resolve_uris(uris)
+    def resolve_uris(uris) #:nodoc:
       @@store.resolve_uris(uris)
     end
 
+    # Return the version for this UserStore
     def version; 1; end
   end
 end
