@@ -11,12 +11,6 @@ module CloudKit
       @cloudkit_params ||= cloudkit_params.merge(oauth_header_params)
     end
 
-    def doc_id
-      result = path_element(2)
-      return nil if result == 'meta'
-      result
-    end
-
     def match?(method, path, required_params=[])
       (request_method == method) &&
         path_info.match(path.gsub(':id', '*')) && # just enough to work for now
@@ -40,6 +34,9 @@ module CloudKit
     end
 
     def oauth_header_params
+      # This is a copy of the same method from the OAuth gem.
+      # TODO: Refactor the OAuth gem so that this method is available via a
+      # mixin, outside of the request proxy context.
       %w( X-HTTP_AUTHORIZATION Authorization HTTP_AUTHORIZATION ).each do |header|
         next unless @env.include?(header)
         header = @env[header]
@@ -71,18 +68,16 @@ module CloudKit
     end
 
     def if_match
-      parse_header('HTTP_IF_MATCH')
-    end
-
-    def if_none_match
-      parse_header('HTTP_IF_NONE_MATCH')
-    end
-
-    def parse_header(name)
-      return nil unless @env[name]
-      list = @env[name].split(',')
-      list.map!{|i| i.strip}
-      list.map!{|i| i =~ /^\".*\"$/ ? i[1..-2] : i}
+      # Note: Only a single ETag is useful in the context of CloudKit, so a list
+      # is treated as one ETag; the result of using the wrong ETag or a list of
+      # ETags is the same in the context of PUT and DELETE where If-Match
+      # headers are required.
+      etag = @env['HTTP_IF_MATCH']
+      return nil unless etag
+      etag.strip!
+      etag = unquote(etag)
+      return nil if etag == '*'
+      etag
     end
 
     def inject_via(key)
@@ -101,18 +96,6 @@ module CloudKit
 
     def using_auth?
       @env[auth_presence_key] != nil
-    end
-
-    def history_path?
-      last_path_element == 'history'
-    end
-
-    def etags_path?
-      last_path_element == 'etags'
-    end
-
-    def meta_path?
-      last_path_element == 'meta'
     end
 
     def announce_auth(via)

@@ -1,7 +1,7 @@
 <html>
 <body>
-<%= @request.flash[:error] %>
-<%= @request.flash[:info] %>
+<%= request.flash[:error] %>
+<%= request.flash[:info] %>
 <form action="/login" method="POST">
 <input type="text" name="openid_url"/>
 <input type="submit"/>

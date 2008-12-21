@@ -1,6 +1,8 @@
 require 'helper'
 class RackBuilderTest < Test::Unit::TestCase
+
   context "Rack::Builder" do
+
     should "expose services" do
       app = Rack::Builder.new do
         expose :items, :things
@@ -8,9 +10,10 @@ class RackBuilderTest < Test::Unit::TestCase
       end
       response = Rack::MockRequest.new(app).get('/items')
       assert_equal 200, response.status
-      documents = JSON.parse(response.body)['documents']
+      documents = JSON.parse(response.body)['uris']
       assert_equal [], documents
     end
+
     should "expose services with auth using 'contain'" do
       app = Rack::Builder.new do
         contain :items, :things
@@ -24,6 +27,7 @@ class RackBuilderTest < Test::Unit::TestCase
       assert_equal 200, response.status
       assert_equal 'hello', response.body
     end
+
     should "insert a default app if one does not exist" do
       app = Rack::Builder.new { contain :items }
       response = Rack::MockRequest.new(app).get('/items')
@@ -32,5 +36,6 @@ class RackBuilderTest < Test::Unit::TestCase
       assert_equal 200, response.status
       assert response.body.match('CloudKit')
     end
+
   end
 end

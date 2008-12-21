@@ -4,6 +4,5 @@
 4. oauth+notes
 5. openid+oauth+notes with sqlite file store
 6. openid+oauth+notes with mysql store
-7. openid+oauth+notes with memcached store
-8. rack static app plus contained notes with api mapped to version url
-9. rack static app + cascade containing exposed and contained resources
+7. rack static app plus contained notes with api mapped to version url
+8. rack static app + cascade containing exposed and contained resources

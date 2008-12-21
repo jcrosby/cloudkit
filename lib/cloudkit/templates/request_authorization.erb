@@ -1,7 +1,7 @@
 <html>
 <body>
 <p>You sure?</p>
-<form action="/oauth/authorized_request_tokens/<%= @request['oauth_token'] %>" method="POST">
+<form action="/oauth/authorized_request_tokens/<%= request['oauth_token'] %>" method="POST">
 <input type="hidden" name="_method" value="PUT"/>
 <input type="submit" value="Yes"/>
 </form>

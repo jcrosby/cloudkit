@@ -1,0 +1,32 @@
+0.9
+- complete examples directory
+- place tag definitions on joncrosby.me for reference
+- discovery cleanup
+- template polish
+- default page polish
+- finish rdocs
+- better rake tasks for gem publication
+- gemspec
+
+1.0
+- jquery.cloudkit
+    titanium/gears
+- sreg
+- titanium middleware
+    version/upgrade middleware
+    rake automation
+- oauth token management
+- oauth consumer registration
+- acls i.e. allowed methods per user per uri
+- complete user data export
+- method filtering on collections
+- js functions as observers (validation, mapping, etc.)
+- custom templates
+
+Backlog
+- expect header/100-continue
+- deployable gem + admin app
+- cappuccino adapter
+- sproutcore adapter
+- tokyocabinet
+- ldap adapter for UserStore

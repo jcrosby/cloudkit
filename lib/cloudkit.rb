@@ -16,11 +16,9 @@ require 'oauth/signature'
 require 'cloudkit/util'
 require 'cloudkit/store/adapter'
 require 'cloudkit/store/extraction_view'
-require 'cloudkit/store/get_helpers'
 require 'cloudkit/store/response'
 require 'cloudkit/store/response_helpers'
 require 'cloudkit/store/sql_adapter'
-require 'cloudkit/store/validators'
 require 'cloudkit/store'
 require 'cloudkit/flash_session'
 require 'cloudkit/oauth_filter'
@@ -49,5 +47,18 @@ class Hash
     if self[oldkey]
       self[newkey] = self.delete(oldkey)
     end
+  end
+
+  def excluding(*keys)
+    trimmed = self.dup
+    keys.each{|k| trimmed.delete(k)}
+    trimmed
+  end
+end
+
+class Array
+  def excluding(*keys)
+    trimmed = self.dup
+    trimmed.reject{|v| keys.include?(v)}
   end
 end

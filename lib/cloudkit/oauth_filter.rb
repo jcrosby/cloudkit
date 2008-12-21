@@ -1,185 +1,217 @@
 module CloudKit
   class OAuthFilter
     include Util
-    @@lock = Mutex.new
+
+    @@lock  = Mutex.new
     @@store = nil
 
     def initialize(app, options={})
-      @app = app; @options = options
+      @app     = app
+      @options = options
     end
 
     def call(env)
       @@lock.synchronize do
         @@store = OAuthStore.new(env[storage_uri_key])
       end unless @@store
-      @request = Request.new(env)
-      @request.announce_auth(oauth_filter_key)
-      return @app.call(env) if @request.path_info == '/'
+
+      request = Request.new(env)
+      request.announce_auth(oauth_filter_key)
+      return @app.call(env) if request.path_info == '/'
+
       begin
-        case @request
+        case request
         when r(:get, '/oauth/meta')
-          get_meta
+          get_meta(request)
         when r(:post, '/oauth/request_tokens', ['oauth_consumer_key'])
-          create_request_token
+          create_request_token(request)
         when r(:get, '/oauth/authorization', ['oauth_token'])
-          request_authorization
+          request_authorization(request)
         when r(:put, '/oauth/authorized_request_tokens/:id')
-          authorize_request_token
+          authorize_request_token(request)
         when r(:post, '/oauth/authorized_request_tokens/:id', [{'_method' => 'PUT'}])
-          authorize_request_token
+          authorize_request_token(request)
         when r(:post, '/oauth/access_tokens')
-          create_access_token
+          create_access_token(request)
         when r(:get, '/oauth')
-          get_descriptor
+          get_descriptor(request)
         else
-          inject_user_or_challenge
+          inject_user_or_challenge(request)
           @app.call(env)
         end
       rescue OAuth::Signature::UnknownSignatureMethod
         # The OAuth spec suggests a 400 status, but serving a 401 with the
-        # meta/challenge info seems more appropriate as the oauth metadata
+        # meta/challenge info seems more appropriate as the OAuth metadata
         # specifies the supported signature methods, giving the user agent an
         # opportunity to fix the error.
-        return challenge('unknown signature method')
+        return challenge(request, 'unknown signature method')
       end
     end
 
-    def create_request_token
-      return challenge('invalid nonce') unless valid_nonce?
-      (consumer = get_consumer) rescue (return challenge('invalid consumer'))
-      signature = OAuth::Signature.build(@request) do
-        [nil, consumer['secret']]
+    def store; @@store; end
+
+    protected
+
+    def create_request_token(request)
+      return challenge(request, 'invalid nonce') unless valid_nonce?(request)
+
+      consumer_result = @@store.get(
+        "/cloudkit_oauth_consumers/#{request[:oauth_consumer_key]}")
+      unless consumer_result.status == 200
+        return challenge(request, 'invalid consumer')
       end
-      return challenge('invalid signature') unless signature.verify
-      token_id, secret = OAuth::Server.new(@request.host).generate_credentials
+
+      consumer  = consumer_result.parsed_content
+      signature = OAuth::Signature.build(request) { [nil, consumer['secret']] }
+      return challenge(request, 'invalid signature') unless signature.verify
+
+      token_id, secret = OAuth::Server.new(request.host).generate_credentials
       request_token = JSON.generate(
-        :id           => token_id,
         :secret       => secret,
-        :consumer_key => consumer['id'])
-      @@store.put(:request_tokens, :id => token_id, :data => request_token)
+        :consumer_key => request[:oauth_consumer_key])
+      @@store.put(
+        "/cloudkit_oauth_request_tokens/#{token_id}",
+        :json => request_token)
       [201, {}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
     end
-    
-    def login_redirect
-      [302, {'Location' => @request.login_url}, []]
-    end
 
-    def request_authorization
-      return login_redirect unless @request.current_user
-      (request_token = get_request_token) rescue (return challenge('invalid request token'))
-      erb :request_authorization
-    end
+    def request_authorization(request)
+      return login_redirect(request) unless request.current_user
 
-    def authorize_request_token
-      return login_redirect unless @request.current_user
-      request_token = @@store.get(
-        :request_tokens,
-        :id => @request.last_path_element).parsed_content
-      return challenge('invalid request token') if request_token['authorized_at'] 
-      request_token['user_id'] = @request.current_user
-      request_token['authorized_at'] = Time.now.httpdate
-      json = JSON.generate(request_token)
-      @@store.put(
-        :request_tokens,
-        :id   => request_token['id'],
-        :etag => request_token['etag'],
-        :data => json)
-      erb :authorize_request_token
-    end
-
-    def create_access_token
-      return challenge('invalid nonce') unless valid_nonce?
-      (consumer = get_consumer) rescue (return challenge('invalid consumer'))
-      (request_token = get_request_token) rescue (return challenge('invalid request token'))
-      unless request_token['consumer_key'] == consumer['id']
-        return challenge('invalid consumer')
+      request_token_result = @@store.get(
+        "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}")
+      unless request_token_result.status == 200
+        return challenge(request, 'invalid request token')
       end
-      signature = OAuth::Signature.build(@request) do
+
+      request_token = request_token_result.parsed_content
+      erb(request, :request_authorization)
+    end
+
+    def authorize_request_token(request)
+      return login_redirect(request) unless request.current_user
+
+      request_token_response = @@store.get(
+        "/cloudkit_oauth_request_tokens/#{request.last_path_element}")
+      request_token = request_token_response.parsed_content
+      if request_token['authorized_at']
+        return challenge(request, 'invalid request token')
+      end
+
+      request_token['user_id']       = request.current_user
+      request_token['authorized_at'] = Time.now.httpdate
+      json                           = JSON.generate(request_token)
+      @@store.put(
+        "/cloudkit_oauth_request_tokens/#{request.last_path_element}",
+        :etag => request_token_response.etag,
+        :json => json)
+      erb(request, :authorize_request_token)
+    end
+
+    def create_access_token(request)
+      return challenge(request, 'invalid nonce') unless valid_nonce?(request)
+
+      consumer_response = @@store.get(
+        "/cloudkit_oauth_consumers/#{request[:oauth_consumer_key]}")
+      unless consumer_response.status == 200
+        return challenge(request, 'invalid consumer')
+      end
+
+      consumer = consumer_response.parsed_content
+      request_token_response = @@store.get(
+        "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}")
+      unless request_token_response.status == 200
+        return challenge(request, 'invalid request token')
+      end
+
+      request_token = request_token_response.parsed_content
+      unless request_token['consumer_key'] == request[:oauth_consumer_key]
+        return challenge(request, 'invalid consumer')
+      end
+
+      signature = OAuth::Signature.build(request) do
         [request_token['secret'], consumer['secret']]
       end
-      return challenge('invalid signature') unless signature.verify
-      token_id, secret = OAuth::Server.new(@request.host).generate_credentials
+      unless signature.verify
+        return challenge(request, 'invalid signature')
+      end
+
+      token_id, secret = OAuth::Server.new(request.host).generate_credentials
       token_data = JSON.generate(
-        :id              => token_id,
         :secret          => secret,
-        :consumer_key    => consumer['id'],
+        :consumer_key    => request[:oauth_consumer_key],
         :consumer_secret => consumer['secret'],
         :user_id         => request_token['user_id'])
-      @@store.put(:tokens, :id => token_id, :data => token_data)
+      @@store.put(
+        "/cloudkit_oauth_tokens/#{token_id}",
+        :json => token_data)
       @@store.delete(
-        :request_tokens,
-        :id   => request_token['id'],
-        :etag => request_token['etag'])
+        "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}",
+        :etag => request_token_response.etag)
       [201, {}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
     end
 
-    def inject_user_or_challenge
-      unless valid_nonce?
-        @request.current_user = ''
-        inject_challenge
+    def inject_user_or_challenge(request)
+      unless valid_nonce?(request)
+        request.current_user = ''
+        inject_challenge(request)
         return
       end
-      result = @@store.get(:tokens, :id => @request[:oauth_token])
+
+      result       = @@store.get("/cloudkit_oauth_tokens/#{request[:oauth_token]}")
       access_token = result.parsed_content
-      signature = OAuth::Signature.build(@request) do
+      signature    = OAuth::Signature.build(request) do
         [access_token['secret'], access_token['consumer_secret']]
       end
       if signature.verify
-        @request.current_user = access_token['user_id']
+        request.current_user = access_token['user_id']
       else
-        @request.current_user = ''
-        inject_challenge
+        request.current_user = ''
+        inject_challenge(request)
       end
     end
 
-    def valid_nonce?
-      timestamp = @request[:oauth_timestamp]
-      nonce = @request[:oauth_nonce]
+    def valid_nonce?(request)
+      timestamp = request[:oauth_timestamp]
+      nonce     = request[:oauth_nonce]
       return false unless (timestamp && nonce)
-      id = "#{timestamp}:#{nonce}"
-      json = JSON.generate(:id => id)
-      result = @@store.put(:nonces, :id => id, :data => json)
+
+      uri    = "/cloudkit_oauth_nonces/#{timestamp},#{nonce}"
+      result = @@store.put(uri, :json => '{}')
       return false unless result.status == 201
+
       true
     end
 
-    def inject_challenge
-      @request.env[challenge_key] = challenge_headers
+    def inject_challenge(request)
+      request.env[challenge_key] = challenge_headers(request)
     end
 
-    def challenge(message)
-      [401, challenge_headers, [message || '']]
+    def challenge(request, message)
+      [401, challenge_headers(request), [message || '']]
     end
 
-    def challenge_headers
+    def challenge_headers(request)
       {
-        'WWW-Authenticate' => "OAuth realm=\"http://#{@request.env['HTTP_HOST']}\"",
-        'Link' => discovery_link
+        'WWW-Authenticate' => "OAuth realm=\"http://#{request.env['HTTP_HOST']}\"",
+        'Link' => discovery_link(request)
       }
     end
 
-    def discovery_link
-      "<#{@request.scheme}://#{@request.env['HTTP_HOST']}/oauth/meta>; rel=\"http://oauth.net/discovery/1.0/rel/provider\""
+    def discovery_link(request)
+      "<#{request.scheme}://#{request.env['HTTP_HOST']}/oauth/meta>; rel=\"http://oauth.net/discovery/1.0/rel/provider\""
     end
 
-    def get_meta
-      erb :oauth_meta
+    def login_redirect(request)
+      [302, {'Location' => request.login_url}, []]
     end
 
-    def get_descriptor
-      erb :oauth_descriptor
+    def get_meta(request)
+      erb(request, :oauth_meta)
     end
 
-    def get_consumer
-      result = @@store.get(:consumers, :id => @request[:oauth_consumer_key])
-      raise 'Consumer Not Found' unless result.status == 200
-      result.parsed_content
-    end
-
-    def get_request_token
-      result = @@store.get(:request_tokens, :id => @request[:oauth_token])
-      raise 'Request Token Not Found' unless result.status == 200
-      result.parsed_content
+    def get_descriptor(request)
+      erb(request, :oauth_descriptor)
     end
   end
 end

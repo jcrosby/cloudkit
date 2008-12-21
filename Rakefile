@@ -1,3 +1,7 @@
+require 'rake/clean'
+
+CLEAN.include 'doc/api'
+
 task :default => :test
 
 desc 'Run specs'
@@ -8,6 +12,20 @@ end
 
 desc 'Generate rdoc'
 task :rdoc do
-  rm_rf 'doc'
-  `hanna --inline-source --line-numbers --include=lib/cloudkit.rb --include=lib/cloudkit/*.rb --include=lib/cloudkit/*/*.rb --exclude=templates/* --exclude=test/*`
+  rm_rf 'doc/api'
+  sh((<<-SH).gsub(/[\s\n]+/, ' ').strip)
+  hanna
+    --inline-source
+    --line-numbers
+    --include=lib/cloudkit.rb
+    --include=lib/cloudkit/*.rb
+    --include=lib/cloudkit/*/*.rb
+    --exclude=templates/*
+    --exclude=examples/*
+    --exclude=test/*
+    --exclude=doc/index.html
+    --exclude=doc/curl.html
+    --exclude=doc/rest-api.html
+    --op=doc/api
+  SH
 end

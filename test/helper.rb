@@ -19,12 +19,6 @@ def auth
   {auth_key => remote_user}
 end
 
-def service_store
-  CloudKit::Store.new(
-    :adapter => CloudKit::SQLAdapter.new('sqlite://service.db'),
-    :collections => [:items, :things])
-end
-
 def plain_service
   Rack::Builder.new do
     use Rack::Config do |env|
@@ -47,26 +41,10 @@ def authed_service
   end
 end
 
-def oauth_store
-  CloudKit::OAuthStore.new
-end
-
-def user_store
-  CloudKit::UserStore.new
-end
-
-def oauth_filtered_app
-  CloudKit::OAuthFilter.new(echo_env(auth_key))
-end
-
 def openid_app
   Rack::Builder.new do
     use Rack::Session::Pool
     use CloudKit::OpenIDFilter
     run echo_env(auth_key)
   end
-end
-
-def build_etag_header(etags)
-  etags.map{|t| "\"#{t}\""}.join(', ')
 end

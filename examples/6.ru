@@ -4,6 +4,7 @@ use Rack::Config do |env|
   env['cloudkit.storage.uri'] = 'mysql://root:@localhost/cloudkit_example'
 end
 use Rack::Session::Pool
+use CloudKit::OAuthFilter
 use CloudKit::OpenIDFilter
 use CloudKit::Service, :collections => [:notes]
 run lambda{|env| [200, {}, ['HELLO']]}

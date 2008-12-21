@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>CloudKit REST API</title>
+  <link rel="stylesheet" href="main.css" type="text/css" charset="utf-8"/>
+</head>
+<body>
+<h1>CloudKit REST API</h1>
+<div id="wrapper">
+<div class="meta">
+  <p>All request and response bodies are JSON documents.</p>
+
+  <p>URI and JSON templates in this document are represented as follows:<br/>
+  - Values in %% are variables.<br/>
+  - All other symbols are literals.<br/>
+  </p>
+
+  <p>All URIs are relative to the service root, which can be mounted in any
+    number of ways using Rack's URL Maps and Cascades. See the examples
+    directory in the source for specific techniques.
+  </p>
+
+  <p>All response codes closely follow RFC 2616 with the addition of 422 from
+    RFC 4918.
+  </p>
+
+  <p>All errors use JSON to supplement their status codes:<br/>
+  {"error":"%message%"}
+  </p>
+</div>
+
+<div class="uri-template">
+  GET /cloudkit-meta
+</div>
+<p>
+  List resource collection URIs hosted at the service root.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {"uris":[%collection-uri-list%]}
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">collection-uri-list:</span> an array of collection URIs hosted at the service root.
+</p>
+
+<div class="uri-template">
+  OPTIONS /%uri%
+</div>
+<p>
+  Return an Allow header containing the available methods for a given URI.
+</p>
+
+<div class="uri-template">
+  GET /%collection%
+</div>
+<p>
+  List URIs of available documents within a collection. This includes only
+  current version URIs. Previous versions of a given document are hosted under a
+  different URI. Sort order is descending by last modified date.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of JSON documents.
+</p>
+
+<p>
+  <span class="spec-header">Optional Query Parameters:</span><br/>
+  <span class="definition">offset:</span> 0-based starting index for the list of results. Default is 0.<br/>
+  <span class="definition">limit:</span>  maximum number of results to return. Default is undefined, meaning unlimited.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "total":%total-results%,<br/>
+    "offset":%offset-value%,<br/>
+    "uris":[%uri-list%]<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">total-results:</span> the total number of available results in the complete set, calculated prior applying any provided limits.<br/>
+  <span class="definition">offset-value:</span> integer representing the offset.<br/>
+  <span class="definition">uri-list:</span> an array of document URIs within the given collection. If less than the total available are supplied in the uris element, additional requests can be made, specifying the offset and limit query parameters. Future versions of CloudKit may page result sets to optimize performance.
+</p>
+
+
+<div class="uri-template">
+  GET /%collection%/%uuid%
+</div>
+<p>
+  Return the current version of a JSON document.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of documents.<br/>
+  <span class="definition">uuid:</span> the unique key for a JSON document.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  %json-document%
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">json-document:</span> a valid JSON document.
+</p>
+
+<div class="uri-template">
+  GET /%collection%/%uuid%/versions
+</div>
+<p>
+  List URIs of all versions of a given JSON document. This is a union of current
+  and previous document versions. Sort order is descending by last modified date.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of JSON documents.<br/>
+  <span class="definition">uuid:</span> the unique key for a JSON document.
+</p>
+
+<p>
+  <span class="spec-header">Optional Query Parameters:</span><br/>
+  <span class="definition">offset:</span> 0-based starting index for the list of results. Default is 0.<br/>
+  <span class="definition">limit:</span> maximum number of results to return. Default is undefined, meaning unlimited.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "total":%total-results%,<br/>
+    "offset":%offset-value%,<br/>
+    "uris":[%uri-list%]<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">total-results:</span> the total number of available results in the complete set, calculated prior to applying any provided limits.<br/>
+  <span class="definition">offset-value:</span> integer representing the offset.<br/>
+  <span class="definition">uri-list:</span> an array of document URIs within the given collection. If less than the total available are supplied in the uris element, additional requests can be made, specifying the offset and limit query parameters. Future versions of CloudKit may page result sets to optimize performance.
+</p>
+
+<div class="uri-template">
+  GET /%collection%/%uuid%/versions/%etag%
+</div>
+<p>
+  Return the given version of a JSON document as specified by its ETag.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of documents.<br/>
+  <span class="definition">uuid:</span> the unique key for a JSON document.<br/>
+  <span class="definition">etag:</span> the ETag of the desired document version.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  %json-document%
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">json-document:</span> a valid JSON document.
+</p>
+
+<div class="uri-template">
+  POST /%collection%
+</div>
+<p>
+  Create a resource within the given collection using the provided JSON document.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of documents.
+</p>
+
+<p>
+  <span class="spec-header">Request Body:</span><br/>
+  %json-document%
+</p>
+
+<p>
+  <span class="spec-header">Request Body Variables:</span><br/>
+  <span class="definition">json-document:</span> a valid JSON document.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "ok":true,<br/>
+    "uri":%uri%,<br/>
+    "etag":%etag%,<br/>
+    "last_modified":%last-modified%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">uri:</span> the URI for the stored document relative to the service root.<br/>
+  <span class="definition">etag:</span> the ETag for the current version of the submitted document.<br/>
+  <span class="definition">last_modified:</span> the Last-Modified timestamp for the submitted document according to the service. This is different from any client last_modified timestamps that may be embedded as a regular part of the JSON document body.
+</p>
+
+<p>
+  <span class="spec-header">Error Response:</span><br/>
+  {<br/>
+    "error":%message%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Error Response Variables:</span><br/>
+  <span class="definition">message:</span> a short description of the source of the error.
+</p>
+
+
+<div class="uri-template">
+  PUT /%collection%/%uuid%
+</div>
+<p>
+  Create or update the resource at the given URI.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of documents.<br/>
+  <span class="definition">uuid:</span> the unique key for a JSON document that is being created or updated.
+</p>
+
+<p>
+  <span class="spec-header">Request Body:</span><br/>
+  %json-document%
+</p>
+
+<p>
+  <span class="spec-header">Request Body Variables:</span><br/>
+  <span class="definition">json-document:</span> a valid JSON document.
+</p>
+
+<p>
+  <span class="spec-header">Request Headers:</span><br/>
+  <span class="definition">If-Match:</span> required for documents that are being updated. Ignored for new document storage.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "ok":true,<br/>
+    "uri":%uri%,<br/>
+    "etag":%etag%,<br/>
+    "last_modified":%last-modified%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">uri:</span> the URI for the stored document relative to the service root.<br/>
+  <span class="definition">etag:</span> the ETag for the current version of the submitted document.<br/>
+  <span class="definition">last_modified:</span> the Last-Modified timestamp for the submitted document according to the service. This is different from any client last_modified timestamps that may be embedded as a regular part of the JSON document body.
+</p>
+
+<p>
+  <span class="spec-header">Error Response:</span><br/>
+  {<br/>
+    "error":%message%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Error Response Variables:</span><br/>
+  <span class="definition">message:</span> a short description of the source of the error.
+</p>
+
+<div class="uri-template">
+  DELETE /%collection%/%uuid%
+</div>
+<p>
+  Delete the document at the given URI.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of documents.<br/>
+  <span class="definition">uuid:</span> the unique key for a JSON document that is being created or updated.
+</p>
+
+<p>
+  <span class="spec-header">Request Headers:</span><br/>
+  <span class="definition">If-Match:</span> required for documents that are being updated. Ignored for new document storage.
+</p>
+ 
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "ok":true,<br/>
+    "uri":%uri%,<br/>
+    "etag":%etag%,<br/>
+    "last_modified":%last-modified%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">uri:</span> the URI for the stored document relative to the service root. In the case of DELETE, this is the URI for archived resource version.<br/>
+  <span class="definition">etag:</span> the ETag for the current version of the document, now archived. This ETag will match the previous version as new ETags are not relevant to deleted resources.<br/>
+  <span class="definition">last_modified:</span> the Last-Modified timestamp for the document according to the service. This is different from any client last_modified timestamps that may be embedded as a regular part of the JSON document body. Note that this last_modified timestamp matches the previous version.
+</p>
+
+<p>
+  <span class="spec-header">Error Response:</span><br/>
+  {<br/>
+    "error":%message%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Error Response Variables:</span><br/>
+  <span class="definition">message:</span> a short description of the source of the error.
+</p>
+
+<div class="uri-template">
+  HEAD /%uri%
+</div>
+<p>
+  Return the headers for an identical GET at the same URI.
+</p>
+</div>
+</body>
+</html>

@@ -3,6 +3,6 @@
   <Type>http://oauth.net/discovery/1.0</Type>
   <Service>
     <Type>http://oauth.net/discovery/1.0/rel/provider</Type>
-    <URI><%= @request.scheme %>://<%= @request.env['HTTP_HOST'] %>/oauth</URI>
+    <URI><%= request.scheme %>://<%= request.env['HTTP_HOST'] %>/oauth</URI>
   </Service>
 </XRD>

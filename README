@@ -1,0 +1,53 @@
+==CloudKit
+
+CloudKit is an Open Web JSON Appliance.
+
+More specifically, CloudKit provides RESTful JSON storage with optional OpenID and OAuth support, including OAuth Discovery. Stored entities are versioned. Services manage their own storage and do not require schema updates when models change. The functionality has been implemented as Rack middleware and as such can be used on its own or alongside other Rack-based applications or middleware components like Rails, Merb or Sinatra.
+
+===Examples
+
+In a rackup file called config.ru:
+
+  require 'cloudkit'
+  expose :notes, :todos
+
+The above creates a versioned HTTP service using JSON to represent two types of resource collections -- Notes and ToDos.
+
+In a different rackup file:
+
+  require 'cloudkit'
+  contain :notes, :todos
+
+The aboves provides the same API as example 1 with added authentication and authorization via OpenID and OAuth, respectively.
+
+An explicit version of example 2, minus the default developer landing page:
+
+  require 'cloudkit'
+  use Rack::Pool::Session
+  use CloudKit::OAuthFilter
+  use CloudKit::OpenIDFilter
+  use CloudKit::Service, :collecxtions => [:notes, :todos]
+  run lambda {|env| [200, {}, ['HELLO']]}
+
+See the examples directory for more.
+
+Copyright (c) 2008 Jon Crosby http://joncrosby.me
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

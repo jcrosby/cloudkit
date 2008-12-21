@@ -3,39 +3,38 @@ module CloudKit
     attr_accessor :name, :observe, :extract
 
     def initialize(name, options)
-      @name = name
+      @name    = name
       @observe = options[:observe]
       @extract = options[:extract]
     end
 
-    def map(db, type, data)
+    def map(db, type, uri, data)
       if @observe == type
         elements = @extract.inject({}) do |e, field|
           e.merge(field.to_s => data[field.to_s])
         end
-        elements.merge!(
-          'entity_id' => data['id'],
-          'content'   => JSON.generate(data))
-        db[@name].filter(:entity_id => data['id']).delete
-        db[@name].insert(elements)
+        elements.merge!('uri' => uri)
+        db.transaction do
+          db[@name].filter(:uri => uri).delete
+          db[@name].insert(elements)
+        end
       end
     end
 
-    def unmap(db, type, id)
+    def unmap(db, type, uri)
       if @observe == type
-        db[@name].filter(:entity_id => id).delete
+        db[@name].filter(:uri => uri).delete
       end
     end
 
-    def create_storage(db)
+    def initialize_storage(db)
       extractions = @extract
       db.create_table @name do
         extractions.each do |field|
           text field
         end
-        text :content
-        varchar :entity_id
-        index :entity_id
+        primary_key :id
+        varchar     :uri
       end unless db.table_exists?(@name)
     end
   end

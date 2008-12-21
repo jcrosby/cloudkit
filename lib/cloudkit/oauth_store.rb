@@ -5,41 +5,43 @@ module CloudKit
     def initialize(uri=nil)
       @@store = Store.new(
         :collections => [
-          namespace(:nonces),
-          namespace(:tokens),
-          namespace(:request_tokens),
-          namespace(:consumers)],
+          :cloudkit_oauth_nonces,
+          :cloudkit_oauth_tokens,
+          :cloudkit_oauth_request_tokens,
+          :cloudkit_oauth_consumers],
         :adapter => SQLAdapter.new(uri)) unless @@store
       load_static_consumer
     end
 
-    def get(type, options={})
-      @@store.get(namespace(type), options)
+    def get(uri, options={})
+      @@store.get(uri, options)
     end
 
-    def post(type, options={})
-      @@store.post(namespace(type), options)
+    def post(uri, options={})
+      @@store.post(uri, options)
     end
 
-    def put(type, options={})
-      @@store.put(namespace(type), options)
+    def put(uri, options={})
+      @@store.put(uri, options)
     end
 
-    def delete(type, options={})
-      @@store.delete(namespace(type), options)
+    def delete(uri, options={})
+      @@store.delete(uri, options)
+    end
+
+    def resolve_uris(uris)
+      @@store.resolve_uris(uris)
+    end
+    
+    def reset!
+      @@store.reset!
     end
 
     def version; 1; end
 
-    protected
-
     def load_static_consumer
-      json = JSON.generate(:id => 'cloudkitconsumer', :secret => '')
-      @@store.put(namespace(:consumers), :id => 'cloudkitconsumer', :data => json)
-    end
-    
-    def namespace(key)
-      "cloudkit_oauth_#{key}".to_sym
+      json = JSON.generate(:secret => '')
+      @@store.put('/cloudkit_oauth_consumers/cloudkitconsumer', :json => json)
     end
   end
 end

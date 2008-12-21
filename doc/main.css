@@ -1,0 +1,50 @@
+body {
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', san-serif;
+  font-size: 14px;
+}
+h1 {
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 28px;
+}
+a {
+  color: #6b8df2;
+  text-decoration: none;
+}
+#wrapper {
+  width: 700px;
+}
+.code {
+  padding: 7px;
+  font-family: 'Courier New', monospace;
+  color: #00ff00;
+  background-color: black;
+  font-size: 13px;
+  width: 680px;
+  margin-left: 20px;
+  margin-bottom: 30px;
+}
+.meta {
+  padding: 7px;
+  background-color: #ffffdd;
+  border: 1px solid #ffddbb;
+  width: 690px;
+  font-size: 14px;
+}
+.uri-template {
+  font-family: 'Courier New', monospace;
+  color: #00ff00;
+  background-color: black;
+  width: 700px;
+  padding-left: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-top: 30px;
+}
+.spec-header {
+  font-weight: bold;
+  font-size: 15px;
+}
+.definition {
+  font-weight: bold;
+}
