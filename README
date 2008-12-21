@@ -26,7 +26,7 @@ An explicit version of example 2, minus the default developer landing page:
   use Rack::Pool::Session
   use CloudKit::OAuthFilter
   use CloudKit::OpenIDFilter
-  use CloudKit::Service, :collecxtions => [:notes, :todos]
+  use CloudKit::Service, :collections => [:notes, :todos]
   run lambda {|env| [200, {}, ['HELLO']]}
 
 See the examples directory for more.
