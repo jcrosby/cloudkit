@@ -5,7 +5,7 @@ require 'shoulda'
 require 'rexml/document'
 
 def auth_key; "cloudkit.user"; end
-def remote_user; "123456789"; end
+def remote_user; "/cloudkit_users/abcdef"; end
 
 def echo_text(text)
   lambda {|env| [200, {'Content-Type' => 'text/html'}, [text]]}

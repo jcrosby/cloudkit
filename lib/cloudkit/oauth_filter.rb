@@ -36,7 +36,10 @@ module CloudKit
 
       request = Request.new(env)
       request.announce_auth(oauth_filter_key)
+      return xrds_location(request) if oauth_disco_draft2_xrds?(request)
       return @app.call(env) if request.path_info == '/'
+
+      load_user_from_session(request)
 
       begin
         case request
@@ -46,8 +49,13 @@ module CloudKit
           create_request_token(request)
         when r(:get, '/oauth/authorization', ['oauth_token'])
           request_authorization(request)
-        when r(:put, '/oauth/authorized_request_tokens/:id')
+        when r(:put, '/oauth/authorized_request_tokens/:id', ['submit' => 'Approve'])
+          # Temporarily relying on a button value until pluggable templates are
+          # introduced in 1.0.
           authorize_request_token(request)
+        when r(:put, '/oauth/authorized_request_tokens/:id', ['submit' => 'Deny'])
+          # See previous comment.
+          deny_request_token(request)
         when r(:post, '/oauth/authorized_request_tokens/:id', [{'_method' => 'PUT'}])
           authorize_request_token(request)
         when r(:post, '/oauth/access_tokens')
@@ -125,6 +133,17 @@ module CloudKit
         :etag => request_token_response.etag,
         :json => json)
       erb(request, :authorize_request_token)
+    end
+
+    def deny_request_token(request)
+      return login_redirect(request) unless request.current_user
+
+      request_token_response = @@store.get(
+        "/cloudkit_oauth_request_tokens/#{request.last_path_element}")
+      @@store.delete(
+        "/cloudkit_oauth_request_tokens/#{request.last_path_element}",
+        :etag => request_token_response.etag)
+      erb(request, :request_token_denied)
     end
 
     def create_access_token(request)
@@ -222,15 +241,33 @@ module CloudKit
     end
 
     def login_redirect(request)
+      request.session['return_to'] = request.url if request.session
       [302, {'Location' => request.login_url}, []]
     end
 
+    def load_user_from_session(request)
+      request.current_user = request.session['user_uri'] if request.session
+    end
+
     def get_meta(request)
+      # Expected in next OAuth Discovery Draft
       erb(request, :oauth_meta)
     end
 
+    def oauth_disco_draft2_xrds?(request)
+      # Current OAuth Discovery Draft 2 / XRDS-Simple 1.0, Section 5.1.2
+      request.get? &&
+        request.env['HTTP_ACCEPT'] &&
+        request.env['HTTP_ACCEPT'].match(/application\/xrds\+xml/)
+    end
+
+    def xrds_location(request)
+      # Current OAuth Discovery Draft 2 / XRDS-Simple 1.0, Section 5.1.2
+      [200, {'X-XRDS-Location' => "#{request.scheme}://#{request.env['HTTP_HOST']}/oauth"}, []]
+    end
+
     def get_descriptor(request)
-      erb(request, :oauth_descriptor)
+      erb(request, :oauth_descriptor, {'Content-Type' => 'application/xrds+xml'})
     end
   end
 end

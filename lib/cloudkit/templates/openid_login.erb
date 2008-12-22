@@ -1,10 +1,31 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>Sign Up or Sign In</title>
+  <style type="text/css">
+    body {
+      font-family: 'Helvetica', 'Arial', san-serif;
+    }
+    #openid_url {
+      background: url(data:image/gif;base64,R0lGODlhEAAQANUAAPr6+t/f37Gxsby8vJycnKWlpaampq+vr/zUpfz8/Lm5ufLy8r6+vp2dncvLy/muVsjIyLW1tcTExKGhof7+/sDAwMHBwbS0tNnZ2erq6qioqPn5+bi4uLu7u+np6e3t7evr66mpqeXl5b29vaqqqtfX18zMzO7u7u/v756enveTHv///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAAAAAAALAAAAAAQABAAAAZlwJVwKEQQj0eECslcqZbN4zMqhTY/EoFzKbCAVoDNKjFIERTbFaeRcpwWCU3qgBJOVxVDhOEpH4hTFBkBIyQiKSkBgFZEiBiLTBApBgBDd0gXKROKaU0mZiEFl0wAJR0FD1SqQ0EAOw%3D%3D) no-repeat #FFF 5px;
+      padding-left: 25px;
+      width: 300px;
+    }
+    #submit {
+      display: block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
 <body>
 <%= request.flash[:error] %>
 <%= request.flash[:info] %>
+<p>Sign Up or Sign In with OpenID</p>
 <form action="/login" method="POST">
-<input type="text" name="openid_url"/>
-<input type="submit"/>
+<input type="text" id="openid_url" name="openid_url"/>
+<input id="submit" type="submit" value="Sign In"/>
 </form>
 </body>
 </html>

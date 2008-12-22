@@ -1,9 +1,23 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>OAuth Authorization Requested</title>
+  <style type="text/css">
+    body {
+      font-family: 'Helvetica', 'Arial', san-serif;
+    }
+  </style>
+</head>
 <body>
-<p>You sure?</p>
+<p>
+  Another application or website has requested access to your data.
+</p>
 <form action="/oauth/authorized_request_tokens/<%= request['oauth_token'] %>" method="POST">
-<input type="hidden" name="_method" value="PUT"/>
-<input type="submit" value="Yes"/>
+  <input type="hidden" name="_method" value="PUT"/>
+  <input type="submit" value="Approve"/>
+  <input type="submit" value="Deny"/>
 </form>
 </body>
 </html>

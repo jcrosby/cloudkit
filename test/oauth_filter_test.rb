@@ -97,41 +97,20 @@ class OAuthFilterTest < Test::Unit::TestCase
           REXML::XPath.first(doc, '//XRD/Service/URI').children[0].to_s
       end
 
+      should "respond to OAuth Discovery Draft 2 / XRDS-Simple Discovery" do
+        response = Rack::MockRequest.new(@oauth_filtered_app).get(
+          '/anything',
+          'HTTP_HOST'   => 'example.org',
+          'HTTP_ACCEPT' => 'application/xrds+xml')
+        assert 200, response.status
+        assert_equal 'http://example.org/oauth', response['X-XRDS-Location']
+      end
+
       should "provide a descriptor document on GET /oauth" do
         response = Rack::MockRequest.new(@oauth_filtered_app).get(
           '/oauth', 'HTTP_HOST' => 'example.org')
         assert_equal 200, response.status
-        doc = REXML::Document.new(response.body)
-        types = REXML::XPath.match(doc, '//XRD/Type')
-        assert types
-        assert types.any? {|t|
-          t.children[0] == 'http://oauth.net/discovery/1.0/type/provider'}
-        assert types.any? {|t|
-          t.children[0] == 'http://oauth.net/core/1.0/parameters/auth-header'}
-        assert types.any? {|t|
-          t.children[0] == 'http://oauth.net/core/1.0/parameters/uri-query'}
-        assert types.any? {|t|
-          t.children[0] == 'http://oauth.net/core/1.0/signature/HMAC-SHA1'}
-        services = REXML::XPath.match(doc, '//XRD/Service/Type')
-        assert services
-        assert services.any? {|s|
-          s.children[0] == 'http://oauth.net/core/1.0/endpoint/request'}
-        assert services.any? {|s|
-          s.children[0] == 'http://oauth.net/core/1.0/endpoint/authorize'}
-        assert services.any? {|s|
-          s.children[0] == 'http://oauth.net/core/1.0/endpoint/access'}
-        assert services.any? {|s|
-          s.children[0] == 'http://oauth.net/discovery/1.0/consumer-identity/static'}
-        uris = REXML::XPath.match(doc, '//XRD/Service/URI')
-        assert uris
-        assert uris.any? {|u|
-          u.children[0] == 'http://example.org/oauth/request_tokens'}
-        assert uris.any? {|u|
-          u.children[0] == 'http://example.org/oauth/authorization'}
-        assert uris.any? {|u|
-          u.children[0] == 'http://example.org/oauth/access_tokens'}
-        assert_equal 'cloudkitconsumer',
-          REXML::XPath.first(doc, '//XRD/Service/LocalID').children[0].to_s
+        assert_equal 'application/xrds+xml', response['Content-Type']
       end
 
       should "populate the static consumer on startup" do
@@ -145,7 +124,7 @@ class OAuthFilterTest < Test::Unit::TestCase
 
       should "generate request tokens" do
         response = get_request_token
-        assert_equal 201, response.status # 401
+        assert_equal 201, response.status
         token, secret = response.body.split('&')
         token_parts = token.split('=')
         secret_parts = secret.split('=')
@@ -223,18 +202,28 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve", auth)
         assert_equal 200, response.status
         request_token = @store.get("/cloudkit_oauth_request_tokens/#{token}").parsed_content
         assert request_token['authorized_at']
         assert request_token['user_id']
       end
 
+      should "removed denied request tokens" do
+        response = get_request_token
+        token, secret = extract_token(response)
+        response = Rack::MockRequest.new(@oauth_filtered_app).put(
+          "/oauth/authorized_request_tokens/#{token}?submit=Deny", auth)
+        assert_equal 200, response.status
+        request_token = @store.get("/cloudkit_oauth_request_tokens/#{token}").parsed_content
+        assert 410, response.status
+      end
+
       should "redirect to login for authorization PUT requests unless logged-in" do
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}")
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve")
         assert_equal 302, response.status
         assert_equal '/login', response['Location']
       end
@@ -243,10 +232,10 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve", auth)
         assert_equal 200, response.status
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve", auth)
         assert_equal 401, response.status
       end
 

@@ -111,6 +111,7 @@ module CloudKit
       user        = user_result.parsed_content
 
       if request.session['user_uri'] = user_uri
+        request.current_user = user_uri
         user['remember_me_expiration'] = two_weeks_from_now
         user['remember_me_token'] = Base64.encode64(
           OpenSSL::Random.random_bytes(32)).gsub(/\W/,'')
