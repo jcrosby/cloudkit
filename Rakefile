@@ -22,6 +22,7 @@ task :rdoc do
     --include=lib/cloudkit/*/*.rb
     --exclude=Rakefile
     --exclude=TODO
+    --exclude=cloudkit.gemspec
     --exclude=templates/*
     --exclude=examples/*
     --exclude=test/*

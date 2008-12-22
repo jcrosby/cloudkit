@@ -1,7 +1,3 @@
-0.9
-- better rake tasks for gem publication
-- gemspec
-
 1.0
 - jquery.cloudkit
     titanium/gears
@@ -15,7 +11,7 @@
 - complete user data export
 - method filtering on collections
 - js functions as observers (validation, mapping, etc.)
-- custom templates
+- custom templates for openid / oauth
 
 Backlog
 - expect header/100-continue

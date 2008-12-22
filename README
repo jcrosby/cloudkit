@@ -2,7 +2,9 @@
 
 CloudKit is an Open Web JSON Appliance.
 
-More specifically, CloudKit provides RESTful JSON storage with optional OpenID and OAuth support, including OAuth Discovery. Stored entities are versioned. Services manage their own storage and do not require schema updates when models change. The functionality has been implemented as Rack middleware and as such can be used on its own or alongside other Rack-based applications or middleware components like Rails, Merb or Sinatra.
+More specifically, CloudKit provides RESTful JSON storage with optional OpenID and OAuth support, including OAuth Discovery. Stored entities are versioned. Services manage their own storage and do not require schema updates when models change.
+
+CloudKit is Rack middleware and as such can be used on its own or alongside other Rack-based applications or middleware components like Rails, Merb or Sinatra.
 
 ===Examples
 
