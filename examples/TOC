@@ -4,7 +4,7 @@ Index of Examples
 When using the gem version of CloudKit, the first line of each example can be
 removed.
 
-1. Expose Notes      - Mount a JSON "notes" API.
+1. Expose Notes      - Mount a JSON "notes" API. Uses in-memory SQLite.
 
 2. Contain Notes     - Same as #1, adding OpenID and OAuth.
 
@@ -15,10 +15,3 @@ removed.
 5. SQLite Notes      - Same as #2 with a SQLite file store.
 
 6. MySQL Notes       - Same as #2 with MySQL store.
-
-7. Versioned API     - Serve static content out of a directory, plus a "notes"
-                       API with OpenID and OAuth mounted at a versioned API URL:
-                       /v1/notes.
-
-8. Combination       - Serve static content out of a directory, plus public
-                       "notes" and protected (OpenID/OAuth) projects.
