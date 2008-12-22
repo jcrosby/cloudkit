@@ -148,7 +148,7 @@ module CloudKit
             :remote_user          => item[:remote_user],
             :content              => item[:content],
             :deleted              => true)
-          # TODO unmap
+          unmap(uri)
         end
         return json_meta_response(200, version_uri, item[:etag], item[:last_modified])
       end
@@ -444,8 +444,8 @@ module CloudKit
     end
 
     # Delegates removal of view data.
-    def unmap(type, id)
-      @views.each{|view| view.unmap(@db, type, id)} if @views
+    def unmap(uri)
+      @views.each{|view| view.unmap(@db, collection_type(uri), uri)} if @views
     end
 
     # Return a HTTP date representing 'now.'

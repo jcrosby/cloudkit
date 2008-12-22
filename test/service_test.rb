@@ -383,23 +383,24 @@ class ServiceTest < Test::Unit::TestCase
           response = @request.post('/items', :input => 'fail', auth_key => remote_user)
           assert_equal 422, response.status
         end
-        # should "insert into its views" do
-        #           view = CloudKit::ExtractionView.new(
-        #             :fruits,
-        #             :observe => :items,
-        #             :extract => [:apple, :lemon])
-        #           store = ExposedStore.new(
-        #             :collections => [:items],
-        #             :views       => [view])
-        #           json = JSON.generate(:id => '123', :apple => 'green')
-        #           store.put(:items, :id => '123', :json => json)
-        #           json = JSON.generate(:id => '123', :apple => 'red')
-        #           store.put(:items, :id => '123', :json => json)
-        #           result = store.get(:fruits, :apple => 'green')
-        #           uris = result.parsed_content['uris']
-        #           assert_equal 1, uris.size
-        #           assert 'green', uris.first['apple']
-        #         end
+
+        should "insert into its views" do
+          view = CloudKit::ExtractionView.new(
+            :fruits,
+            :observe => :items,
+            :extract => [:apple, :lemon])
+          store = CloudKit::Store.new(
+            :collections => [:items],
+            :views       => [view])
+          json = JSON.generate(:apple => 'green')
+          store.put('/items/123', :json => json)
+          json = JSON.generate(:apple => 'red')
+          store.put('/items/456', :json => json)
+          result = store.get('/fruits', :apple => 'green')
+          uris = result.parsed_content['uris']
+          assert_equal 1, uris.size
+          assert uris.include?('/items/123')
+        end
       end
 
       context "on PUT /:collection/:id" do 
@@ -511,32 +512,28 @@ class ServiceTest < Test::Unit::TestCase
           new_etag = JSON.parse(new_response.body)['etag']
           assert_not_equal etag, new_etag
         end
-        # should "retain version history" do
-        #           json = JSON.generate(
-        #             :id    => 'abc123',
-        #             :hello => 'dolly',
-        #             :etag  => @etag)
-        #           update_result = @store.put(:items, :id => 'abc123', :json => json)
-        #           result = @store.get(:items, :id => 'abc123', :etag => @etag)
-        #           assert_equal 'there', result.parsed_content['hello']
-        #         end
-        #         should "update its views" do
-        #           view = CloudKit::ExtractionView.new(
-        #             :fruits,
-        #             :observe => :items,
-        #             :extract => [:apple, :lemon])
-        #           store = ExposedStore.new(
-        #             :collections => [:items],
-        #             :views       => [view])
-        #           json = JSON.generate(:id => '123', :apple => 'green')
-        #           store.put(:items, :id => '123', :json => json)
-        #           json = JSON.generate(:id => '123', :apple => 'red')
-        #           store.put(:items, :id => '123', :json => json)
-        #           result = store.get(:fruits, :apple => 'green')
-        #           uris = result.parsed_content['uris']
-        #           assert_equal 1, uris.size
-        #           # assert 'red', documents.first['apple'] # TODO resolve, fetch, and check
-        #         end
+
+        should "update its views" do
+          view = CloudKit::ExtractionView.new(
+            :fruits,
+            :observe => :items,
+            :extract => [:apple, :lemon])
+          store = CloudKit::Store.new(
+            :collections => [:items],
+            :views       => [view])
+          json = JSON.generate(:apple => 'green')
+          result = store.put('/items/123', :json => json)
+          json = JSON.generate(:apple => 'red')
+          store.put(
+            '/items/123', :etag => result.parsed_content['etag'], :json => json)
+          result = store.get('/fruits', :apple => 'green')
+          uris = result.parsed_content['uris']
+          assert_equal 0, uris.size
+          result = store.get('/fruits', :apple => 'red')
+          uris = result.parsed_content['uris']
+          assert_equal 1, uris.size
+          assert uris.include?('/items/123')
+        end
       end
 
       context "on DELETE /:collection/:id" do
@@ -646,21 +643,22 @@ class ServiceTest < Test::Unit::TestCase
           json = JSON.parse(response.body)
           assert_equal 1, json['total']
         end
-        # should "remove records from its views" do
-        #           view = CloudKit::ExtractionView.new(
-        #             :fruits,
-        #             :observe => :items,
-        #             :extract => [:apple, :lemon])
-        #           store = ExposedStore.new(
-        #             :collections => [:items],
-        #             :views       => [view])
-        #           json = JSON.generate(:id => '123', :apple => 'green')
-        #           result = store.put(:items, :id => '123', :json => json)
-        #           store.delete(:items, :id => '123', :etag => result['ETag'].gsub('"', ''))
-        #           result = store.get(:fruits, :apple => 'green')
-        #           uris = result.parsed_content['uris']
-        #           assert_equal [], uris
-        #         end
+
+        should "remove records from its views" do
+          view = CloudKit::ExtractionView.new(
+            :fruits,
+            :observe => :items,
+            :extract => [:apple, :lemon])
+          store = CloudKit::Store.new(
+            :collections => [:items],
+            :views       => [view])
+          json = JSON.generate(:apple => 'green')
+          result = store.put('/items/123', :json => json)
+          store.delete('/items/123', :etag => result.parsed_content['etag'])
+          result = store.get('/fruits', :apple => 'green')
+          uris = result.parsed_content['uris']
+          assert_equal [], uris
+        end
       end
 
       context "on OPTIONS /:collection" do
