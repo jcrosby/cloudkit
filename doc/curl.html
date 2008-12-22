@@ -95,10 +95,6 @@ List the currently available notes:
 </p>
 
 <p>
-The Link header will be explained momentarily.
-</p>
-
-<p>
 Create a note using <a href="http://tools.ietf.org/html/rfc2616#section-9.5">POST</a>:
   <div class="code">
     $ curl -i -XPOST -d'{"title":"projects"}' http://localhost:3000/notes<br/>
@@ -179,9 +175,7 @@ Along with the usual metadata, individual resources also provide discovery
 information via
 <a href="http://www.mnot.net/drafts/draft-nottingham-http-link-header-03.txt">Link Headers</a>
 as shown above. These links allow user agents to find related resources such as
-the complete history of a document and its
-<a href="http://tools.ietf.org/html/rfc2616#section-14.19">ETags</a>.
-The utility of these items will be demonstrated momentarily.
+the complete history of a document.
 </p>
 
 <p>
@@ -218,8 +212,9 @@ Succeed in updating by being specific:
 </p>
 
 <p>
-(Note: Your ETag will likely be different so substitute the one that curl
-provided when you created your own "abc" resource.)
+(Note: Your <a href="http://tools.ietf.org/html/rfc2616#section-14.19">ETag</a>
+will likely be different so substitute the one that curl provided when you
+created your own "abc" resource.)
 </p>
 
 <p>
