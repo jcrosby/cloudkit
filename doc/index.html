@@ -4,10 +4,84 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <title>CloudKit - An Open Web JSON Appliance</title>
+  <link rel="stylesheet" href="main.css" type="text/css" charset="utf-8"/>
 </head>
 <body>
-  <a href="api">rdoc</a>
-  <a href="curl.html">curl</a>
-  <a href="rest-api.html">rest api</a>
+  <div class="wrapper">
+    <ul class="nav">
+      <li><a href="rest-api.html" title="REST API">REST API</a></li>
+      <li><a href="curl.html" title="cURL Tutorial">cURL</a></li>
+      <li><a href="api" title="RDoc">RDoc</a></li>
+      <li><a href="http://github.com/jcrosby/cloudkit" title="GitHub Source Repository">Code</a></li>
+      <li><a href="http://blog.joncrosby.me" title="Author's Blog">Blog</a></li>
+    </ul>
+  </div>
+  <div id="header">
+    <div class="wrapper">
+      <h1>CloudKit</h1>
+      <div class="subtitle">An Open Web JSON Appliance</div>
+    </div>
+  </div>
+  <div class="wrapper intro-row">
+    <div class="column-one">
+      <div class="block-header">
+        Build APIs Like This
+      </div>
+      <img alt="Example Code" src="images/example-code.gif"/>
+    </div>
+    <div class="column-two">
+      <p>
+        CloudKit provides RESTful JSON storage with optional OpenID and OAuth
+        support, including OAuth Discovery. Stored entities are versioned.
+        Services manage their own storage and do not require schema updates
+        when models change.
+      </p>
+      <p>
+        CloudKit is Rack middleware and as such can be used on its own or
+        alongside other Rack-based applications or middleware components such
+        as Rails, Merb or Sinatra.
+      </p>
+    </div>
+  </div>
+
+  <div id="splitter"></div>
+
+  <div class="wrapper stack-logo-row">
+    <div class="column-one">
+      <img alt="OAuth Discovery Logo" src="images/oauth-discovery-logo.gif"/>
+    </div>
+    <div class="column-two">
+      <img alt="OpenID Logo" src="images/openid-logo.gif"/>
+    </div>
+    <div class="column-three">
+      <img alt="JSON Title" src="images/json-title.gif"/>
+    </div>
+  </div>
+
+  <div class="wrapper stack-row">
+    <div class="column-one">
+      <p>
+        The CloudKit stack provides an optional OAuth Filter with support for
+        OAuth Core 1.0 and OAuth Discovery. Share your APIs with other
+        web services, desktop apps, Open Social containers and more.
+      </p>
+    </div>
+    <div class="plus">+</div>
+    <div class="column-two">
+      <p>
+        An OpenID Filter supplies authentication for browser-based clients.
+        Both the OAuth and OpenID Filters collaborate to simultaneously provide
+        login screens and auth challenges in a single HTTP response.
+      </p>
+    </div>
+    <div class="plus">+</div>
+    <div class="column-three">
+      <p>
+        Discoverable, schema-free, auto-versioned JSON storage tracks each
+        version of each JSON document to allow progressive diff/merge with
+        decentralized or occasionally connected clients.
+      </p>
+    </div>
+  </div>
 </body>
 </html>

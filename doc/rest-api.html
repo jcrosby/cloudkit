@@ -7,29 +7,45 @@
   <link rel="stylesheet" href="main.css" type="text/css" charset="utf-8"/>
 </head>
 <body>
-<h1>CloudKit REST API</h1>
-<div id="wrapper">
-<div class="meta">
-  <p>All request and response bodies are JSON documents.</p>
+  <div class="wrapper">
+    <ul class="nav">
+      <li><a href="rest-api.html" title="REST API">REST API</a></li>
+      <li><a href="curl.html" title="cURL Tutorial">cURL</a></li>
+      <li><a href="api" title="RDoc">RDoc</a></li>
+      <li><a href="http://github.com/jcrosby/cloudkit" title="GitHub Source Repository">Code</a></li>
+      <li><a href="http://blog.joncrosby.me" title="Author's Blog">Blog</a></li>
+    </ul>
+  </div>
+  <div id="header">
+    <div class="wrapper">
+      <h1><a href="index.html">CloudKit</a></h1>
+      <div class="subpage-subtitle">REST API</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div class="wrapper">
+      <p>All request and response bodies are JSON documents.</p>
 
-  <p>URI and JSON templates in this document are represented as follows:<br/>
-  - Values in %% are variables.<br/>
-  - All other symbols are literals.<br/>
-  </p>
+      <p>URI and JSON templates in this document are represented as follows:<br/>
+      - Values in %% are variables.<br/>
+      - All other symbols are literals.<br/>
+      </p>
 
-  <p>All URIs are relative to the service root, which can be mounted in any
-    number of ways using Rack's URL Maps and Cascades. See the examples
-    directory in the source for specific techniques.
-  </p>
+      <p>All URIs are relative to the service root, which can be mounted in any
+        number of ways using Rack's URL Maps and Cascades. See the examples
+        directory in the source for specific techniques.
+      </p>
 
-  <p>All response codes closely follow RFC 2616 with the addition of 422 from
-    RFC 4918.
-  </p>
+      <p>All response codes closely follow RFC 2616 with the addition of 422 from
+        RFC 4918.
+      </p>
 
-  <p>All errors use JSON to supplement their status codes:<br/>
-  {"error":"%message%"}
-  </p>
-</div>
+      <p>All errors use JSON to supplement their status codes:<br/>
+      {"error":"%message%"}
+      </p>
+    </div>
+  </div>
+<div class="wrapper">
 
 <div class="uri-template">
   GET /cloudkit-meta

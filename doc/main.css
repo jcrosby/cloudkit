@@ -1,18 +1,117 @@
 body {
-  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', san-serif;
-  font-size: 14px;
+  font-family: 'Helvetica', 'Arial', san-serif;
+  font-size: 15px;
+  margin: 0;
+  padding: 0;
+  color: #222222;
 }
 h1 {
-  font-size: 40px;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', san-serif;
+  font-size: 73px;
   font-weight: bold;
   line-height: 28px;
+  margin: 20px 0px 20px 0px;
+}
+.wrapper {
+  width: 860px;
+  margin: 0 auto;
+  clear: both;
+}
+.intro-row {
+  margin-top: 28px;
+}
+.stack-logo-row {
+  margin-bottom: 150px;
+}
+.stack-row {
+  margin-top: 28px;
+}
+.column-one {
+  width: 240px;
+  float: left;
+}
+.column-two {
+  margin-left: 70px;
+  float: left;
+  width: 240px;
+}
+.column-two img {
+  padding-top: 15px;
+}
+p {
+  margin-top: 0px;
+  line-height: 1.5em;
+}
+.column-three {
+  float: right;
+  width: 240px;
+  margin-left: 70px;
+}
+.stack-row .column-two {
+  margin-left: 0px;
+}
+.column-three img {
+  padding-top: 35px;
+}
+.stack-row .column-three {
+  margin-left: 0px;
+}
+.plus {
+  color: #ffcc66;
+  float: left;
+  width: 70px;
+  font-size: 35px;
+  margin-top: 35px;
+  text-align: center;
+}
+#splitter {
+  border-top: 1px solid #ffcc66;
+  clear: both;
+  margin-bottom: 28px;
+}
+#header {
+  background-color: #ffffcc;
+  display: block;
+  padding: 2px 0;
+  margin: 35px 0px 10px 0px;
+  border-top: 1px solid #ffcc66;
+  border-bottom: 1px solid #ffcc66;
+}
+#header .wrapper .subtitle {
+  margin-left: 110px;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', san-serif;
+  font-size: 30px;
+}
+#header .wrapper .subpage-subtitle {
+  margin-left: 10px;
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', san-serif;
+  font-size: 30px;
+}
+#header a {
+  color: #222222;
+}
+ul.nav {
+  list-style: none;
+  float: right;
+  font-size: 17px;
+  margin: -28px 0;
+  height: 20px;
+}
+ul.nav li {
+  float: left;
+  margin-left: 28px;
+}
+ul.nav li a {
+  color: #222222;
 }
 a {
   color: #6b8df2;
   text-decoration: none;
 }
-#wrapper {
-  width: 700px;
+.block-header {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 7px;
 }
 .code {
   padding: 7px;
@@ -20,22 +119,24 @@ a {
   color: #00ff00;
   background-color: black;
   font-size: 13px;
-  width: 680px;
+  width: 100%;
   margin-left: 20px;
   margin-bottom: 30px;
 }
 .meta {
-  padding: 7px;
-  background-color: #ffffdd;
-  border: 1px solid #ffddbb;
-  width: 690px;
+  padding: 7px 7px 7px 7px;
+  background-color: #ffccff;
+  border-top: 1px solid #cc99ff;
+  border-bottom: 1px solid #cc99ff;
   font-size: 14px;
+  display: block;
+  margin: 10px 0px 10px 0px;
 }
 .uri-template {
   font-family: 'Courier New', monospace;
   color: #00ff00;
   background-color: black;
-  width: 700px;
+  width: 860px;
   padding-left: 5px;
   padding-top: 10px;
   padding-bottom: 10px;
