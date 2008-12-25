@@ -80,4 +80,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'oauth', '>= 0.2.7'
   s.add_dependency 'ruby-openid', '= 2.1.2'
   s.add_dependency 'json', '= 1.1.3'
+  s.add_dependency 'sqlite3-ruby', '= 1.2.4'
 end
