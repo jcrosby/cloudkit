@@ -2,8 +2,8 @@ Gem::Specification.new do |s|
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
-  s.version           = "0.9.0"
-  s.date              = "2008-12-22"
+  s.version           = "0.9.1"
+  s.date              = "2008-12-24"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
   s.authors           = ["Jon Crosby"]
@@ -38,6 +38,7 @@ Gem::Specification.new do |s|
     lib/cloudkit/openid_filter.rb
     lib/cloudkit/openid_store.rb
     lib/cloudkit/rack/builder.rb
+    lib/cloudkit/rack/lint.rb
     lib/cloudkit/rack/router.rb
     lib/cloudkit/request.rb
     lib/cloudkit/service.rb
