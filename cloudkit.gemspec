@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
   s.version           = "0.9.1"
-  s.date              = "2008-12-24"
+  s.date              = "2008-12-31"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
   s.authors           = ["Jon Crosby"]
@@ -11,11 +11,11 @@ Gem::Specification.new do |s|
   s.homepage          = "http://getcloudkit.com"
   s.files             = %w[
     CHANGES
-    cloudkit.gemspec
     COPYING
     README
     Rakefile
     TODO
+    cloudkit.gemspec
     doc/curl.html
     doc/images/example-code.gif
     doc/images/json-title.gif
