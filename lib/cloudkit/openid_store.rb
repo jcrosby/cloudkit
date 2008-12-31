@@ -72,9 +72,11 @@ module CloudKit
     def use_nonce(server_url, timestamp, salt) #:nodoc:
       return false if (timestamp - Time.now.to_i).abs > OpenID::Nonce.skew
 
-      fragment = URI.escape([server_url, timestamp, salt].join('-'))
-      uri      = "/cloudkit_openid_nonces/#{fragment}"
-      result   = @@store.put(uri, :json => '{}')
+      fragment = URI.escape(
+        [server_url, timestamp, salt].join('-'), 
+        Regexp.union(URI::REGEXP::UNSAFE, '/', ':'))
+      uri    = "/cloudkit_openid_nonces/#{fragment}"
+      result = @@store.put(uri, :json => '{}')
       return (result.status == 201)
     end
 

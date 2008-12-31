@@ -11,7 +11,7 @@ module CloudKit
   class OpenIDFilter
     include Util
 
-    @@lock = Mutex.new
+    @@lock  = Mutex.new
     @@store = nil
 
     def initialize(app, options={})
@@ -21,7 +21,7 @@ module CloudKit
     def call(env)
       @@lock.synchronize do
         @@store = OpenIDStore.new(env[storage_uri_key])
-        @users = UserStore.new(env[storage_uri_key])
+        @users  = UserStore.new(env[storage_uri_key])
         @@store.get_association('x') rescue nil # refresh sqlite3
       end unless @@store
 
@@ -72,7 +72,7 @@ module CloudKit
 
     def begin_openid_login(request)
       begin
-        response = openid_consumer(request).begin request[:openid_url]
+        response = openid_consumer(request).begin(request[:openid_url])
       rescue => e
         request.flash[:error] = e
         return login_redirect(request)
@@ -119,7 +119,7 @@ module CloudKit
         response = Rack::Response.new([], 302, {'Location' => (url || '/')})
         response.set_cookie(
           'remember_me', {
-            :value => user['remember_me_token'],
+            :value   => user['remember_me_token'],
             :expires => Time.at(user['remember_me_expiration']).utc})
         json = JSON.generate(user)
         @users.put(user_uri, :etag => user_result.etag, :json => json)
