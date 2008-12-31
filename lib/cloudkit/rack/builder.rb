@@ -10,7 +10,7 @@ module Rack #:nodoc:
         if (env['PATH_INFO'] == '/')
           [200, {'Content-Type' => 'text/html'}, [welcome]]
         else
-          [404, {}, []]
+          [404, {'Content-Type' => 'text/html'}, []]
         end
       end
       @ins << default_app if @last_cloudkit_id == @ins.last.object_id

@@ -99,7 +99,7 @@ module CloudKit
       @@store.put(
         "/cloudkit_oauth_request_tokens/#{token_id}",
         :json => request_token)
-      [201, {}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
+      [201, {'Content-Type' => 'text/html'}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
     end
 
     def request_authorization(request)
@@ -186,7 +186,7 @@ module CloudKit
       @@store.delete(
         "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}",
         :etag => request_token_response.etag)
-      [201, {}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
+      [201, {'Content-Type' => 'text/html'}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
     end
 
     def inject_user_or_challenge(request)
@@ -232,7 +232,8 @@ module CloudKit
     def challenge_headers(request)
       {
         'WWW-Authenticate' => "OAuth realm=\"http://#{request.env['HTTP_HOST']}\"",
-        'Link' => discovery_link(request)
+        'Link' => discovery_link(request),
+        'Content-Type' => 'application/json'
       }
     end
 
@@ -242,7 +243,7 @@ module CloudKit
 
     def login_redirect(request)
       request.session['return_to'] = request.url if request.session
-      [302, {'Location' => request.login_url}, []]
+      [302, {'Location' => request.login_url, 'Content-Type' => 'text/html'}, []]
     end
 
     def load_user_from_session(request)

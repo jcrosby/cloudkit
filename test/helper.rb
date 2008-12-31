@@ -21,6 +21,7 @@ end
 
 def plain_service
   Rack::Builder.new do
+    use Rack::Lint
     use Rack::Config do |env|
       env['cloudkit.storage.uri'] = 'sqlite://service.db'
     end
@@ -31,6 +32,7 @@ end
 
 def authed_service
   Rack::Builder.new do
+    use Rack::Lint
     use Rack::Config do |env|
       env['cloudkit.storage.uri'] = 'sqlite://service.db'
       r = CloudKit::Request.new(env)
@@ -43,6 +45,7 @@ end
 
 def openid_app
   Rack::Builder.new do
+    use Rack::Lint
     use Rack::Session::Pool
     use CloudKit::OpenIDFilter
     run echo_env(auth_key)

@@ -39,7 +39,11 @@ module CloudKit
         else
           if request.env[challenge_key]
             store_location(request)
-            erb(request, :openid_login, request.env[challenge_key], 401)
+            erb(
+              request,
+              :openid_login,
+              request.env[challenge_key].merge('Content-Type' => 'text/html'),
+              401)
           elsif !request.via.include?(oauth_filter_key)
             store_location(request)
             login_redirect(request)
@@ -61,7 +65,10 @@ module CloudKit
 
       request.env[auth_key] = nil
       request.flash['info'] = 'You have been logged out.'
-      response = Rack::Response.new([], 302, {'Location' => request.login_url})
+      response = Rack::Response.new(
+        [],
+        302,
+        {'Location' => request.login_url, 'Content-Type' => 'text/html'})
       response.delete_cookie('remember_me')
       response.finish
     end
@@ -79,7 +86,7 @@ module CloudKit
       end
 
       redirect_url = response.redirect_url(base_url(request), full_url(request))
-      [302, {'Location' => redirect_url}, []]
+      [302, {'Location' => redirect_url, 'Content-Type' => 'text/html'}, []]
     end
 
     def complete_openid_login(request)
@@ -116,7 +123,10 @@ module CloudKit
         user['remember_me_token'] = Base64.encode64(
           OpenSSL::Random.random_bytes(32)).gsub(/\W/,'')
         url      = request.session.delete('return_to')
-        response = Rack::Response.new([], 302, {'Location' => (url || '/')})
+        response = Rack::Response.new(
+          [],
+          302,
+          {'Location' => (url || '/'), 'Content-Type' => 'text/html'})
         response.set_cookie(
           'remember_me', {
             :value   => user['remember_me_token'],
@@ -132,7 +142,7 @@ module CloudKit
     end
 
     def login_redirect(request)
-      [302, {'Location' => request.login_url}, []]
+      [302, {'Location' => request.login_url, 'Content-Type' => 'text/html'}, []]
     end
 
     def base_url(request)

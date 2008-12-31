@@ -14,7 +14,17 @@ class ServiceTest < Test::Unit::TestCase
     should "return a 501 for unimplemented methods" do
       response = @request.request('TRACE', '/items')
       assert_equal 501, response.status
-      response = @request.request('REJUXTAPOSE', '/items')
+
+      # disable Rack::Lint so that an invalid HTTP method
+      # can be tested
+      app = Rack::Builder.new {
+        use Rack::Config do |env|
+          env['cloudkit.storage.uri'] = 'sqlite://service.db'
+        end
+        use CloudKit::Service, :collections => [:items, :things]
+        run echo_text('nothing')
+      }
+      response = Rack::MockRequest.new(app).request('REJUXTAPOSE', '/items')
       assert_equal 501, response.status
     end
 

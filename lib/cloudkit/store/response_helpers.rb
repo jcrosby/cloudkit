@@ -39,7 +39,9 @@ module CloudKit::ResponseHelpers
   end
 
   def allow(methods)
-    CloudKit::Response.new(200, {'Allow' => methods.join(', ')})
+    CloudKit::Response.new(
+      200, 
+      {'Allow' => methods.join(', '), 'Content-Type' => 'application/json'})
   end
 
   def response(status, content='', etag=nil, last_modified=nil, options={})
