@@ -1,2 +1,9 @@
+0.9.1
+- Fixed Rack::Lint/rackup errors related to Content-Type headers
+- Patched Rack to support StringIO#string in Rack::Lint::InputWrapper
+- Fixed server_url encoding in OpenIDStore
+- Added sqlite3-ruby dependency in gemspec
+- Updated documentation
+
 0.9.0
 - First public gem release

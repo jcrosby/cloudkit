@@ -6,6 +6,10 @@ More specifically, CloudKit provides RESTful JSON storage with optional OpenID a
 
 CloudKit is Rack middleware and as such can be used on its own or alongside other Rack-based applications or middleware components like Rails, Merb or Sinatra.
 
+===Install
+
+  gem install cloudkit
+
 ===Examples
 
 In a rackup file called config.ru:
@@ -29,9 +33,33 @@ An explicit version of example 2, minus the default developer landing page:
   use CloudKit::OAuthFilter
   use CloudKit::OpenIDFilter
   use CloudKit::Service, :collections => [:notes, :todos]
-  run lambda {|env| [200, {}, ['HELLO']]}
+  run lambda {|env| [200, {'Content-Type' => 'text/html'}, ['HELLO']]}
+
+The same as above, using MySQL:
+
+  require 'cloudkit'
+  use Rack::Config { |env|
+    env['cloudkit.storage.uri'] = 'mysql://user:pass@localhost/cloudkit_example'
+  }
+  use Rack::Pool::Session
+  use CloudKit::OAuthFilter
+  use CloudKit::OpenIDFilter
+  use CloudKit::Service, :collections => [:notes, :todos]
+  run lambda {|env| [200, {'Content-Type' => 'text/html'}, ['HELLO']]}
 
 See the examples directory for more.
+
+===Online
+
+Main Site: http://getcloudkit.com
+
+Blog: http://blog.joncrosby.me
+
+Google Group: http://groups.google.com/group/cloudkit
+
+Source: http://github.com/jcrosby/cloudkit
+
+===License
 
 Copyright (c) 2008 Jon Crosby http://joncrosby.me
 

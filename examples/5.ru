@@ -7,4 +7,4 @@ use Rack::Session::Pool
 use CloudKit::OAuthFilter
 use CloudKit::OpenIDFilter
 use CloudKit::Service, :collections => [:notes]
-run lambda{|env| [200, {}, ['HELLO']]}
+run lambda{|env| [200, {'Content-Type' => 'text/html'}, ['HELLO']]}
