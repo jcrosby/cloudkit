@@ -31,11 +31,11 @@ module CloudKit
 
     def call(env)
       @@lock.synchronize do
-        @@store = OAuthStore.new(env[storage_uri_key])
+        @@store = OAuthStore.new(env[CLOUDKIT_STORAGE_URI])
       end unless @@store
 
       request = Request.new(env)
-      request.announce_auth(oauth_filter_key)
+      request.announce_auth(CLOUDKIT_OAUTH_FILTER_KEY)
       return xrds_location(request) if oauth_disco_draft2_xrds?(request)
       return @app.call(env) if request.path_info == '/'
 
@@ -222,7 +222,7 @@ module CloudKit
     end
 
     def inject_challenge(request)
-      request.env[challenge_key] = challenge_headers(request)
+      request.env[CLOUDKIT_AUTH_CHALLENGE] = challenge_headers(request)
     end
 
     def challenge(request, message)

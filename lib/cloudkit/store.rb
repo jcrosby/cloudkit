@@ -2,7 +2,6 @@ module CloudKit
 
   # A functional storage interface with HTTP semantics and pluggable adapters.
   class Store
-    include CloudKit::Util
     include ResponseHelpers
 
     # Initialize a new Store, creating its schema if needed. All resources in a
@@ -88,7 +87,7 @@ module CloudKit
       if resource_uri?(uri) || resource_version_uri?(uri)
         # ETag and Last-Modified are already stored for single items, so a slight
         # optimization can be made for HEAD requests.
-        result = @db[store_key].
+        result = @db[CLOUDKIT_STORE].
           select(:etag, :last_modified, :deleted).
           filter(options.merge(:uri => uri))
         if result.any?
@@ -130,7 +129,7 @@ module CloudKit
       return status_405(methods) unless methods.include?('DELETE')
       return invalid_entity_type unless @collections.include?(collection_type(uri))
       return etag_required       unless options[:etag]
-      original = @db[store_key].
+      original = @db[CLOUDKIT_STORE].
         filter(options.excluding(:etag).merge(:uri => uri))
       if original.any?
         item = original.first
@@ -141,7 +140,7 @@ module CloudKit
         @db.transaction do
           version_uri = "#{item[:uri]}/versions/#{item[:etag]}"
           original.update(:uri => version_uri)
-          @db[store_key].insert(
+          @db[CLOUDKIT_STORE].insert(
             :uri                  => item[:uri],
             :collection_reference => item[:collection_reference],
             :resource_reference   => item[:resource_reference],
@@ -299,7 +298,7 @@ module CloudKit
 
     # Return a list of resource URIs for the given collection URI.
     def resource_collection(uri, options)
-      result = @db[store_key].
+      result = @db[CLOUDKIT_STORE].
         select(:uri, :last_modified).
         filter(options.excluding(:offset, :limit).merge(:deleted => false)).
         filter(:collection_reference => collection_uri_fragment(uri)).
@@ -311,7 +310,7 @@ module CloudKit
     # Return the resource for the given URI. Return 404 if not found or if
     # protected and unauthorized, 410 if authorized but deleted.
     def resource(uri, options)
-      result = @db[store_key].
+      result = @db[CLOUDKIT_STORE].
         select(:content, :etag, :last_modified, :deleted).
         filter(options.merge!(:uri => uri))
       if result.any?
@@ -325,12 +324,12 @@ module CloudKit
     # Return a collection of URIs for all versions of a resource including the
     #current version. Sorted by Last-Modified date in descending order.
     def version_collection(uri, options)
-      found = @db[store_key].
+      found = @db[CLOUDKIT_STORE].
         select(:uri).
         filter(options.excluding(:offset, :limit).merge(
           :uri => current_resource_uri(uri)))
       return status_404 unless found.any?
-      result = @db[store_key].
+      result = @db[CLOUDKIT_STORE].
         select(:uri, :last_modified).
         filter(:resource_reference => current_resource_uri(uri)).
         filter(options.excluding(:offset, :limit).merge(:deleted => false)).
@@ -340,7 +339,7 @@ module CloudKit
 
     # Return a specific version of a resource.
     def resource_version(uri, options)
-      result = @db[store_key].
+      result = @db[CLOUDKIT_STORE].
         select(:content, :etag, :last_modified).
         filter(options.merge(:uri => uri))
       return status_404 unless result.any?
@@ -362,7 +361,7 @@ module CloudKit
       data = JSON.parse(options[:json]) rescue (return status_422)
       etag = UUID.generate
       last_modified = timestamp
-      @db[store_key].insert(
+      @db[CLOUDKIT_STORE].insert(
         :uri                  => uri,
         :collection_reference => collection_uri_fragment(uri),
         :resource_reference   => uri,
@@ -377,7 +376,7 @@ module CloudKit
     # Update the resource at the specified URI. Requires the :etag option.
     def update_resource(uri, options)
       data = JSON.parse(options[:json]) rescue (return status_422)
-      original = @db[store_key].
+      original = @db[CLOUDKIT_STORE].
         filter(options.excluding(:json, :etag).merge(:uri => uri))
       if original.any?
         item = original.first
@@ -388,7 +387,7 @@ module CloudKit
         last_modified = timestamp
         @db.transaction do
           original.update(:uri => "#{uri}/versions/#{item[:etag]}")
-          @db[store_key].insert(
+          @db[CLOUDKIT_STORE].insert(
             :uri                  => uri,
             :collection_reference => item[:collection_reference],
             :resource_reference   => item[:resource_reference],

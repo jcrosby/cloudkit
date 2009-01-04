@@ -20,7 +20,7 @@ module CloudKit
 
     # Initialize the HTTP-oriented storage if it does not exist.
     def initialize_storage
-      @db.create_table store_key do
+      @db.create_table CLOUDKIT_STORE do
         primary_key :id
         varchar     :uri, :unique => true
         varchar     :etag
@@ -30,7 +30,7 @@ module CloudKit
         varchar     :remote_user
         text        :content
         boolean     :deleted, :default => false
-      end unless @db.table_exists?(store_key)
+      end unless @db.table_exists?(CLOUDKIT_STORE)
     end
   end
 end

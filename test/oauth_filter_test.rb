@@ -4,7 +4,7 @@ class OAuthFilterTest < Test::Unit::TestCase
   context "An OAuthFilter" do  
 
     setup do
-      @oauth_filtered_app = CloudKit::OAuthFilter.new(echo_env(auth_key))
+      @oauth_filtered_app = CloudKit::OAuthFilter.new(echo_env(CLOUDKIT_AUTH_KEY))
       token = JSON.generate(
         :secret          => 'pfkkdhi9sl3r4s00',
         :consumer_key    => 'dpf43f3p2l4k3l03',
@@ -28,9 +28,9 @@ class OAuthFilterTest < Test::Unit::TestCase
     end
 
     should "notify downstream nodes of its presence" do
-      app = CloudKit::OAuthFilter.new(echo_env('cloudkit.via'))
+      app = CloudKit::OAuthFilter.new(echo_env(CLOUDKIT_VIA))
       response = Rack::MockRequest.new(app).get('/')
-      assert_equal 'cloudkit.filter.oauth', response.body
+      assert_equal CLOUDKIT_OAUTH_FILTER_KEY, response.body
     end
 
     should "not allow a nonce/timestamp combination to appear twice" do
@@ -69,12 +69,12 @@ class OAuthFilterTest < Test::Unit::TestCase
 
       should "set the auth challenge for unauthorized requests" do
         app = CloudKit::OAuthFilter.new(
-          lambda {|env| [200, {}, [env['cloudkit.challenge']['WWW-Authenticate'] || '']]})
+          lambda {|env| [200, {}, [env[CLOUDKIT_AUTH_CHALLENGE]['WWW-Authenticate'] || '']]})
         response = Rack::MockRequest.new(app).get(
           '/items', 'HTTP_HOST' => 'example.org')
         assert_equal 'OAuth realm="http://example.org"', response.body
         app = CloudKit::OAuthFilter.new(
-          lambda {|env| [200, {}, [env['cloudkit.challenge']['Link'] || '']]})
+          lambda {|env| [200, {}, [env[CLOUDKIT_AUTH_CHALLENGE]['Link'] || '']]})
         response = Rack::MockRequest.new(app).get(
           '/items', 'HTTP_HOST' => 'example.org')
         assert_equal '<http://example.org/oauth/meta>; rel="http://oauth.net/discovery/1.0/rel/provider"',
@@ -186,7 +186,7 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).get(
-          "/oauth/authorization?oauth_token=#{token}", auth)
+          "/oauth/authorization?oauth_token=#{token}", VALID_TEST_AUTH)
         assert_equal 200, response.status
       end
 
@@ -194,7 +194,7 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).get(
-          "/oauth/authorization?oauth_token=fail", auth)
+          "/oauth/authorization?oauth_token=fail", VALID_TEST_AUTH)
         assert_equal 401, response.status
       end
 
@@ -202,7 +202,7 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}?submit=Approve", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve", VALID_TEST_AUTH)
         assert_equal 200, response.status
         request_token = @store.get("/cloudkit_oauth_request_tokens/#{token}").parsed_content
         assert request_token['authorized_at']
@@ -213,7 +213,7 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}?submit=Deny", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Deny", VALID_TEST_AUTH)
         assert_equal 200, response.status
         request_token = @store.get("/cloudkit_oauth_request_tokens/#{token}").parsed_content
         assert 410, response.status
@@ -232,10 +232,10 @@ class OAuthFilterTest < Test::Unit::TestCase
         response = get_request_token
         token, secret = extract_token(response)
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}?submit=Approve", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve", VALID_TEST_AUTH)
         assert_equal 200, response.status
         response = Rack::MockRequest.new(@oauth_filtered_app).put(
-          "/oauth/authorized_request_tokens/#{token}?submit=Approve", auth)
+          "/oauth/authorized_request_tokens/#{token}?submit=Approve", VALID_TEST_AUTH)
         assert_equal 401, response.status
       end
 
@@ -296,7 +296,7 @@ class OAuthFilterTest < Test::Unit::TestCase
     response = get_request_token
     token, secret = extract_token(response)
     response = Rack::MockRequest.new(@oauth_filtered_app).put(
-      "/oauth/authorized_request_tokens/#{token}", auth)
+      "/oauth/authorized_request_tokens/#{token}", VALID_TEST_AUTH)
     assert_equal 200, response.status
     pre_sign = Rack::Request.new(Rack::MockRequest.env_for(
       'http://photos.example.net/oauth/access_tokens',

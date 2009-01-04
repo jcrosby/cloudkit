@@ -20,13 +20,13 @@ module CloudKit
 
     def call(env)
       @@lock.synchronize do
-        @@store = OpenIDStore.new(env[storage_uri_key])
-        @users  = UserStore.new(env[storage_uri_key])
+        @@store = OpenIDStore.new(env[CLOUDKIT_STORAGE_URI])
+        @users  = UserStore.new(env[CLOUDKIT_STORAGE_URI])
         @@store.get_association('x') rescue nil # refresh sqlite3
       end unless @@store
 
       request = Request.new(env)
-      request.announce_auth(openid_filter_key)
+      request.announce_auth(CLOUDKIT_OPENID_FILTER_KEY)
 
       case request
       when r(:get, request.login_url); request_login(request)
@@ -37,14 +37,14 @@ module CloudKit
         if (root_request?(request) || valid_auth_key?(request) || logged_in?(request))
           @app.call(env)
         else
-          if request.env[challenge_key]
+          if request.env[CLOUDKIT_AUTH_CHALLENGE]
             store_location(request)
             erb(
               request,
               :openid_login,
-              request.env[challenge_key].merge('Content-Type' => 'text/html'),
+              request.env[CLOUDKIT_AUTH_CHALLENGE].merge('Content-Type' => 'text/html'),
               401)
-          elsif !request.via.include?(oauth_filter_key)
+          elsif !request.via.include?(CLOUDKIT_OAUTH_FILTER_KEY)
             store_location(request)
             login_redirect(request)
           else
@@ -63,7 +63,7 @@ module CloudKit
       json = JSON.generate(user)
       @users.put(user_uri, :etag => result.etag, :json => json)
 
-      request.env[auth_key] = nil
+      request.env[CLOUDKIT_AUTH_KEY] = nil
       request.flash['info'] = 'You have been logged out.'
       response = Rack::Response.new(
         [],
@@ -172,7 +172,7 @@ module CloudKit
     end
 
     def valid_auth_key?(request)
-      request.env[auth_key] && request.env[auth_key] != ''
+      request.env[CLOUDKIT_AUTH_KEY] && request.env[CLOUDKIT_AUTH_KEY] != ''
     end
 
     def openid_consumer(request)

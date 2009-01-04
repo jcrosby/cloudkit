@@ -21,7 +21,7 @@ class StoreTest < Test::Unit::TestCase
 
     should "create its storage" do
       store = ExposedStore.new(:collections => [:items])
-      table = store.db.schema[:cloudkit_json_store]
+      table = store.db.schema[CLOUDKIT_STORE]
       assert table
       assert table.any?{|t| t[0] == :id}
       assert table.any?{|t| t[0] == :uri}

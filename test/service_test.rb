@@ -19,7 +19,7 @@ class ServiceTest < Test::Unit::TestCase
       # can be tested
       app = Rack::Builder.new {
         use Rack::Config do |env|
-          env['cloudkit.storage.uri'] = 'sqlite://service.db'
+          env[CLOUDKIT_STORAGE_URI] = 'sqlite://service.db'
         end
         use CloudKit::Service, :collections => [:items, :things]
         run echo_text('nothing')
@@ -48,7 +48,7 @@ class ServiceTest < Test::Unit::TestCase
       end
 
       should "return a 500 if authentication is configured incorrectly" do
-        # simulate auth requirement without the auth_key being set by the
+        # simulate auth requirement without CLOUDKIT_AUTH_KEY being set by the
         # auth filter(s)
         response = @request.get('/items')
         assert_equal 500, response.status
@@ -57,7 +57,7 @@ class ServiceTest < Test::Unit::TestCase
       context "on GET /cloudkit-meta" do
 
         setup do
-          @response = @request.get('/cloudkit-meta', auth_key => remote_user)
+          @response = @request.get('/cloudkit-meta', VALID_TEST_AUTH)
         end
 
         should "be successful" do
@@ -87,11 +87,11 @@ class ServiceTest < Test::Unit::TestCase
         setup do
           3.times do |i|
             json = JSON.generate(:this => i.to_s)
-            @store.put("/items/#{i}", :json => json, :remote_user => remote_user)
+            @store.put("/items/#{i}", :json => json, :remote_user => TEST_REMOTE_USER)
           end
           json = JSON.generate(:this => '4')
           @store.put('/items/4', :json => json, :remote_user => 'someoneelse')
-          @response = @request.get('/items', auth_key => remote_user)
+          @response = @request.get('/items', VALID_TEST_AUTH)
           @parsed_response = JSON.parse(@response.body)
         end
 
@@ -132,14 +132,14 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "accept a limit parameter" do
-          response = @request.get('/items?limit=2', auth_key => remote_user)
+          response = @request.get('/items?limit=2', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal ['/items/2', '/items/1'], parsed_response['uris']
           assert_equal 3, parsed_response['total']
         end
 
         should "accept an offset parameter" do
-          response = @request.get('/items?offset=1', auth_key => remote_user)
+          response = @request.get('/items?offset=1', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal ['/items/1', '/items/0'], parsed_response['uris']
           assert_equal 1, parsed_response['offset']
@@ -147,7 +147,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "accept combined limit and offset parameters" do
-          response = @request.get('/items?limit=1&offset=1', auth_key => remote_user)
+          response = @request.get('/items?limit=1&offset=1', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal ['/items/1'], parsed_response['uris']
           assert_equal 1, parsed_response['offset']
@@ -155,7 +155,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "return an empty list if no resources are found" do
-          response = @request.get('/things', auth_key => remote_user)
+          response = @request.get('/things', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal [], parsed_response['uris']
           assert_equal 0, parsed_response['total']
@@ -167,9 +167,9 @@ class ServiceTest < Test::Unit::TestCase
 
         setup do
           json = JSON.generate(:this => 'that')
-          @store.put('/items/abc', :json => json, :remote_user => remote_user)
+          @store.put('/items/abc', :json => json, :remote_user => TEST_REMOTE_USER)
           @response = @request.get(
-            '/items/abc', 'HTTP_HOST' => 'example.org', auth_key => remote_user)
+            '/items/abc', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
         end
 
         should "be successful" do
@@ -182,7 +182,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "return a 404 if a document does not exist" do
-          response = @request.get('/items/nothing', auth_key => remote_user)
+          response = @request.get('/items/nothing', VALID_TEST_AUTH)
           assert_equal 404, response.status
         end
 
@@ -199,7 +199,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "not return documents for unauthorized users" do
-          response = @request.get('/items/abc', auth_key => 'bogus')
+          response = @request.get('/items/abc', CLOUDKIT_AUTH_KEY => 'bogus')
           assert_equal 404, response.status
         end
 
@@ -215,12 +215,12 @@ class ServiceTest < Test::Unit::TestCase
           @etags = []
           4.times do |i|
             json = JSON.generate(:this => i)
-            options = {:json => json, :remote_user => remote_user}
+            options = {:json => json, :remote_user => TEST_REMOTE_USER}
             options.filter_merge!(:etag => @etags.try(:last))
             result = @store.put('/items/abc', options)
             @etags << result.parsed_content['etag']
           end
-          @response = @request.get('/items/abc/versions', auth_key => remote_user)
+          @response = @request.get('/items/abc/versions', VALID_TEST_AUTH)
           @parsed_response = JSON.parse(@response.body)
         end
 
@@ -229,8 +229,8 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "be successful even if the current resource has been deleted" do
-          @store.delete('/items/abc', :etag => @etags.last, :remote_user => remote_user)
-          response = @request.get('/items/abc/versions', auth_key => remote_user)
+          @store.delete('/items/abc', :etag => @etags.last, :remote_user => TEST_REMOTE_USER)
+          response = @request.get('/items/abc/versions', VALID_TEST_AUTH)
           assert_equal 200, @response.status
           parsed_response = JSON.parse(response.body)
           assert_equal 4, parsed_response['uris'].size
@@ -243,18 +243,20 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "return a 404 if the resource does not exist" do
-          response = @request.get('/items/nothing/versions', auth_key => remote_user)
+          response = @request.get('/items/nothing/versions', VALID_TEST_AUTH)
           assert_equal 404, response.status
         end
 
         should "return a 404 for non-owner-originated requests" do
-          response = @request.get('/items/abc/versions', auth_key => 'someoneelse')
+          response = @request.get(
+            '/items/abc/versions', CLOUDKIT_AUTH_KEY => 'someoneelse')
           assert_equal 404, response.status
         end
 
         should "sort descending on last_modified date" do
-          assert_equal ['/items/abc'].concat(@etags[0..-2].reverse.map{|e| "/items/abc/versions/#{e}"}),
-            @parsed_response['uris']
+          assert_equal(
+            ['/items/abc'].concat(@etags[0..-2].reverse.map{|e| "/items/abc/versions/#{e}"}),
+            @parsed_response['uris'])
         end
 
         should "return the total number of uris" do
@@ -280,7 +282,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "accept a limit parameter" do
-          response = @request.get('/items/abc/versions?limit=2', auth_key => remote_user)
+          response = @request.get('/items/abc/versions?limit=2', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal ['/items/abc', "/items/abc/versions/#{@etags[-2]}"],
             parsed_response['uris']
@@ -288,7 +290,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "accept an offset parameter" do
-          response = @request.get('/items/abc/versions?offset=1', auth_key => remote_user)
+          response = @request.get('/items/abc/versions?offset=1', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"},
             parsed_response['uris']
@@ -297,7 +299,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "accept combined limit and offset parameters" do
-          response = @request.get('/items/abc/versions?limit=1&offset=1', auth_key => remote_user)
+          response = @request.get('/items/abc/versions?limit=1&offset=1', VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           assert_equal ["/items/abc/versions/#{@etags[-2]}"], parsed_response['uris']
           assert_equal 1, parsed_response['offset']
@@ -311,13 +313,13 @@ class ServiceTest < Test::Unit::TestCase
           @etags = []
           2.times do |i|
             json = JSON.generate(:this => i)
-            options = {:json => json, :remote_user => remote_user}
+            options = {:json => json, :remote_user => TEST_REMOTE_USER}
             options.filter_merge!(:etag => @etags.try(:last))
             result = @store.put('/items/abc', options)
             @etags << result.parsed_content['etag']
           end
           @response = @request.get(
-            "/items/abc/versions/#{@etags.first}", auth_key => remote_user)
+            "/items/abc/versions/#{@etags.first}", VALID_TEST_AUTH)
           @parsed_response = JSON.parse(@response.body)
         end
 
@@ -331,7 +333,7 @@ class ServiceTest < Test::Unit::TestCase
 
         should "return a 404 if a document is not found" do
           response = @request.get(
-            "/items/nothing/versions/#{@etags.first}", auth_key => remote_user)
+            "/items/nothing/versions/#{@etags.first}", VALID_TEST_AUTH)
           assert_equal 404, response.status
         end
 
@@ -349,7 +351,7 @@ class ServiceTest < Test::Unit::TestCase
 
         should "not return documents for unauthorized users" do
           response = @request.get(
-            "/items/abc/versions/#{@etags.first}", auth_key => 'someoneelse')
+            "/items/abc/versions/#{@etags.first}", CLOUDKIT_AUTH_KEY => 'someoneelse')
           assert_equal 404, response.status
         end
       end
@@ -359,7 +361,7 @@ class ServiceTest < Test::Unit::TestCase
         setup do
           json = JSON.generate(:this => 'that')
           @response = @request.post(
-            '/items', :input => json, auth_key => remote_user)
+            '/items', {:input => json}.merge(VALID_TEST_AUTH))
           @body = JSON.parse(@response.body)
         end
 
@@ -390,7 +392,7 @@ class ServiceTest < Test::Unit::TestCase
         end
 
         should "return a 422 if parsing fails" do
-          response = @request.post('/items', :input => 'fail', auth_key => remote_user)
+          response = @request.post('/items', {:input => 'fail'}.merge(VALID_TEST_AUTH))
           assert_equal 422, response.status
         end
 
@@ -417,21 +419,22 @@ class ServiceTest < Test::Unit::TestCase
 
         setup do
           json = JSON.generate(:this => 'that')
-          @original = @store.put('/items/abc', :json => json, :remote_user => remote_user)
+          @original = @store.put(
+            '/items/abc', :json => json, :remote_user => TEST_REMOTE_USER)
           etag = @original.parsed_content['etag']
           json = JSON.generate(:this => 'other', :etag => etag)
           @response = @request.put(
             '/items/abc',
-            :input          => json,
-            'HTTP_IF_MATCH' => etag,
-            auth_key        => remote_user)
+            :input            => json,
+            'HTTP_IF_MATCH'   => etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           @json = JSON.parse(@response.body)
         end
 
         should "create a document if it does not already exist" do
           json = JSON.generate(:this => 'thing')
           response = @request.put(
-            '/items/xyz', :input => json, auth_key => remote_user)
+            '/items/xyz', {:input => json}.merge(VALID_TEST_AUTH))
           assert_equal 201, response.status
           result = @store.get('/items/xyz')
           assert_equal 200, result.status
@@ -465,9 +468,9 @@ class ServiceTest < Test::Unit::TestCase
           json = JSON.generate(:this => 'other')
           response = @request.put(
             '/items/abc',
-            :input          => json,
-            'HTTP_IF_MATCH' => @json['etag'],
-            auth_key        => 'someone_else')
+            :input            => json,
+            'HTTP_IF_MATCH'   => @json['etag'],
+            CLOUDKIT_AUTH_KEY => 'someone_else')
           assert_equal 404, response.status
         end
 
@@ -476,15 +479,15 @@ class ServiceTest < Test::Unit::TestCase
           client_b_input = JSON.generate(:other => 'thing')
           response = @request.put(
             '/items/abc',
-            :input          => client_a_input,
-            'HTTP_IF_MATCH' => @json['etag'],
-            auth_key        => remote_user)
+            :input            => client_a_input,
+            'HTTP_IF_MATCH'   => @json['etag'],
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 200, response.status
           response = @request.put(
             '/items/abc',
-            :input          => client_b_input,
-            'HTTP_IF_MATCH' => @json['etag'],
-            auth_key        => remote_user)
+            :input            => client_b_input,
+            'HTTP_IF_MATCH'   => @json['etag'],
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 412, response.status
         end
 
@@ -492,14 +495,13 @@ class ServiceTest < Test::Unit::TestCase
           json = JSON.generate(:this => 'updated')
           response = @request.put(
             '/items/abc',
-            :input   => json,
-            auth_key => remote_user)
+            {:input   => json}.merge(VALID_TEST_AUTH))
           assert_equal 400, response.status
         end
 
         should "return a 422 if parsing fails" do
           response = @request.put(
-            '/items/zzz', :input => 'fail', auth_key => remote_user)
+            '/items/zzz', {:input => 'fail'}.merge(VALID_TEST_AUTH))
           assert_equal 422, response.status
         end
 
@@ -509,15 +511,15 @@ class ServiceTest < Test::Unit::TestCase
             '/items/abc',
             :input          => json,
             'HTTP_IF_MATCH' => @json['etag'],
-            auth_key        => remote_user)
+            CLOUDKIT_AUTH_KEY        => TEST_REMOTE_USER)
           assert_equal 200, response.status
           etag = JSON.parse(response.body)['etag']
           json = JSON.generate(:this => 'updated again')
           new_response = @request.put(
             '/items/abc',
-            :input          => json,
-            'HTTP_IF_MATCH' => etag,
-            auth_key        => remote_user)
+            :input            => json,
+            'HTTP_IF_MATCH'   => etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 200, new_response.status
           new_etag = JSON.parse(new_response.body)['etag']
           assert_not_equal etag, new_etag
@@ -550,15 +552,16 @@ class ServiceTest < Test::Unit::TestCase
 
         setup do
           json = JSON.generate(:this => 'that')
-          @result = @store.put('/items/abc', :json => json, :remote_user => remote_user)
+          @result = @store.put(
+            '/items/abc', :json => json, :remote_user => TEST_REMOTE_USER)
           @etag = @result.parsed_content['etag']
         end
 
         should "delete the document" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 200, response.status
           result = @store.get('/items/abc')
           assert_equal 410, result.status
@@ -567,8 +570,8 @@ class ServiceTest < Test::Unit::TestCase
         should "return the metadata" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           json = JSON.parse(response.body)
           assert_equal 4, json.keys.size
           assert_same_elements ['ok', 'uri', 'etag', 'last_modified'], json.keys
@@ -577,79 +580,79 @@ class ServiceTest < Test::Unit::TestCase
         should "set the Content-Type header" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 'application/json', response['Content-Type']
         end
 
         should "not set an ETag header" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_nil response['ETag']
         end
 
         should "not set a Last-Modified header" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_nil response['Last-Modified']
         end
 
         should "return a 404 for items that have never existed" do
           response = @request.delete(
             '/items/zzz',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 404, response.status
         end
 
         should "require an ETag" do
           response = @request.delete(
             '/items/abc',
-            auth_key => remote_user)
+            VALID_TEST_AUTH)
           assert_equal 400, response.status
         end
 
         should "verify the user in the doc" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => 'someoneelse')
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => 'someoneelse')
           assert_equal 404, response.status
         end
 
         should "detect and return conflicts" do
           json = JSON.generate(:this => 'that')
-          result = @store.put('/items/123', :json => json, :remote_user => remote_user)
+          result = @store.put('/items/123', :json => json, :remote_user => TEST_REMOTE_USER)
           etag = result.parsed_content['etag']
           client_a_input = JSON.generate(:this => 'updated')
           client_b_input = JSON.generate(:other => 'thing')
           response = @request.put(
             '/items/123',
-            :input          => client_a_input,
-            'HTTP_IF_MATCH' => etag,
-            auth_key        => remote_user)
+            :input            => client_a_input,
+            'HTTP_IF_MATCH'   => etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 200, response.status
           response = @request.delete(
             '/items/123',
-            :input          => client_b_input,
-            'HTTP_IF_MATCH' => etag,
-            auth_key        => remote_user)
+            :input            => client_b_input,
+            'HTTP_IF_MATCH'   => etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 412, response.status
         end
 
         should "retain version history" do
           response = @request.delete(
             '/items/abc',
-            'HTTP_IF_MATCH' => @etag,
-            auth_key        => remote_user)
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
           assert_equal 200, response.status
           response = @request.get(
             '/items/abc/versions',
-            auth_key => remote_user)
+            VALID_TEST_AUTH)
           json = JSON.parse(response.body)
           assert_equal 1, json['total']
         end
@@ -674,7 +677,7 @@ class ServiceTest < Test::Unit::TestCase
       context "on OPTIONS /:collection" do
 
         setup do
-          @response = @request.request('OPTIONS', '/items', auth_key => remote_user)
+          @response = @request.request('OPTIONS', '/items', VALID_TEST_AUTH)
         end
 
         should "return a 200 status" do
@@ -691,7 +694,7 @@ class ServiceTest < Test::Unit::TestCase
       context "on OPTIONS /:collection/:id" do
 
         setup do
-          @response = @request.request('OPTIONS', '/items/xyz', auth_key => remote_user)
+          @response = @request.request('OPTIONS', '/items/xyz', VALID_TEST_AUTH)
         end
 
         should "return a 200 status" do
@@ -715,10 +718,10 @@ class ServiceTest < Test::Unit::TestCase
 
         should "return an empty body" do
           json = JSON.generate(:this => 'that')
-          @store.put('/items/abc', :json => json, :remote_user => remote_user)
-          response = @request.request('HEAD', '/items/abc', auth_key => remote_user)
+          @store.put('/items/abc', :json => json, :remote_user => TEST_REMOTE_USER)
+          response = @request.request('HEAD', '/items/abc', VALID_TEST_AUTH)
           assert_equal '', response.body
-          response = @request.request('HEAD', '/items', auth_key => remote_user)
+          response = @request.request('HEAD', '/items', VALID_TEST_AUTH)
           assert_equal '', response.body
         end
 

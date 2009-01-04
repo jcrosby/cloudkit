@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
     examples/6.ru
     examples/TOC
     lib/cloudkit.rb
+    lib/cloudkit/constants.rb
     lib/cloudkit/flash_session.rb
     lib/cloudkit/oauth_filter.rb
     lib/cloudkit/oauth_store.rb

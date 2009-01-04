@@ -22,31 +22,31 @@ class OpenIDFilterTest < Test::Unit::TestCase
       app = Rack::Builder.new do
         use Rack::Session::Pool
         use CloudKit::OpenIDFilter
-        run echo_env('cloudkit.via')
+        run echo_env(CLOUDKIT_VIA)
       end
       response = Rack::MockRequest.new(app).get('/')
-      assert_equal 'cloudkit.filter.openid', response.body
+      assert_equal CLOUDKIT_OPENID_FILTER_KEY, response.body
     end
 
     context "with upstream authorization middleware" do
 
       should "allow pass through if the auth env variable is populated" do
-        response = @request.get('/protected', auth)
+        response = @request.get('/protected', VALID_TEST_AUTH)
         assert_equal 200, response.status
-        assert_equal remote_user, response.body
+        assert_equal TEST_REMOTE_USER, response.body
       end
 
       should "return the auth challenge header" do
         response = @request.get('/protected',
-          'cloudkit.via' => 'cloudkit.filter.oauth',
-          'cloudkit.challenge' => {'WWW-Authenticate' => 'etc.'})
+          CLOUDKIT_VIA => CLOUDKIT_OAUTH_FILTER_KEY,
+          CLOUDKIT_AUTH_CHALLENGE => {'WWW-Authenticate' => 'etc.'})
         assert response['WWW-Authenticate']
       end
 
       should "return a 401 status if authorization is required" do
         response = @request.get('/protected',
-          'cloudkit.via' => 'cloudkit.filter.oauth',
-          'cloudkit.challenge' => {'WWW-Authenticate' => 'etc.'})
+          CLOUDKIT_VIA => CLOUDKIT_OAUTH_FILTER_KEY,
+          CLOUDKIT_AUTH_CHALLENGE => {'WWW-Authenticate' => 'etc.'})
         assert_equal 401, response.status
       end
     end

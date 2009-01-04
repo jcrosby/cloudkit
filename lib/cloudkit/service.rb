@@ -25,7 +25,6 @@ module CloudKit
   # For more examples, including the use of different storage implementations,
   # see the Table of Contents in the examples directory.
   class Service
-    include Util
     include ResponseHelpers
 
     @@lock = Mutex.new
@@ -38,7 +37,7 @@ module CloudKit
     def call(env)
       @@lock.synchronize do
         @store = Store.new(
-          :adapter     => SQLAdapter.new(env[storage_uri_key]),
+          :adapter     => SQLAdapter.new(env[CLOUDKIT_STORAGE_URI]),
           :collections => @collections)
       end unless @store
 

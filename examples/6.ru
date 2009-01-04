@@ -1,7 +1,7 @@
 $:.unshift File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require 'cloudkit'
 use Rack::Config do |env|
-  env['cloudkit.storage.uri'] = 'mysql://user:pass@localhost/cloudkit_example'
+  env[CLOUDKIT_STORAGE_URI] = 'mysql://user:pass@localhost/cloudkit_example'
 end
 use Rack::Session::Pool
 use CloudKit::OAuthFilter

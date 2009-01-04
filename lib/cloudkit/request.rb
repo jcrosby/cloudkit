@@ -78,7 +78,7 @@ module CloudKit
     # not use the header because the transition from one piece of middleware to
     # the next does not use HTTP.
     def via
-      @env[via_key].split(', ') rescue []
+      @env[CLOUDKIT_VIA].split(', ') rescue []
     end
 
     # Return parsed contents of an If-Match header.
@@ -99,29 +99,29 @@ module CloudKit
     # Add a via entry to the Rack environment.
     def inject_via(key)
       items = via << key
-      @env[via_key] = items.join(', ')
+      @env[CLOUDKIT_VIA] = items.join(', ')
     end
 
     # Return the current user URI.
     def current_user
-      return nil unless @env[auth_key] && @env[auth_key] != ''
-      @env[auth_key]
+      return nil unless @env[CLOUDKIT_AUTH_KEY] && @env[CLOUDKIT_AUTH_KEY] != ''
+      @env[CLOUDKIT_AUTH_KEY]
     end
 
     # Set the current user URI.
     def current_user=(user)
-      @env[auth_key] = user
+      @env[CLOUDKIT_AUTH_KEY] = user
     end
 
     # Return true if authentication is being used.
     def using_auth?
-      @env[auth_presence_key] != nil
+      @env[CLOUDKIT_AUTH_PRESENCE] != nil
     end
 
     # Report to downstream middleware that authentication is in use.
     def announce_auth(via)
       inject_via(via)
-      @env[auth_presence_key] = 1
+      @env[CLOUDKIT_AUTH_PRESENCE] = 1
     end
 
     # Return the session associated with this request.
@@ -133,27 +133,27 @@ module CloudKit
     # environment so the OpenID and OAuth middleware can cooperate during the
     # token authorization step in the OAuth flow.
     def login_url
-      @env[login_url_key] || '/login'
+      @env[CLOUDKIT_LOGIN_URL] || '/login'
     end
 
     # Set the login url for this request.
     def login_url=(url)
-      @env[login_url_key] = url
+      @env[CLOUDKIT_LOGIN_URL] = url
     end
 
     # Return the logout URL for this request.
     def logout_url
-      @env[logout_url_key] || '/logout'
+      @env[CLOUDKIT_LOGOUT_URL] || '/logout'
     end
 
     # Set the logout URL for this request.
     def logout_url=(url)
-      @env[logout_url_key] = url
+      @env[CLOUDKIT_LOGOUT_URL] = url
     end
 
     # Return the flash session for this request.
     def flash
-      session[flash_key] ||= CloudKit::FlashSession.new
+      session[CLOUDKIT_FLASH] ||= CloudKit::FlashSession.new
     end
   end
 end

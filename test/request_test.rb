@@ -68,13 +68,13 @@ class RequestTest < Test::Unit::TestCase
 
     should "announce the use of auth middleware" do
       request = CloudKit::Request.new(Rack::MockRequest.env_for('/'))
-      request.announce_auth('cloudkit.filter.oauth')
-      assert request.via.include?('cloudkit.filter.oauth')
+      request.announce_auth(CLOUDKIT_OAUTH_FILTER_KEY)
+      assert request.via.include?(CLOUDKIT_OAUTH_FILTER_KEY)
     end
 
     should "know if auth provided by upstream middleware" do
       request = CloudKit::Request.new(Rack::MockRequest.env_for('/'))
-      request.announce_auth('cloudkit.filter.oauth')
+      request.announce_auth(CLOUDKIT_OAUTH_FILTER_KEY)
       assert request.using_auth?
     end
 
@@ -82,7 +82,7 @@ class RequestTest < Test::Unit::TestCase
       request = CloudKit::Request.new(Rack::MockRequest.env_for('/'))
       assert_nil request.current_user
       request = CloudKit::Request.new(
-        Rack::MockRequest.env_for('/', 'cloudkit.user' => 'cecil'))
+        Rack::MockRequest.env_for('/', CLOUDKIT_AUTH_KEY => 'cecil'))
       assert request.current_user
       assert_equal 'cecil', request.current_user
     end
@@ -99,7 +99,7 @@ class RequestTest < Test::Unit::TestCase
       assert_equal '/login', request.login_url
       request = CloudKit::Request.new(
         Rack::MockRequest.env_for(
-          '/', 'cloudkit.filter.openid.url.login' => '/sessions'))
+          '/', CLOUDKIT_LOGIN_URL => '/sessions'))
       assert_equal '/sessions', request.login_url
     end
 
@@ -114,7 +114,7 @@ class RequestTest < Test::Unit::TestCase
       assert_equal '/logout', request.logout_url
       request = CloudKit::Request.new(
         Rack::MockRequest.env_for(
-          '/', 'cloudkit.filter.openid.url.logout' => '/sessions'))
+          '/', CLOUDKIT_LOGOUT_URL => '/sessions'))
       assert_equal '/sessions', request.logout_url
     end
 

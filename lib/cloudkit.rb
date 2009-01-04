@@ -14,6 +14,7 @@ require 'oauth/consumer'
 require 'oauth/request_proxy/rack_request'
 require 'oauth/server'
 require 'oauth/signature'
+require 'cloudkit/constants'
 require 'cloudkit/util'
 require 'cloudkit/store/adapter'
 require 'cloudkit/store/extraction_view'
@@ -32,6 +33,8 @@ require 'cloudkit/rack/router'
 require 'cloudkit/request'
 require 'cloudkit/service'
 require 'cloudkit/user_store'
+
+include CloudKit::Constants
 
 class Object
 
