@@ -1,7 +1,7 @@
 require 'helper'
 class OAuthFilterTest < Test::Unit::TestCase
 
-  context "An OAuthFilter" do  
+  context "An OAuthFilter" do
 
     setup do
       @oauth_filtered_app = CloudKit::OAuthFilter.new(echo_env(CLOUDKIT_AUTH_KEY))

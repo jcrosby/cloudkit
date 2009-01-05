@@ -4,6 +4,12 @@ class OpenIDFilterTest < Test::Unit::TestCase
   context "An OpenIDFilter" do
 
     setup do
+      openid_app = Rack::Builder.new {
+        use Rack::Lint
+        use Rack::Session::Pool
+        use CloudKit::OpenIDFilter
+        run echo_env(CLOUDKIT_AUTH_KEY)
+      }
       @request = Rack::MockRequest.new(openid_app)
     end
 

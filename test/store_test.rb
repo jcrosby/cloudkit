@@ -7,16 +7,9 @@ class StoreTest < Test::Unit::TestCase
 
   context "A CloudKit::Store" do
 
-    setup do
-      @store = ExposedStore.new(:collections => [:items])
-    end
-
-    teardown do
-      FileUtils.rm_f('test.db')
-    end
-
     should "know its version" do
-      assert_equal 1, @store.version
+      store = ExposedStore.new(:collections => [:items])
+      assert_equal 1, store.version
     end
 
     should "create its storage" do
@@ -72,6 +65,7 @@ class StoreTest < Test::Unit::TestCase
       assert store.db.schema[:colors]
       assert store.db.schema[:weights]
       result = store.get('/colors', :color => 'green')
+      FileUtils.rm_f('test.db')
       assert_equal 200, result.status
       assert_equal 1, result.parsed_content['uris'].size
     end
