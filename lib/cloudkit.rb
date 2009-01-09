@@ -35,6 +35,10 @@ require 'cloudkit/user_store'
 
 include CloudKit::Constants
 
+module CloudKit
+  VERSION = '0.10.0'
+end
+
 class Object
 
   # Execute a method if it exists.

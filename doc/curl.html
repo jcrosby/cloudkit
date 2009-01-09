@@ -38,6 +38,17 @@ If you haven't already installed the gem:
 </p>
 
 <p>
+If you already have the gem, make sure you're running the latest version (0.10.0):
+  <div class="code">
+    $ gem list cloudkit<br/>
+    cloudkit (0.9.1) &lt;-- need to upgrade<br/>
+    $ gem update cloudkit<br/>
+    $ gem list cloudkit<br/>
+    cloudkit (0.10.0, 0.9.1) &lt;-- 0.10.0 is now in the list
+  </div>
+</p>
+
+<p>
 Create a rackup file named config.ru, containing these two lines of code:
   <div class="code">
     require 'cloudkit'<br/>

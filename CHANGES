@@ -1,3 +1,9 @@
+0.10.0
+- Updated for Rack 0.9
+- Added batch URI resolution for resource collections
+- Refactored use of constants
+- Updated documentation
+
 0.9.1
 - Fixed Rack::Lint/rackup errors related to Content-Type headers
 - Patched Rack to support StringIO#string in Rack::Lint::InputWrapper

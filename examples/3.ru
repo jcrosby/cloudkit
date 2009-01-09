@@ -3,4 +3,4 @@ require 'cloudkit'
 use Rack::Session::Pool
 use CloudKit::OpenIDFilter
 use CloudKit::Service, :collections => [:notes]
-run lambda{|env| [200, {'Content-Type' => 'text/html'}, ['HELLO']]}
+run lambda{|env| [200, {'Content-Type' => 'text/html', 'Content-Length' => '5'}, ['HELLO']]}
