@@ -39,7 +39,6 @@ Gem::Specification.new do |s|
     lib/cloudkit/openid_filter.rb
     lib/cloudkit/openid_store.rb
     lib/cloudkit/rack/builder.rb
-    lib/cloudkit/rack/lint.rb
     lib/cloudkit/rack/router.rb
     lib/cloudkit/request.rb
     lib/cloudkit/service.rb
@@ -74,7 +73,7 @@ Gem::Specification.new do |s|
   s.test_files        = s.files.select {|path| path =~ /^test\/.*_test.rb/}
   s.rubyforge_project = "cloudkit"
   s.rubygems_version  = "1.1.1"
-  s.add_dependency 'rack', '~> 0.4'
+  s.add_dependency 'rack', '~> 0.9'
   s.add_dependency 'rack-config', '>= 0.9'
   s.add_dependency 'uuid', '= 2.0.1'
   s.add_dependency 'sequel', '= 2.6.0'

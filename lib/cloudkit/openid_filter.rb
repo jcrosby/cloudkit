@@ -48,7 +48,7 @@ module CloudKit
             store_location(request)
             login_redirect(request)
           else
-            [500, {}, ['server misconfigured']]
+            Rack::Response.new('server misconfigured', 500).finish
           end
         end
       end
@@ -86,7 +86,7 @@ module CloudKit
       end
 
       redirect_url = response.redirect_url(base_url(request), full_url(request))
-      [302, {'Location' => redirect_url, 'Content-Type' => 'text/html'}, []]
+      Rack::Response.new([], 302, {'Location' => redirect_url}).finish
     end
 
     def complete_openid_login(request)
@@ -142,7 +142,7 @@ module CloudKit
     end
 
     def login_redirect(request)
-      [302, {'Location' => request.login_url, 'Content-Type' => 'text/html'}, []]
+      Rack::Response.new([], 302, {'Location' => request.login_url}).finish
     end
 
     def base_url(request)

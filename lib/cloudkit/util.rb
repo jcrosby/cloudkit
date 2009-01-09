@@ -8,7 +8,8 @@ module CloudKit
         'templates',
         "#{template.to_s}.erb"))
       template = ERB.new(template_file.read)
-      [status, headers, [template.result(binding)]]
+      result = template.result(binding)
+      Rack::Response.new(result, status, headers).finish
     end
 
     # Build a Rack::Router instance

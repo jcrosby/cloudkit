@@ -203,7 +203,7 @@ created your own "abc" resource.)
 <p>
 Watch a secondary, out-of-date client fail at updating by being specific but also being stale:
   <div class="code">
-    $ curl -i -XPUT -H'If-Match:89487620-b134-012b-a2d8-0017f2c62348' -d'{"title":"foo"}' http://localhost:9292/notes/abc<br/>
+    $ curl -i -XPUT -H'If-Match:89487620-b134-012b-a2d8-0017f2c62348' -d'{"title":"bar"}' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 412 Precondition Failed<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
@@ -250,7 +250,7 @@ List all versions again, this time using the "resolved" URI from the Link header
 This effectively delivers the same information that would be obtained by first listing
 the URIs, then fetching each one of them individually.
   <div class="code">
-    curl -i http://localhost:9292/notes/abc/versions/_resolved<br/>
+    $ curl -i http://localhost:9292/notes/abc/versions/_resolved<br/>
     HTTP/1.1 200 OK<br/>
     Last-Modified: Sun, 21 Dec 2008 02:30:56 GMT<br/>
     ETag: "282819afc09d7735fd6801532c0c7033"<br/>
@@ -286,7 +286,7 @@ the URIs, then fetching each one of them individually.
 <p>
   We can use this same "resolved" technique on the main "notes" listing:
   <div class="code">
-    curl -i http://localhost:9292/notes/_resolved<br/>
+    $ curl -i http://localhost:9292/notes/_resolved<br/>
     HTTP/1.1 200 OK<br/>
     Last-Modified: Sun, 21 Dec 2008 02:30:56 GMT<br/>
     ETag: "6628242625a7f71cce838a02deb27912"<br/>

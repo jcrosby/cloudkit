@@ -14,6 +14,12 @@ module CloudKit
       @cloudkit_params ||= cloudkit_params.merge(oauth_header_params)
     end
 
+    # Return the JSON content from the request body
+    def json
+      self.body.rewind
+      self.body.read
+    end
+
     # Return true if method, path, and required_params match.
     def match?(method, path, required_params=[])
       (request_method == method) &&

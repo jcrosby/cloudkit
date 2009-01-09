@@ -23,6 +23,7 @@ module CloudKit
 
     # Translate to the standard Rack representation: [status, headers, content]
     def to_rack
+      meta['Content-Length'] = content.length.to_s
       [status, meta, [content]]
     end
 

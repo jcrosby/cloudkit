@@ -70,14 +70,14 @@ module CloudKit
       end
       @store.post(
         request.path_info,
-        {:json => request.body.string}.filter_merge!(
+        {:json => request.json}.filter_merge!(
           :remote_user => request.current_user)).to_rack
     end
 
     def put(request)
       @store.put(
         request.path_info,
-        {:json => request.body.string}.filter_merge!(
+        {:json => request.json}.filter_merge!(
           :remote_user => request.current_user,
           :etag        => request.if_match)).to_rack
     end

@@ -99,7 +99,7 @@ module CloudKit
       @@store.put(
         "/cloudkit_oauth_request_tokens/#{token_id}",
         :json => request_token)
-      [201, {'Content-Type' => 'text/html'}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
+      Rack::Response.new("oauth_token=#{token_id}&oauth_token_secret=#{secret}", 201).finish
     end
 
     def request_authorization(request)
@@ -186,7 +186,7 @@ module CloudKit
       @@store.delete(
         "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}",
         :etag => request_token_response.etag)
-      [201, {'Content-Type' => 'text/html'}, ["oauth_token=#{token_id}&oauth_token_secret=#{secret}"]]
+      Rack::Response.new("oauth_token=#{token_id}&oauth_token_secret=#{secret}", 201).finish
     end
 
     def inject_user_or_challenge(request)
@@ -225,8 +225,8 @@ module CloudKit
       request.env[CLOUDKIT_AUTH_CHALLENGE] = challenge_headers(request)
     end
 
-    def challenge(request, message)
-      [401, challenge_headers(request), [message || '']]
+    def challenge(request, message='')
+      Rack::Response.new(message, 401, challenge_headers(request)).finish
     end
 
     def challenge_headers(request)
@@ -243,7 +243,7 @@ module CloudKit
 
     def login_redirect(request)
       request.session['return_to'] = request.url if request.session
-      [302, {'Location' => request.login_url, 'Content-Type' => 'text/html'}, []]
+      Rack::Response.new([], 302, {'Location' => request.login_url}).finish
     end
 
     def load_user_from_session(request)
@@ -264,7 +264,7 @@ module CloudKit
 
     def xrds_location(request)
       # Current OAuth Discovery Draft 2 / XRDS-Simple 1.0, Section 5.1.2
-      [200, {'X-XRDS-Location' => "#{request.scheme}://#{request.env['HTTP_HOST']}/oauth"}, []]
+      Rack::Response.new([], 200, {'X-XRDS-Location' => "#{request.scheme}://#{request.env['HTTP_HOST']}/oauth"}).finish
     end
 
     def get_descriptor(request)

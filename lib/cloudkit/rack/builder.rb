@@ -8,9 +8,9 @@ module Rack #:nodoc:
     def to_app
       default_app = lambda do |env|
         if (env['PATH_INFO'] == '/')
-          [200, {'Content-Type' => 'text/html'}, [welcome]]
+          Rack::Response.new(welcome).finish
         else
-          [404, {'Content-Type' => 'text/html'}, []]
+          Rack::Response.new('not found', 404).finish
         end
       end
       @ins << default_app if @last_cloudkit_id == @ins.last.object_id
