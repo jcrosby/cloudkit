@@ -1,5 +1,5 @@
 module CloudKit
-  
+
   # An OAuthStore is a thin abstraction around CloudKit::Store, providing
   # consistent collection names, and allowing automatic migrations in later
   # releases if needed.
@@ -35,10 +35,6 @@ module CloudKit
       @@store.delete(uri, options)
     end
 
-    def resolve_uris(uris) #:nodoc:
-      @@store.resolve_uris(uris)
-    end
-    
     def reset! #:nodoc:
       @@store.reset!
     end

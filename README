@@ -38,9 +38,9 @@ An explicit version of example 2, minus the default developer landing page:
 The same as above, using MySQL:
 
   require 'cloudkit'
-  use Rack::Config { |env|
+  use Rack::Config do |env|
     env[CLOUDKIT_STORAGE_URI] = 'mysql://user:pass@localhost/cloudkit_example'
-  }
+  end
   use Rack::Pool::Session
   use CloudKit::OAuthFilter
   use CloudKit::OpenIDFilter

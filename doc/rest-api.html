@@ -107,6 +107,59 @@
   <span class="definition">uri-list:</span> an array of document URIs within the given collection. If less than the total available are supplied in the uris element, additional requests can be made, specifying the offset and limit query parameters. Future versions of CloudKit may page result sets to optimize performance.
 </p>
 
+<div class="uri-template">
+  GET /%collection%/_resolved
+</div>
+<p>
+  List the objects and metadata contained within a collection. This effectively provides the
+  same result as first listing the URIs using GET /%collection% followed by
+  performing a GET /%collection%/%uuid% for each URI.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of JSON documents.
+</p>
+
+<p>
+  <span class="spec-header">Optional Query Parameters:</span><br/>
+  <span class="definition">offset:</span> 0-based starting index for the list of results. Default is 0.<br/>
+  <span class="definition">limit:</span>  maximum number of results to return. Default is undefined, meaning unlimited.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "total":%total-results%,<br/>
+    "offset":%offset-value%,<br/>
+    "documents":[%document-list%]<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">total-results:</span> the total number of available results in the complete set, calculated prior applying any provided limits.<br/>
+  <span class="definition">offset-value:</span> integer representing the offset.<br/>
+  <span class="definition">document-list:</span> an array of documents and their metadata within the given collection. If less than the total available are supplied in the documents element, additional requests can be made, specifying the offset and limit query parameters. Future versions of CloudKit may page result sets to optimize performance.
+</p>
+
+<p>
+  <span class="spec-header">Document:</span><br/>
+  {<br/>
+    "etag":%etag%,<br/>
+    "last_modified":%last-modified%,<br/>
+    "uri":%uri-value%,<br/>
+    "document":%json-document%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Document Variables:</span><br/>
+  <span class="definition">etag:</span> the value of the ETag normally returned in a response header when requesting the individual document.<br/>
+  <span class="definition">last-modified:</span> the value of the Last-Modified timestamp normally returned in a response header when requesting the individual document.<br/>
+  <span class="definition">uri-value:</span> the URI for the individual document relative to the service root.<br/>
+  <span class="definition">json-document:</span> a valid JSON document.
+</p>
 
 <div class="uri-template">
   GET /%collection%/%uuid%
@@ -165,6 +218,62 @@
   <span class="definition">total-results:</span> the total number of available results in the complete set, calculated prior to applying any provided limits.<br/>
   <span class="definition">offset-value:</span> integer representing the offset.<br/>
   <span class="definition">uri-list:</span> an array of document URIs within the given collection. If less than the total available are supplied in the uris element, additional requests can be made, specifying the offset and limit query parameters. Future versions of CloudKit may page result sets to optimize performance.
+</p>
+
+<div class="uri-template">
+  GET /%collection%/%uuid%/versions/_resolved
+</div>
+<p>
+  List the objects and metadata contained within a collection of document versions.
+  This effectively provides the same result as first listing the URIs using
+  GET /%collection%/%uuid%/versions followed by performing a
+  GET /%collection%/%uuid%/versions/%etag% for each URI.
+</p>
+
+<p>
+  <span class="spec-header">URI Variables:</span><br/>
+  <span class="definition">collection:</span> a named collection of documents.<br/>
+  <span class="definition">uuid:</span> the unique key for a JSON document.
+</p>
+
+<p>
+  <span class="spec-header">Optional Query Parameters:</span><br/>
+  <span class="definition">offset:</span> 0-based starting index for the list of results. Default is 0.<br/>
+  <span class="definition">limit:</span> maximum number of results to return. Default is undefined, meaning unlimited.
+</p>
+
+<p>
+  <span class="spec-header">Response:</span><br/>
+  {<br/>
+    "total":%total-results%,<br/>
+    "offset":%offset-value%,<br/>
+    "documents":[%document-list%]<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Response Variables:</span><br/>
+  <span class="definition">total-results:</span> the total number of available results in the complete set, calculated prior applying any provided limits.<br/>
+  <span class="definition">offset-value:</span> integer representing the offset.<br/>
+  <span class="definition">document-list:</span> an array of documents and their metadata within the given collection. If less than the total available are supplied in the documents element, additional requests can be made, specifying the offset and limit query parameters. Future versions of CloudKit may page result sets to optimize performance.
+</p>
+
+<p>
+  <span class="spec-header">Document:</span><br/>
+  {<br/>
+    "etag":%etag%,<br/>
+    "last_modified":%last-modified%,<br/>
+    "uri":%uri-value%,<br/>
+    "document":%json-document%<br/>
+  }
+</p>
+
+<p>
+  <span class="spec-header">Document Variables:</span><br/>
+  <span class="definition">etag:</span> the value of the ETag normally returned in a response header when requesting the individual document.<br/>
+  <span class="definition">last-modified:</span> the value of the Last-Modified timestamp normally returned in a response header when requesting the individual document.<br/>
+  <span class="definition">uri-value:</span> the URI for the individual document relative to the service root.<br/>
+  <span class="definition">json-document:</span> a valid JSON document.
 </p>
 
 <div class="uri-template">

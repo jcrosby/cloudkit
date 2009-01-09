@@ -94,7 +94,8 @@ class ServiceTest < Test::Unit::TestCase
           json = JSON.generate(:this => '4')
           @request.put(
             '/items/4', {:input => json}.merge(CLOUDKIT_AUTH_KEY => 'someoneelse'))
-          @response = @request.get('/items', VALID_TEST_AUTH)
+          @response = @request.get(
+            '/items', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
           @parsed_response = JSON.parse(@response.body)
         end
 
@@ -164,6 +165,102 @@ class ServiceTest < Test::Unit::TestCase
           assert_equal 0, parsed_response['total']
           assert_equal 0, parsed_response['offset']
         end
+
+        should "return a resolved link header" do
+          assert @response['Link']
+          assert @response['Link'].match("<http://example.org/items/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"")
+        end
+      end
+
+      context "on GET /:collection/_resolved" do
+
+        setup do
+          3.times do |i|
+            json = JSON.generate(:this => i.to_s)
+            @request.put("/items/#{i}", {:input => json}.merge(VALID_TEST_AUTH))
+          end
+          json = JSON.generate(:this => '4')
+          @request.put(
+            '/items/4', {:input => json}.merge(CLOUDKIT_AUTH_KEY => 'someoneelse'))
+          @response = @request.get(
+            '/items/_resolved', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
+          @parsed_response = JSON.parse(@response.body)
+        end
+
+        should "be successful" do
+          assert_equal 200, @response.status
+        end
+
+        should "return all owner-originated documents" do
+          assert_same_elements ['/items/0', '/items/1', '/items/2'],
+            @parsed_response['documents'].map{|d| d['uri']}
+        end
+
+        should "sort descending on last_modified date" do
+          assert_equal ['/items/2', '/items/1', '/items/0'],
+            @parsed_response['documents'].map{|d| d['uri']}
+        end
+
+        should "return the total number of documents" do
+          assert @parsed_response['total']
+          assert_equal 3, @parsed_response['total']
+        end
+
+        should "return the offset" do
+          assert @parsed_response['offset']
+          assert_equal 0, @parsed_response['offset']
+        end
+
+        should "return a Content-Type header" do
+          assert_equal 'application/json', @response['Content-Type']
+        end
+
+        should "return an ETag" do
+          assert @response['ETag']
+        end
+
+        should "return a Last-Modified date" do
+          assert @response['Last-Modified']
+        end
+
+        should "accept a limit parameter" do
+          response = @request.get('/items/_resolved?limit=2', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal ['/items/2', '/items/1'],
+            parsed_response['documents'].map{|d| d['uri']}
+          assert_equal 3, parsed_response['total']
+        end
+
+        should "accept an offset parameter" do
+          response = @request.get('/items/_resolved?offset=1', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal ['/items/1', '/items/0'],
+            parsed_response['documents'].map{|d| d['uri']}
+          assert_equal 1, parsed_response['offset']
+          assert_equal 3, parsed_response['total']
+        end
+
+        should "accept combined limit and offset parameters" do
+          response = @request.get('/items/_resolved?limit=1&offset=1', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal ['/items/1'],
+            parsed_response['documents'].map{|d| d['uri']}
+          assert_equal 1, parsed_response['offset']
+          assert_equal 3, parsed_response['total']
+        end
+
+        should "return an empty list if no documents are found" do
+          response = @request.get('/things/_resolved', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal [], parsed_response['documents']
+          assert_equal 0, parsed_response['total']
+          assert_equal 0, parsed_response['offset']
+        end
+
+        should "return an index link header" do
+          assert @response['Link']
+          assert @response['Link'].match("<http://example.org/items>; rel=\"index\"")
+        end
       end
 
       context "on GET /:collection/:id" do
@@ -223,7 +320,8 @@ class ServiceTest < Test::Unit::TestCase
             result = @request.put('/items/abc', options)
             @etags << JSON.parse(result.body)['etag']
           end
-          @response = @request.get('/items/abc/versions', VALID_TEST_AUTH)
+          @response = @request.get(
+            '/items/abc/versions', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
           @parsed_response = JSON.parse(@response.body)
         end
 
@@ -307,6 +405,119 @@ class ServiceTest < Test::Unit::TestCase
           assert_equal ["/items/abc/versions/#{@etags[-2]}"], parsed_response['uris']
           assert_equal 1, parsed_response['offset']
           assert_equal 4, parsed_response['total']
+        end
+
+        should "return a resolved link header" do
+          assert @response['Link']
+          assert @response['Link'].match("<http://example.org/items/abc/versions/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"")
+        end
+      end
+
+      context "on GET /:collections/:id/versions/_resolved" do
+
+        setup do
+          @etags = []
+          4.times do |i|
+            json = JSON.generate(:this => i)
+            options = {:input => json}.merge(VALID_TEST_AUTH)
+            options.filter_merge!('HTTP_IF_MATCH' => @etags.try(:last))
+            result = @request.put('/items/abc', options)
+            @etags << JSON.parse(result.body)['etag']
+          end
+          @response = @request.get(
+            '/items/abc/versions/_resolved', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
+          @parsed_response = JSON.parse(@response.body)
+        end
+
+        should "be successful" do
+          assert_equal 200, @response.status
+        end
+
+        should "be successful even if the current resource has been deleted" do
+          @request.delete(
+            '/items/abc', {'HTTP_IF_MATCH' => @etags.last}.merge(VALID_TEST_AUTH))
+          response = @request.get('/items/abc/versions/_resolved', VALID_TEST_AUTH)
+          assert_equal 200, @response.status
+          parsed_response = JSON.parse(response.body)
+          assert_equal 4, parsed_response['documents'].size
+        end
+
+        should "return all versions of a document" do
+          documents = @parsed_response['documents']
+          assert documents
+          assert_equal 4, documents.size
+        end
+
+        should "return a 404 if the resource does not exist" do
+          response = @request.get('/items/nothing/versions/_resolved', VALID_TEST_AUTH)
+          assert_equal 404, response.status
+        end
+
+        should "return a 404 for non-owner-originated requests" do
+          response = @request.get('/items/abc/versions/_resolved', CLOUDKIT_AUTH_KEY => 'someoneelse')
+          assert_equal 404, response.status
+        end
+
+        should "sort descending on last_modified date" do
+          assert_equal(
+            ['/items/abc'].concat(@etags[0..-2].reverse.map{|e| "/items/abc/versions/#{e}"}),
+            @parsed_response['documents'].map{|d| d['uri']})
+        end
+
+        should "return the total number of documents" do
+          assert @parsed_response['total']
+          assert_equal 4, @parsed_response['total']
+        end
+
+        should "return the offset" do
+          assert @parsed_response['offset']
+          assert_equal 0, @parsed_response['offset']
+        end
+
+        should "return a Content-Type header" do
+          assert_equal 'application/json', @response['Content-Type']
+        end
+
+        should "return an ETag" do
+          assert @response['ETag']
+        end
+
+        should "return a Last-Modified date" do
+          assert @response['Last-Modified']
+        end
+
+        should "accept a limit parameter" do
+          response = @request.get(
+            '/items/abc/versions/_resolved?limit=2', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal ['/items/abc', "/items/abc/versions/#{@etags[-2]}"],
+            parsed_response['documents'].map{|d| d['uri']}
+          assert_equal 4, parsed_response['total']
+        end
+
+        should "accept an offset parameter" do
+          response = @request.get(
+            '/items/abc/versions/_resolved?offset=1', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"},
+            parsed_response['documents'].map{|d| d['uri']}
+          assert_equal 1, parsed_response['offset']
+          assert_equal 4, parsed_response['total']
+        end
+
+        should "accept combined limit and offset parameters" do
+          response = @request.get(
+            '/items/abc/versions/_resolved?limit=1&offset=1', VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          assert_equal ["/items/abc/versions/#{@etags[-2]}"],
+            parsed_response['documents'].map{|d| d['uri']}
+          assert_equal 1, parsed_response['offset']
+          assert_equal 4, parsed_response['total']
+        end
+
+        should "return an index link header" do
+          assert @response['Link']
+          assert @response['Link'].match("<http://example.org/items/abc/versions>; rel=\"index\"")
         end
       end
 
@@ -695,6 +906,9 @@ class ServiceTest < Test::Unit::TestCase
         end
       end
 
+      context "on OPTIONS /:collection/_resolved" do
+      end
+
       context "on OPTIONS /:collection/:id" do
 
         setup do
@@ -713,6 +927,9 @@ class ServiceTest < Test::Unit::TestCase
       end
 
       context "on OPTIONS /:collection/:id/versions" do
+      end
+
+      context "on OPTIONS /:collection/:id/versions/_resolved" do
       end
 
       context "on OPTIONS /:collection/:id/versions/:etag" do

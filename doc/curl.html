@@ -46,9 +46,9 @@ Create a rackup file named config.ru, containing these two lines of code:
 </p>
 
 <p>
-Run the app using <a href="http://code.macournoyer.com/thin">Thin</a>:
+Run the app:
   <div class="code">
-    $ thin start -R config.ru
+    $ rackup config.ru
   </div>
 </p>
 
@@ -56,13 +56,12 @@ Run the app using <a href="http://code.macournoyer.com/thin">Thin</a>:
 CloudKit is discoverable from top to bottom. Let's see what resource collections
 we're hosting:
   <div class="code">
-    $ curl -i http://localhost:3000/cloudkit-meta<br/>
+    $ curl -i http://localhost:9292/cloudkit-meta<br/>
     HTTP/1.1 200 OK<br/>
     ETag: "ef2f29b1834ef8c2bf0d8f1abb100177"<br/>
     Cache-Control: proxy-revalidate<br/>
     Content-Type: application/json<br/>
-    Content-Length: 20<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 20<br/><br/>
 
     {"uris":["\/notes"]}
   </div>
@@ -71,39 +70,47 @@ we're hosting:
 <p>
 See what we can do with these note resources:
   <div class="code">
-    $ curl -i -XOPTIONS http://localhost:3000/notes<br/>
+    $ curl -i -XOPTIONS http://localhost:9292/notes<br/>
     HTTP/1.1 200 OK<br/>
     Content-Length: 0<br/>
     Content-Type: application/json<br/>
     Allow: GET, HEAD, POST, OPTIONS<br/>
-    Connection: keep-alive<br/>
   </div>
 </p>
 
 <p>
 List the currently available notes:
   <div class="code">
-    $ curl -i http://localhost:3000/notes<br/>
+    $ curl -i http://localhost:9292/notes<br/>
     HTTP/1.1 200 OK<br/>
-    ETag: "df392c5664e6ecd64b83210fb925f6c8"<br/>
+    ETag: "ffc5e6012614d759283199e67f79071b"<br/>
+    Link: &lt;http://localhost:9292/notes/_resolved&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/resolved"<br/>
     Cache-Control: proxy-revalidate<br/>
     Content-Type: application/json<br/>
-    Content-Length: 32<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 32<br/><br/>
 
     {"uris":[],"total":0,"offset":0}
   </div>
 </p>
 
 <p>
-Create a note using <a href="http://tools.ietf.org/html/rfc2616#section-9.5">POST</a>:
+  Along with the usual metadata, many responses also provide discovery
+  information via
+  <a href="http://www.mnot.net/drafts/draft-nottingham-http-link-header-03.txt">Link Headers</a>
+  as shown above. These links allow user agents to find related resources. The
+  purpose of the above rel="resolved" Link Header is to offer a complete representation of
+  all documents in a collection as an alternative to the simple list of links provided above.
+  We'll look at the the result of using the "resolved" URI after we have created a few resources.
+</p>
+
+<p>
+Let's move on, creating a note using <a href="http://tools.ietf.org/html/rfc2616#section-9.5">POST</a>:
   <div class="code">
-    $ curl -i -XPOST -d'{"title":"projects"}' http://localhost:3000/notes<br/>
+    $ curl -i -XPOST -d'{"title":"projects"}' http://localhost:9292/notes<br/>
     HTTP/1.1 201 Created<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 159<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 159<br/><br/>
 
     {<br/>
       "uri":"\/notes\/0dda06f0-b134-012b-a2d8-0017f2c62348",<br/>
@@ -115,35 +122,14 @@ Create a note using <a href="http://tools.ietf.org/html/rfc2616#section-9.5">POS
 </p>
 
 <p>
-List the currently available notes again:
-  <div class="code">
-    $ curl -i http://localhost:3000/notes<br/>
-    HTTP/1.1 200 OK<br/>
-    Last-Modified: Sun, 21 Dec 2008 02:21:52 GMT<br/>
-    ETag: "dd30142ff023386d2515b41fb88447a5"<br/>
-    Cache-Control: proxy-revalidate<br/>
-    Content-Type: application/json<br/>
-    Content-Length: 79<br/>
-    Connection: keep-alive<br/><br/>
-
-    {<br/>
-      "uris":["\/notes\/0dda06f0-b134-012b-a2d8-0017f2c62348"],<br/>
-      "total":1,<br/>
-      "offset":0<br/>
-    }
-  </div>
-</p>
-
-<p>
-Create a note using <a href="http://tools.ietf.org/html/rfc2616#section-9.6">PUT</a>
+Create a different note using <a href="http://tools.ietf.org/html/rfc2616#section-9.6">PUT</a>
 so that we can specify its location:
   <div class="code">
-    $ curl -i -XPUT -d'{"title":"reminders"}' http://localhost:3000/notes/abc<br/>
+    $ curl -i -XPUT -d'{"title":"reminders"}' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 201 Created<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 126<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 126<br/><br/>
 
     {<br/>
       "uri":"\/notes\/abc",<br/>
@@ -157,37 +143,33 @@ so that we can specify its location:
 <p>
 View the new note:
   <div class="code">
-    $ curl -i http://localhost:3000/notes/abc<br/>
+    $ curl -i http://localhost:9292/notes/abc<br/>
     HTTP/1.1 200 OK<br/>
     Last-Modified: Sun, 21 Dec 2008 02:25:19 GMT<br/>
     ETag: "89487620-b134-012b-a2d8-0017f2c62348"<br/>
-    Link: &lt;http://localhost:3000/notes/abc/versions&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/versions"<br/>
+    Link: &lt;http://localhost:9292/notes/abc/versions&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/versions"<br/>
     Cache-Control: proxy-revalidate<br/>
     Content-Type: application/json<br/>
-    Content-Length: 21<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 21<br/><br/>
 
     {"title":"reminders"}
   </div>
 </p>
 
 <p>
-Along with the usual metadata, individual resources also provide discovery
-information via
-<a href="http://www.mnot.net/drafts/draft-nottingham-http-link-header-03.txt">Link Headers</a>
-as shown above. These links allow user agents to find related resources such as
-the complete history of a document.
+Once again, we see a Link header. This one lists the location of the complete history
+of this particular document. This history contains all versions of the document including
+the most recent. We will see it in action in a moment.
 </p>
 
 <p>
-Attempt a careless update and enjoy the failure:
+Next, attempt a careless update of our newest resource and enjoy the failure:
   <div class="code">
-    $ curl -i -XPUT -d'{"title":"foo"}' http://localhost:3000/notes/abc<br/>
+    $ curl -i -XPUT -d'{"title":"foo"}' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 400 Bad Request<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 25<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 25<br/><br/>
 
     {"error":"etag required"}
   </div>
@@ -196,7 +178,7 @@ Attempt a careless update and enjoy the failure:
 <p>
 Succeed in updating by being specific:
   <div class="code">
-    $ curl -i -XPUT -H'If-Match:89487620-b134-012b-a2d8-0017f2c62348' -d'{"title":"foo"}' http://localhost:3000/notes/abc<br/>
+    $ curl -i -XPUT -H'If-Match:89487620-b134-012b-a2d8-0017f2c62348' -d'{"title":"foo"}' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 200 OK<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
@@ -221,12 +203,11 @@ created your own "abc" resource.)
 <p>
 Watch a secondary, out-of-date client fail at updating by being specific but also being stale:
   <div class="code">
-    $ curl -i -XPUT -H'If-Match:89487620-b134-012b-a2d8-0017f2c62348' -d'{"title":"foo"}' http://localhost:3000/notes/abc<br/>
+    $ curl -i -XPUT -H'If-Match:89487620-b134-012b-a2d8-0017f2c62348' -d'{"title":"foo"}' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 412 Precondition Failed<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 31<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 31<br/><br/>
 
     {"error":"precondition failed"}
   </div>
@@ -241,17 +222,17 @@ version of the resource.
 </p>
 
 <p>
-Get all versions of the document using the URI tagged with rel="versions" in the
+We can list all versions of the document using the URI tagged with rel="versions" in the
 link header mentioned above, reverse sorted by Last-Modified, feed style:
   <div class="code">
-    $ curl -i http://localhost:3000/notes/abc/versions<br/>
+    $ curl -i http://localhost:9292/notes/abc/versions<br/>
     HTTP/1.1 200 OK<br/>
     Last-Modified: Sun, 21 Dec 2008 02:30:56 GMT<br/>
-    ETag: "bd9226d0c5f34fd761f6c64a0fe8bcc9"<br/>
+    ETag: "28ecf6899a45d3cdd0ad82bad56991d1"<br/>
+    Link: &lt;http://localhost:9292/notes/abc/versions/_resolved&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/resolved"<br/>
     Cache-Control: proxy-revalidate<br/>
     Content-Type: application/json<br/>
-    Content-Length: 109<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 109<br/><br/>
 
     {<br/>
       "uris":[<br/>
@@ -265,14 +246,84 @@ link header mentioned above, reverse sorted by Last-Modified, feed style:
 </p>
 
 <p>
-Delete the document:
+List all versions again, this time using the "resolved" URI from the Link header.
+This effectively delivers the same information that would be obtained by first listing
+the URIs, then fetching each one of them individually.
   <div class="code">
-    $ curl -i -XDELETE -H'If-Match:522be9f0-b135-012b-a2d8-0017f2c62348' http://localhost:3000/notes/abc<br/>
+    curl -i http://localhost:9292/notes/abc/versions/_resolved<br/>
+    HTTP/1.1 200 OK<br/>
+    Last-Modified: Sun, 21 Dec 2008 02:30:56 GMT<br/>
+    ETag: "282819afc09d7735fd6801532c0c7033"<br/>
+    Link: &lt;http://localhost:9292/notes/abc/versions&gt;; rel="index"<br/>
+    Cache-Control: proxy-revalidate<br/>
+    Content-Type: application/json<br/>
+    Content-Length: 390<br/><br/>
+
+    {<br/>
+      "documents":[<br/>
+        {<br/>
+          "etag":"522be9f0-b135-012b-a2d8-0017f2c62348",<br/>
+          "last_modified":"Sun, 21 Dec 2008 02:30:56 GMT",<br/>
+          "document":"{\"title\":\"foo\"}",<br/>
+          "uri":"\/notes\/abc"<br/>
+        },<br/>
+        {<br/>
+          "etag":"89487620-b134-012b-a2d8-0017f2c62348",<br/>
+          "last_modified":"Sun, 21 Dec 2008 02:25:19 GMT",<br/>
+          "document":"{\"title\":\"reminders\"}",<br/>
+          "uri":"\/notes\/abc\/versions\/89487620-b134-012b-a2d8-0017f2c62348"}<br/>
+      ],<br/>
+      "total":2,<br/>
+      "offset":0<br/>
+    }
+  </div>
+</p>
+
+<p>
+  Notice the resolved response includes a Link header pointing back to its index.
+</p>
+
+<p>
+  We can use this same "resolved" technique on the main "notes" listing:
+  <div class="code">
+    curl -i http://localhost:9292/notes/_resolved<br/>
+    HTTP/1.1 200 OK<br/>
+    Last-Modified: Sun, 21 Dec 2008 02:30:56 GMT<br/>
+    ETag: "6628242625a7f71cce838a02deb27912"<br/>
+    Link: &lt;http://localhost:9292/notes&gt; rel="index"<br/>
+    Cache-Control: proxy-revalidate<br/>
+    Content-Type: application/json<br/>
+    Content-Length: 374<br/><br/>
+
+    {<br/>
+      "documents":[<br/>
+        {<br/>
+          "etag":"522be9f0-b135-012b-a2d8-0017f2c62348",<br/>
+          "last_modified":"Sun, 21 Dec 2008 02:30:56 GMT",<br/>
+          "document":"{\"title\":\"foo\"}",<br/>
+          "uri":"\/notes\/abc"<br/>
+        },<br/>
+        {<br/>
+          "etag":"0dda0de0-b134-012b-a2d8-0017f2c62348",<br/>
+          "last_modified":"Sun, 21 Dec 2008 02:21:52 GMT",<br/>
+          "document":"{\"title\":\"projects\"}",<br/>
+          "uri":"\/notes\/0dda06f0-b134-012b-a2d8-0017f2c62348"<br/>
+        }<br/>
+      ],<br/>
+      "total":2,<br/>
+      "offset":0<br/>
+    }
+  </div>
+</p>
+
+<p>
+Next, let's delete the our most recent document:
+  <div class="code">
+    $ curl -i -XDELETE -H'If-Match:522be9f0-b135-012b-a2d8-0017f2c62348' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 200 OK<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 174<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 174<br/><br/>
 
     {<br/>
       "uri":"\/notes\/abc\/versions\/522be9f0-b135-012b-a2d8-0017f2c62348",<br/>
@@ -286,13 +337,12 @@ Delete the document:
 <p>
 Try to GET it again and notice the helpful <a href="http://tools.ietf.org/html/rfc2616#section-10.4.11">410</a>:
   <div class="code">
-    $ curl -i http://localhost:3000/notes/abc<br/>
+    $ curl -i http://localhost:9292/notes/abc<br/>
     HTTP/1.1 410 Gone<br/>
-    Link: &lt;http://localhost:3000/notes/abc/versions&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/versions"<br/>
+    Link: &lt;http://localhost:9292/notes/abc/versions&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/versions"<br/>
     Cache-Control: no-cache<br/>
     Content-Type: application/json<br/>
-    Content-Length: 37<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 37<br/><br/>
 
     {"error":"entity previously deleted"}
   </div>
@@ -301,14 +351,14 @@ Try to GET it again and notice the helpful <a href="http://tools.ietf.org/html/r
 <p>
 Notice the history is preserved:
   <div class="code">
-    $ curl -i http://localhost:3000/notes/abc/versions<br/>
+    $ curl -i http://localhost:9292/notes/abc/versions<br/>
     HTTP/1.1 200 OK<br/>
     Last-Modified: Sun, 21 Dec 2008 02:30:56 GMT<br/>
     ETag: "2308ee33e953c9be41221ff7612e5217"<br/>
+    Link: &lt;http://localhost:9292/notes/abc/versions/_resolved&gt;; rel="http://joncrosby.me/cloudkit/1.0/rel/resolved"<br/>
     Cache-Control: proxy-revalidate<br/>
     Content-Type: application/json<br/>
-    Content-Length: 157<br/>
-    Connection: keep-alive<br/><br/>
+    Content-Length: 157<br/><br/>
 
     {<br/>
       "uris":[<br/>

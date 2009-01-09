@@ -20,7 +20,7 @@ module CloudKit
   #   use CloudKit::OAuthFilter
   #   use CloudKit::OpenIDFilter
   #   use CloudKit::Service, :collections => [:items, :things]
-  #   run lambda{|env| [200, {}, ['Hello']]}
+  #   run lambda{|env| [200, {'Content-Type' => 'text/html'}, ['Hello']]}
   #
   # For more examples, including the use of different storage implementations,
   # see the Table of Contents in the examples directory.
@@ -60,7 +60,7 @@ module CloudKit
           :remote_user => request.current_user,
           :offset      => request['offset'],
           :limit       => request['limit']))
-      response['Link'] = link_header(request) if @store.resource_uri?(request.path_info)
+      inject_link_headers(request, response)
       response.to_rack
     end
 
@@ -97,7 +97,7 @@ module CloudKit
           :remote_user => request.current_user,
           :offset      => request['offset'],
           :limit       => request['limit']))
-      response['Link'] = link_header(request) if @store.resource_uri?(request.path_info)
+      inject_link_headers(request, response)
       response.to_rack
     end
 
@@ -105,9 +105,28 @@ module CloudKit
       @store.options(request.path_info).to_rack
     end
 
-    def link_header(request)
+    def inject_link_headers(request, response)
+      response['Link'] = versions_link_header(request) if @store.resource_uri?(request.path_info)
+      response['Link'] = resolved_link_header(request) if @store.resource_collection_uri?(request.path_info)
+      response['Link'] = index_link_header(request)    if @store.resolved_resource_collection_uri?(request.path_info)
+      response['Link'] = resolved_link_header(request) if @store.version_collection_uri?(request.path_info)
+      response['Link'] = index_link_header(request)    if @store.resolved_version_collection_uri?(request.path_info)
+    end
+
+    def versions_link_header(request)
       base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.path_info}"
       "<#{base_url}/versions>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/versions\""
+    end
+
+    def resolved_link_header(request)
+      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.path_info}"
+      "<#{base_url}/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\""
+    end
+
+    def index_link_header(request)
+      index_path = request.path_info.sub(/\/_resolved(\/)*$/, '')
+      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{index_path}"
+      "<#{base_url}>; rel=\"index\""
     end
 
     def auth_missing?(request)
