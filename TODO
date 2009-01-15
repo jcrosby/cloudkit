@@ -1,6 +1,4 @@
 1.0
-- jquery.cloudkit
-    titanium/gears
 - openid sreg
 - oauth token management
 - oauth consumer registration

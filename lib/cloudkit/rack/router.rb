@@ -3,7 +3,7 @@ module Rack #:nodoc:
   # A minimal router providing just what is needed for the OAuth and OpenID
   # filters.
   class Router
-    
+
     # Create an instance of Router to match on method, path and params.
     def initialize(method, path, params=[])
       @method = method.to_s.upcase; @path = path; @params = params

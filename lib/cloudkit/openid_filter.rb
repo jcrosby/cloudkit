@@ -1,5 +1,5 @@
 module CloudKit
-  
+
   # An OpenIDFilter provides OpenID authentication, listening for upstream
   # OAuth authentication and bypassing if already authorized.
   #

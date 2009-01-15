@@ -1,5 +1,5 @@
 module CloudKit
-  
+
   # An ExtractionView observes a resource collection and extracts specified
   # elements for querying.
   class ExtractionView
