@@ -52,13 +52,13 @@ class Hash
   # For each key in 'other' that has a non-nil value, merge it into the current
   # Hash.
   def filter_merge!(other={})
-    other.each_pair{|k,v| self.merge!(k => v) if v}
+    other.each_pair{|k,v| self.merge!(k => v) unless v.nil?}
     self
   end
 
   # Change the key 'oldkey' to 'newkey'
   def rekey!(oldkey, newkey)
-    if self[oldkey]
+    if self.has_key? oldkey
       self[newkey] = self.delete(oldkey)
     end
   end

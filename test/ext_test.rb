@@ -10,6 +10,14 @@ class ExtTest < Test::Unit::TestCase
       x.rekey!(:d, :b)
       assert x == {:a => 1, :c => 2}
     end
+    
+    should "re-key false and nil values" do
+      x = {:a => false, :b => nil}
+      x.rekey!(:b, :c)
+      assert x == {:a => false, :c => nil}
+      x.rekey!(:d, :b)
+      assert x == {:a => false, :c => nil}
+    end
 
     should "merge conditionally" do
       x = {:a => 1}
@@ -20,6 +28,17 @@ class ExtTest < Test::Unit::TestCase
       assert x == {:a => 1, :c => 2}
       x = {}.filter_merge!(:a => 1)
       assert x == {:a => 1}
+    end
+
+    should "merge false values correctly" do
+      x = {:a => 1}
+      y = {:b => 2}
+      x.filter_merge!(:c => false)
+      assert x == {:a => 1, :c => false}
+      x.filter_merge!(:c => y[:b])
+      assert x == {:a => 1, :c => 2}
+      x = {}.filter_merge!(:a => false)
+      assert x == {:a => false}
     end
 
     should "exclude pairs using a single key" do
