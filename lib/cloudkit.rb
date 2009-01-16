@@ -53,6 +53,7 @@ class Hash
   # Hash.
   def filter_merge!(other={})
     other.each_pair{|k,v| self.merge!(k => v) unless v.nil?}
+
     self
   end
 
@@ -61,12 +62,15 @@ class Hash
     if self.has_key? oldkey
       self[newkey] = self.delete(oldkey)
     end
+    
+    nil
   end
 
   # Return a new Hash, excluding the specified list of keys.
   def excluding(*keys)
     trimmed = self.dup
     keys.each{|k| trimmed.delete(k)}
+    
     trimmed
   end
 end
@@ -76,6 +80,7 @@ class Array
   # Return a new Array, excluding the specified list of values.
   def excluding(*keys)
     trimmed = self.dup
-    trimmed.reject{|v| keys.include?(v)}
+    
+    trimmed - keys
   end
 end
