@@ -114,6 +114,7 @@ module CloudKit
       return data_required       unless options[:json]
       current_resource = resource(uri, options.excluding(:json, :etag, :remote_user))
       return update_resource(uri, options) if current_resource.status == 200
+      return current_resource if current_resource.status == 410
       create_resource(uri, options)
     end
 

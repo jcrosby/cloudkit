@@ -655,6 +655,25 @@ class ServiceTest < Test::Unit::TestCase
           assert_equal 'thing', JSON.parse(result.body)['this']
         end
 
+        should "not create new resources using deleted resource URIs" do
+          # This situation occurs when a stale client attempts to update
+          # a resource that has been removed. This test verifies that CloudKit
+          # does not attempt to create a new item with a URI equal to the
+          # removed item.
+          etag = JSON.parse(@response.body)['etag'];
+          @request.delete(
+            '/items/abc',
+            'HTTP_IF_MATCH'   => etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
+          json = JSON.generate(:foo => 'bar')
+          response = @request.put(
+            '/items/abc',
+            :input            => json,
+            'HTTP_IF_MATCH'   => etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
+          assert_equal 410, response.status
+        end
+
         should "update the document if it already exists" do
           assert_equal 200, @response.status
           result = @request.get('/items/abc', VALID_TEST_AUTH)
