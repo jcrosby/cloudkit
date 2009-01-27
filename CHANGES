@@ -1,3 +1,9 @@
+0.10.1
+- Updated oauth and sequel gem dependencies
+- Fixed 410 responses for stale PUT operations
+- Fixed MySQL content encoding (Harry Weppner)
+- Various fixes for filter_merge!, rekey!, and excluding (Cameron Walters)
+
 0.10.0
 - Updated for Rack 0.9
 - Added batch URI resolution for resource collections
