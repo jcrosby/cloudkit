@@ -304,7 +304,7 @@ module CloudKit
     # Clear all contents of the store. Used mostly for testing.
     def reset!
       @db.schema.keys.each do |table|
-        @db[table].delete
+        @db[table.gsub('`','').to_sym].delete
       end
     end
 

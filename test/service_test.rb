@@ -742,9 +742,9 @@ class ServiceTest < Test::Unit::TestCase
           json = JSON.generate(:this => 'updated')
           response = @request.put(
             '/items/abc',
-            :input          => json,
-            'HTTP_IF_MATCH' => @json['etag'],
-            CLOUDKIT_AUTH_KEY        => TEST_REMOTE_USER)
+            :input             => json,
+            'HTTP_IF_MATCH'    => @json['etag'],
+            CLOUDKIT_AUTH_KEY  => TEST_REMOTE_USER)
           assert_equal 200, response.status
           etag = JSON.parse(response.body)['etag']
           json = JSON.generate(:this => 'updated again')
