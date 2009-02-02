@@ -3,6 +3,11 @@ module CloudKit
   # An OpenIDFilter provides OpenID authentication, listening for upstream
   # OAuth authentication and bypassing if already authorized.
   #
+  # The root URI, "/", is always bypassed. More URIs can also be bypassed using
+  # the :allow option:
+  #
+  #   use OpenIDFilter, :allow => ['/foo', '/bar']
+  #
   # Responds to the following URIs:
   #   /login
   #   /logout
@@ -15,7 +20,8 @@ module CloudKit
     @@store = nil
 
     def initialize(app, options={})
-      @app = app; @options = options
+      @app     = app
+      @options = options
     end
 
     def call(env)
@@ -34,7 +40,7 @@ module CloudKit
       when r(:get, '/openid_complete'); complete_openid_login(request)
       when r(:post, request.logout_url); logout(request)
       else
-        if (root_request?(request) || valid_auth_key?(request) || logged_in?(request))
+        if bypass?(request)
           @app.call(env)
         else
           if request.env[CLOUDKIT_AUTH_CHALLENGE]
@@ -203,6 +209,17 @@ module CloudKit
 
     def two_weeks_from_now
       Time.now.to_i+1209600
+    end
+
+    def allow?(uri)
+      @options[:allow] && @options[:allow].include?(uri)
+    end
+
+    def bypass?(request)
+      root_request?(request) ||
+        allow?(request.path_info) ||
+        valid_auth_key?(request) ||
+        logged_in?(request)
     end
   end
 end

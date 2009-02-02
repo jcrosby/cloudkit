@@ -7,7 +7,7 @@ class OpenIDFilterTest < Test::Unit::TestCase
       openid_app = Rack::Builder.new {
         use Rack::Lint
         use Rack::Session::Pool
-        use CloudKit::OpenIDFilter
+        use CloudKit::OpenIDFilter, :allow => ['/foo']
         run echo_env(CLOUDKIT_AUTH_KEY)
       }
       @request = Rack::MockRequest.new(openid_app)
@@ -15,6 +15,11 @@ class OpenIDFilterTest < Test::Unit::TestCase
 
     should "allow root url pass through" do
       response = @request.get('/')
+      assert_equal 200, response.status
+    end
+
+    should "allow pass through of URIs defined in :allow" do
+      response = @request.get('/foo')
       assert_equal 200, response.status
     end
 
