@@ -926,6 +926,20 @@ class ServiceTest < Test::Unit::TestCase
       end
 
       context "on OPTIONS /:collection/_resolved" do
+
+        setup do
+          @response = @request.request('OPTIONS', '/items/_resolved', VALID_TEST_AUTH)
+        end
+
+        should "return a 200 status" do
+          assert_equal 200, @response.status
+        end
+
+        should "return a list of available methods" do
+          assert @response['Allow']
+          methods = @response['Allow'].split(', ')
+          assert_same_elements(['GET', 'HEAD', 'OPTIONS'], methods)
+        end
       end
 
       context "on OPTIONS /:collection/:id" do
@@ -946,12 +960,54 @@ class ServiceTest < Test::Unit::TestCase
       end
 
       context "on OPTIONS /:collection/:id/versions" do
+
+        setup do
+          @response = @request.request('OPTIONS', '/items/xyz/versions', VALID_TEST_AUTH)
+        end
+
+        should "return a 200 status" do
+          assert_equal 200, @response.status
+        end
+
+        should "return a list of available methods" do
+          assert @response['Allow']
+          methods = @response['Allow'].split(', ')
+          assert_same_elements(['GET', 'HEAD', 'OPTIONS'], methods)
+        end
       end
 
       context "on OPTIONS /:collection/:id/versions/_resolved" do
+
+        setup do
+          @response = @request.request('OPTIONS', '/items/xyz/versions/_resolved', VALID_TEST_AUTH)
+        end
+
+        should "return a 200 status" do
+          assert_equal 200, @response.status
+        end
+
+        should "return a list of available methods" do
+          assert @response['Allow']
+          methods = @response['Allow'].split(', ')
+          assert_same_elements(['GET', 'HEAD', 'OPTIONS'], methods)
+        end
       end
 
       context "on OPTIONS /:collection/:id/versions/:etag" do
+
+        setup do
+          @response = @request.request('OPTIONS', "/items/xyz/versions/abc", VALID_TEST_AUTH)
+        end
+
+        should "return a 200 status" do
+          assert_equal 200, @response.status
+        end
+
+        should "return a list of available methods" do
+          assert @response['Allow']
+          methods = @response['Allow'].split(', ')
+          assert_same_elements(['GET', 'HEAD', 'OPTIONS'], methods)
+        end
       end
 
       context "on HEAD" do
