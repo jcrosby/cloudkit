@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
-  s.version           = "0.10.1"
+  s.version           = "0.11.0"
   s.date              = "2008-01-27"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
@@ -43,7 +43,6 @@ Gem::Specification.new do |s|
     lib/cloudkit/request.rb
     lib/cloudkit/service.rb
     lib/cloudkit/store.rb
-    lib/cloudkit/store/adapter.rb
     lib/cloudkit/store/extraction_view.rb
     lib/cloudkit/store/response.rb
     lib/cloudkit/store/response_helpers.rb
@@ -76,7 +75,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'rack', '~> 0.9'
   s.add_dependency 'rack-config', '>= 0.9'
   s.add_dependency 'uuid', '= 2.0.1'
-  s.add_dependency 'sequel', '~> 2.9'
+  s.add_dependency 'dm-core', '~> 0.9.10'
+  s.add_dependency 'dm-validations', '~> 0.9.10'
   s.add_dependency 'oauth', '~> 0.3'
   s.add_dependency 'ruby-openid', '= 2.1.2'
   s.add_dependency 'json', '= 1.1.3'

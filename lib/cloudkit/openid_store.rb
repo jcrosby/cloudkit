@@ -16,7 +16,9 @@ module CloudKit
         @@store = Store.new(
           :collections => [:cloudkit_openid_associations, :cloudkit_openid_nonces],
           :views       => [association_view],
-          :adapter     => SQLAdapter.new(uri))
+          :adapter     => DataMapper.setup(
+            :default,
+            uri || 'sqlite3::memory:'))
       end
     end
 
@@ -91,6 +93,9 @@ module CloudKit
     def self.cleanup_nonces #:nodoc:
       # TODO
     end
+
+    # Return the version number for this store.
+    def version; 1; end
 
     protected
 

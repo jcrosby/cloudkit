@@ -15,7 +15,9 @@ module CloudKit
           :cloudkit_oauth_tokens,
           :cloudkit_oauth_request_tokens,
           :cloudkit_oauth_consumers],
-        :adapter => SQLAdapter.new(uri)) unless @@store
+        :adapter => DataMapper.setup(
+          :default,
+          uri || 'sqlite3::memory:')) unless @@store
       load_static_consumer
     end
 

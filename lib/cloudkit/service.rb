@@ -37,7 +37,9 @@ module CloudKit
     def call(env)
       @@lock.synchronize do
         @store = Store.new(
-          :adapter     => SQLAdapter.new(env[CLOUDKIT_STORAGE_URI]),
+          :adapter     => DataMapper.setup(
+            :default,
+            env[CLOUDKIT_STORAGE_URI] || 'sqlite3::memory:'),
           :collections => @collections)
       end unless @store
 

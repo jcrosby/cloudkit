@@ -1,7 +1,7 @@
 $:.unshift File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require 'cloudkit'
 use Rack::Config do |env|
-  env[CLOUDKIT_STORAGE_URI] = 'sqlite://example.db'
+  env[CLOUDKIT_STORAGE_URI] = "sqlite3:///#{Dir.pwd}/example.db"
 end
 use Rack::Session::Pool
 use CloudKit::OAuthFilter

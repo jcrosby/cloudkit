@@ -14,7 +14,9 @@ module CloudKit
         @@store = Store.new(
           :collections => [:cloudkit_users],
           :views       => [login_view],
-          :adapter     => SQLAdapter.new(uri))
+          :adapter => DataMapper.setup(
+            :default,
+            uri || 'sqlite3::memory:'))
       end
     end
 

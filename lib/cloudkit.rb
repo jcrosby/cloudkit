@@ -3,7 +3,8 @@ require 'erb'
 require 'json'
 require 'md5'
 require 'openid'
-require 'sequel'
+require 'dm-core'
+require 'dm-validations'
 require 'time'
 require 'uuid'
 require 'rack'
@@ -15,11 +16,10 @@ require 'oauth/server'
 require 'oauth/signature'
 require 'cloudkit/constants'
 require 'cloudkit/util'
-require 'cloudkit/store/adapter'
+require 'cloudkit/store/document'
 require 'cloudkit/store/extraction_view'
 require 'cloudkit/store/response'
 require 'cloudkit/store/response_helpers'
-require 'cloudkit/store/sql_adapter'
 require 'cloudkit/store'
 require 'cloudkit/flash_session'
 require 'cloudkit/oauth_filter'
@@ -35,7 +35,7 @@ require 'cloudkit/user_store'
 include CloudKit::Constants
 
 module CloudKit
-  VERSION = '0.10.1'
+  VERSION = '0.11.0'
 end
 
 class Object
@@ -52,7 +52,6 @@ class Hash
   # Hash.
   def filter_merge!(other={})
     other.each_pair{|k,v| self.merge!(k => v) unless v.nil?}
-
     self
   end
 
@@ -61,7 +60,6 @@ class Hash
     if self.has_key? oldkey
       self[newkey] = self.delete(oldkey)
     end
-    
     nil
   end
 
@@ -69,7 +67,6 @@ class Hash
   def excluding(*keys)
     trimmed = self.dup
     keys.each{|k| trimmed.delete(k)}
-    
     trimmed
   end
 end
@@ -79,7 +76,6 @@ class Array
   # Return a new Array, excluding the specified list of values.
   def excluding(*keys)
     trimmed = self.dup
-    
     trimmed - keys
   end
 end
