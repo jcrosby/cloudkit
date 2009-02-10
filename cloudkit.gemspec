@@ -77,6 +77,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rack-config', '>= 0.9'
   s.add_dependency 'uuid', '= 2.0.1'
   s.add_dependency 'dm-core', '~> 0.9.10'
+  s.add_dependency 'dm-aggregates', '~> 0.9.10'
   s.add_dependency 'dm-validations', '~> 0.9.10'
   s.add_dependency 'oauth', '~> 0.3'
   s.add_dependency 'ruby-openid', '= 2.1.2'
