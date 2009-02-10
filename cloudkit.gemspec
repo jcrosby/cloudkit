@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
   s.version           = "0.11.0"
-  s.date              = "2008-01-27"
+  s.date              = "2008-02-09"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
   s.authors           = ["Jon Crosby"]
@@ -43,10 +43,10 @@ Gem::Specification.new do |s|
     lib/cloudkit/request.rb
     lib/cloudkit/service.rb
     lib/cloudkit/store.rb
+    lib/cloudkit/store/document.rb
     lib/cloudkit/store/extraction_view.rb
     lib/cloudkit/store/response.rb
     lib/cloudkit/store/response_helpers.rb
-    lib/cloudkit/store/sql_adapter.rb
     lib/cloudkit/templates/authorize_request_token.erb
     lib/cloudkit/templates/oauth_descriptor.erb
     lib/cloudkit/templates/oauth_meta.erb
@@ -55,6 +55,7 @@ Gem::Specification.new do |s|
     lib/cloudkit/templates/request_token_denied.erb
     lib/cloudkit/user_store.rb
     lib/cloudkit/util.rb
+    test/document_test.rb
     test/ext_test.rb
     test/flash_session_test.rb
     test/helper.rb

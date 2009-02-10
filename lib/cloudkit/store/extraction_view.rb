@@ -30,15 +30,10 @@ module CloudKit
           e.merge(field => data[field.to_s])
         end
 
-        transaction = DataMapper::Transaction.new(resources)
-        transaction.begin
-        DataMapper.repository(:default).adapter.push_transaction(transaction)
-
-        resources.all(:uri => uri).each {|item| item.destroy}
-        resources.create(elements.merge!(:uri => uri))
-
-        DataMapper.repository(:default).adapter.pop_transaction
-        transaction.commit
+        resources.transaction do
+          resources.all(:uri => uri).each {|item| item.destroy}
+          resources.create(elements.merge!(:uri => uri))
+        end
       end
     end
 

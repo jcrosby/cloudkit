@@ -134,24 +134,20 @@ module CloudKit
       return status_404 unless (original && (original.remote_user == options[:remote_user]))
       return status_410 if original.deleted?
       return status_412 if original.etag != options[:etag]
-
-      transaction = DataMapper::Transaction.new(CloudKit::Document)
-      transaction.begin
-      DataMapper.repository(:default).adapter.push_transaction(transaction)
-
       version_uri = "#{original.uri}/versions/#{original.etag}"
-      original.update_attributes(:uri => version_uri)
-      gone = CloudKit::Document.create(
-        :uri                  => uri,
-        :collection_reference => original.collection_reference,
-        :resource_reference   => original.resource_reference,
-        :remote_user          => original.remote_user,
-        :content              => original.content,
-        :deleted              => true)
-      gone.update_attributes(:etag => nil)
 
-      DataMapper.repository(:default).adapter.pop_transaction
-      transaction.commit
+      CloudKit::Document.transaction do
+        original.update_attributes(:uri => version_uri)
+        gone = CloudKit::Document.create(
+          :uri                  => uri,
+          :collection_reference => original.collection_reference,
+          :resource_reference   => original.resource_reference,
+          :remote_user          => original.remote_user,
+          :content              => original.content,
+          :deleted              => true)
+        gone.update_attributes(:etag => nil)
+      end
+
       unmap(uri)
 
       return json_meta_response(200, version_uri, original.etag, original.last_modified)
@@ -411,21 +407,17 @@ module CloudKit
       return status_404    unless (original && (original.remote_user == options[:remote_user]))
       return etag_required unless options[:etag]
       return status_412    unless options[:etag] == original.etag
+      resource = nil
 
-      transaction = DataMapper::Transaction.new(CloudKit::Document)
-      transaction.begin
-      DataMapper.repository(:default).adapter.push_transaction(transaction)
-
-      original.update_attributes(:uri => "#{uri}/versions/#{original.etag}")
-      resource = CloudKit::Document.create(
-        :uri                  => uri,
-        :collection_reference => original.collection_reference,
-        :resource_reference   => original.resource_reference,
-        :remote_user          => options[:remote_user],
-        :content              => options[:json])
-
-      DataMapper.repository(:default).adapter.pop_transaction
-      transaction.commit
+      CloudKit::Document.transaction do
+        original.update_attributes(:uri => "#{uri}/versions/#{original.etag}")
+        resource = CloudKit::Document.create(
+          :uri                  => uri,
+          :collection_reference => original.collection_reference,
+          :resource_reference   => original.resource_reference,
+          :remote_user          => options[:remote_user],
+          :content              => options[:json])
+      end
 
       map(uri, data)
 
