@@ -33,7 +33,7 @@ module CloudKit
       @db          = options[:adapter] || DataMapper.setup(:default, 'sqlite3::memory:')
       @collections = options[:collections]
       @views       = options[:views]
-      DataMapper.auto_migrate!
+      DataMapper.auto_upgrade!
     end
 
     # Retrieve a resource or collection of resources based on a URI.
@@ -297,12 +297,6 @@ module CloudKit
         result << get(uri)
       end
       result
-    end
-
-    # Clear all contents of the store. Used mostly for testing.
-    def reset!
-      CloudKit::Document.all.each {|d| d.destroy}
-      @views.each {|v| class_for(v.name).all {|v| v.destroy}} if @views
     end
 
     # Return the version number of this Store.

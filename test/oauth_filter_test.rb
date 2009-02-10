@@ -17,7 +17,7 @@ class OAuthFilterTest < Test::Unit::TestCase
     end
 
     teardown do
-      @store.reset!
+      DataMapper.auto_migrate!
       @store.load_static_consumer
     end
 

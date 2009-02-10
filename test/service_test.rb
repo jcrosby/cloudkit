@@ -39,6 +39,10 @@ class ServiceTest < Test::Unit::TestCase
         @request = Rack::MockRequest.new(authed_service)
       end
 
+      teardown do
+        DataMapper.auto_migrate!
+      end
+
       should "allow requests for / to pass through" do
         response = @request.get('/')
         assert_equal 'martino', response.body

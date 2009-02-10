@@ -37,10 +37,6 @@ module CloudKit
       @@store.delete(uri, options)
     end
 
-    def reset! #:nodoc:
-      @@store.reset!
-    end
-
     # Return the version number for this store.
     def version; 1; end
 
