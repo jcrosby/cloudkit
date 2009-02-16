@@ -137,7 +137,9 @@ module CloudKit
       version_uri = "#{original.uri}/versions/#{original.etag}"
 
       CloudKit::Document.transaction do
-        original.update_attributes(:uri => version_uri)
+        original.update_attributes(
+          :uri      => version_uri,
+          :archived => true)
         gone = CloudKit::Document.create(
           :uri                  => uri,
           :collection_reference => original.collection_reference,
@@ -312,7 +314,7 @@ module CloudKit
       filter = options.excluding(:offset, :limit).merge(
         :deleted              => false,
         :collection_reference => collection_uri_fragment(uri),
-        :conditions           => ['resource_reference = uri'],
+        :archived             => false,
         :order                => [:id.desc])
       result = CloudKit::Document.all(filter)
       bundle_collection_result(uri, options, result)
@@ -325,7 +327,7 @@ module CloudKit
         options.excluding(:offset, :limit).merge(
           :deleted              => false,
           :collection_reference => collection_uri_fragment(uri),
-          :conditions           => ['resource_reference = uri'],
+          :archived             => false,
           :order                => [:id.desc]))
       bundle_resolved_collection_result(uri, options, result)
     end
@@ -362,7 +364,7 @@ module CloudKit
       found = CloudKit::Document.first(
         options.excluding(:offset, :limit).merge(
           :uri => current_resource_uri(uri)))
-      return status_404 unless found#.any?
+      return status_404 unless found
       result = CloudKit::Document.all(
         options.excluding(:offset, :limit).merge(
           :resource_reference => current_resource_uri(uri),
@@ -410,7 +412,9 @@ module CloudKit
       resource = nil
 
       CloudKit::Document.transaction do
-        original.update_attributes(:uri => "#{uri}/versions/#{original.etag}")
+        original.update_attributes(
+          :uri      => "#{uri}/versions/#{original.etag}",
+          :archived => true)
         resource = CloudKit::Document.create(
           :uri                  => uri,
           :collection_reference => original.collection_reference,

@@ -11,6 +11,7 @@ module CloudKit
     property :remote_user,          String, :length => 255
     property :content,              Text
     property :deleted,              Boolean, :default => false
+    property :archived,             Boolean, :default => false
 
     before :create do
       self.etag = UUID.generate
