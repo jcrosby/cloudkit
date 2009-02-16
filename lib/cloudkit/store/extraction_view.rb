@@ -48,7 +48,7 @@ module CloudKit
 
     # Initialize the storage for this view
     def initialize_storage
-      code = "module ::CloudKit; class #{class_name_for(@name)}; include DataMapper::Resource; property :id, Serial; property :uri, String, :length => 255, :unique => true; "
+      code = "module ::CloudKit; class #{class_name_for(@name)}; include DataMapper::Resource; property :id, String, :key => true, :default => Proc.new { \"\#{Time.now.utc.to_i}:\#{UUID.generate}\" }; property :uri, String, :length => 255, :unique => true; "
       @extract.each do |field|
         code << "property :#{field}, Text; "
       end
