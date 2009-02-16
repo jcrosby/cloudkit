@@ -2,7 +2,7 @@ module CloudKit
   class Document
     include DataMapper::Resource
 
-    property :id,                   Serial
+    property :id,                   String, :key => true, :default => Proc.new { "#{Time.now.utc.to_i}:#{UUID.generate}" }
     property :etag,                 String
     property :last_modified,        String
     property :uri,                  String, :length => 255, :unique => true
