@@ -26,6 +26,12 @@ module CloudKit
     # The key used to store the shared storage URI for the stack.
     CLOUDKIT_STORAGE_URI = 'cloudkit.storage.uri'.freeze
 
+    # This key references the same piece of configuration as
+    # CLOUDKIT_STORAGE_URI. Because DataMapper can use either a URI or an
+    # options hash, this key is provided for code clarity when using
+    # Rack::Config.
+    CLOUDKIT_STORAGE_OPTIONS = 'cloudkit.storage.uri'.freeze
+
     # The key for the login URL used in OpenID and OAuth middleware
     # components.
     CLOUDKIT_LOGIN_URL = 'cloudkit.filter.openid.url.login'.freeze
