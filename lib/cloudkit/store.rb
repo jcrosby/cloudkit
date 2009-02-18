@@ -312,9 +312,9 @@ module CloudKit
     # Last-Modified date in descending order.
     def resource_collection(uri, options)
       filter = options.excluding(:offset, :limit).merge(
-        :deleted              => false,
+        :deleted.not          => true,
         :collection_reference => collection_uri_fragment(uri),
-        :archived             => false,
+        :archived.not         => true,
         :order                => [:id.desc])
       result = CloudKit::Document.all(filter)
       bundle_collection_result(uri, options, result)
@@ -325,9 +325,9 @@ module CloudKit
     def resolved_resource_collection(uri, options)
       result = CloudKit::Document.all(
         options.excluding(:offset, :limit).merge(
-          :deleted              => false,
+          :deleted.not          => true,
           :collection_reference => collection_uri_fragment(uri),
-          :archived             => false,
+          :archived.not         => true,
           :order                => [:id.desc]))
       bundle_resolved_collection_result(uri, options, result)
     end
@@ -352,7 +352,7 @@ module CloudKit
       result = CloudKit::Document.all(
         options.excluding(:offset, :limit).merge(
           :resource_reference => current_resource_uri(uri),
-          :deleted            => false,
+          :deleted.not        => true,
           :order              => [:id.desc]))
       bundle_collection_result(uri, options, result)
     end
@@ -368,7 +368,7 @@ module CloudKit
       result = CloudKit::Document.all(
         options.excluding(:offset, :limit).merge(
           :resource_reference => current_resource_uri(uri),
-          :deleted            => false,
+          :deleted.not        => true,
           :order              => [:id.desc]))
       bundle_resolved_collection_result(uri, options, result)
     end
@@ -430,7 +430,7 @@ module CloudKit
 
     # Bundle a collection of results as a list of URIs for the response.
     def bundle_collection_result(uri, options, result)
-      total  = result.count
+      total  = result.size
       offset = options[:offset].try(:to_i) || 0
       max    = options[:limit] ? offset + options[:limit].to_i : total
       list   = result.to_a[offset...max].map{|r| r.uri}
@@ -443,7 +443,7 @@ module CloudKit
     # metadata (last_modified, uri, etag) that would have accompanied a response
     # to their singular request.
     def bundle_resolved_collection_result(uri, options, result)
-      total  = result.count
+      total  = result.size
       offset = options[:offset].try(:to_i) || 0
       max    = options[:limit] ? offset + options[:limit].to_i : total
       list   = result.to_a[offset...max]
