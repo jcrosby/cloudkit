@@ -1,13 +1,20 @@
 require 'rake/clean'
+require 'spec/rake/spectask'
 
 CLEAN.include 'doc/api'
 
-task :default => :test
+task :default => :spec
 
-desc 'Run specs'
-task :test => FileList['test/*_test.rb'] do |t|
-  suite = t.prerequisites.map{|f| "-r#{f.chomp('.rb')}"}.join(' ')
-  sh "ruby -Ilib:test #{suite} -e ''", :verbose => false
+desc "Run all examples (or a specific spec with TASK=xxxx)"
+Spec::Rake::SpecTask.new('spec') do |t|
+  t.spec_opts  = ["-cfs"]
+  t.spec_files = begin
+    if ENV["TASK"] 
+      ENV["TASK"].split(',').map { |task| "spec/**/#{task}_spec.rb" }
+    else
+      FileList['spec/**/*_spec.rb']
+    end
+  end
 end
 
 desc 'Generate rdoc'
@@ -25,7 +32,7 @@ task :rdoc do
     --exclude=cloudkit.gemspec
     --exclude=templates/*
     --exclude=examples/*
-    --exclude=test/*
+    --exclude=spec/*
     --exclude=doc/index.html
     --exclude=doc/curl.html
     --exclude=doc/rest-api.html

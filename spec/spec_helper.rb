@@ -1,7 +1,5 @@
 $:.unshift File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require 'cloudkit'
-require 'test/unit'
-require 'shoulda'
 require 'rexml/document'
 
 TEST_REMOTE_USER = '/cloudkit_users/abcdef'.freeze
