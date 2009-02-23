@@ -43,7 +43,7 @@ module CloudKit
           :collections => @collections)
       end unless @store
 
-      request = Request.new(env)
+      request = Sinatra::Request.new(env)
       unless bypass?(request)
         return auth_config_error if (request.using_auth? && auth_missing?(request))
         return not_implemented unless @store.implements?(request.request_method)

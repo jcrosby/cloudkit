@@ -31,7 +31,7 @@ module CloudKit
         @@store.get_association('x') rescue nil # refresh sqlite3
       end unless @@store
 
-      request = Request.new(env)
+      request = Sinatra::Request.new(env)
       request.announce_auth(CLOUDKIT_OPENID_FILTER_KEY)
 
       case request

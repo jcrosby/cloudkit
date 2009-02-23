@@ -27,7 +27,7 @@ describe "A CloudKit::Service" do
     before(:each) do
       # mock an authenticated service in pieces
       mock_auth = Proc.new { |env|
-        r = CloudKit::Request.new(env)
+        r = Sinatra::Request.new(env)
         r.announce_auth(CLOUDKIT_OAUTH_FILTER_KEY)
       }
       inner_app = echo_text('martino')
