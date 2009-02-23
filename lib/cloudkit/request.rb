@@ -1,7 +1,7 @@
-module CloudKit
+# module CloudKit
 
-  # A subclass of Rack::Request providing CloudKit-specific features.
-  class Request < Rack::Request
+  # A subclass of Sinatra::Request providing CloudKit-specific features.
+  Sinatra::Request.class_eval do
     include CloudKit::Util
     alias_method :cloudkit_params, :params
 
@@ -162,4 +162,4 @@ module CloudKit
       session[CLOUDKIT_FLASH] ||= CloudKit::FlashSession.new
     end
   end
-end
+# end

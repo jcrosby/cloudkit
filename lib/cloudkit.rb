@@ -1,7 +1,7 @@
 # TEMP - vendor sinatra until middleware update is in the gem
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/../vendor/sinatra/lib'
 require 'rubygems'
-require 'sinatra'
+require 'sinatra/base'
 require 'erb'
 require 'json'
 require 'md5'
