@@ -16,7 +16,7 @@ describe "An OAuthFilter" do
   end
 
   after(:each) do
-    DataMapper.auto_migrate!
+    JANITOR.clear_store
     @store.load_static_consumer
   end
 

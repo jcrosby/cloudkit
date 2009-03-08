@@ -21,13 +21,5 @@ module CloudKit
     def unquote(text)
       (text =~ /^\".*\"$/) ? text[1..-2] : text
     end
-
-    def class_for(symbol)
-      ::CloudKit.const_get(class_name_for(symbol))
-    end
-
-    def class_name_for(symbol)
-      symbol.to_s.gsub(/^\//, '').gsub(/(?:^|_)(.)/) { $1.upcase }
-    end
   end
 end

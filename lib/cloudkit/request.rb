@@ -20,6 +20,10 @@ module CloudKit
       self.body.read
     end
 
+    def uri
+      @uri ||= CloudKit::URI.new(self.path_info)
+    end
+
     # Return true if method, path, and required_params match.
     def match?(method, path, required_params=[])
       (request_method == method) &&
@@ -66,7 +70,7 @@ module CloudKit
 
     # Unescape a value according to the OAuth spec.
     def unescape(value)
-      URI.unescape(value.gsub('+', '%2B'))
+      ::URI.unescape(value.gsub('+', '%2B'))
     end
 
     # Return the last path element in the request URI.

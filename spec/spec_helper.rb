@@ -16,3 +16,13 @@ end
 def app_headers(content)
   {'Content-Type' => 'text/html', 'Content-Length' => content.length.to_s}
 end
+
+module CloudKit
+  class Janitor
+    def clear_store
+      CloudKit.storage_adapter.clear
+    end
+  end
+end
+
+JANITOR = CloudKit::Janitor.new

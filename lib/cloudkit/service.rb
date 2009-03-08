@@ -29,6 +29,8 @@ module CloudKit
 
     @@lock = Mutex.new
 
+    attr_reader :store
+
     def initialize(app, options)
       @app         = app
       @collections = options[:collections]
@@ -37,9 +39,7 @@ module CloudKit
     def call(env)
       @@lock.synchronize do
         @store = Store.new(
-          :adapter     => DataMapper.setup(
-            :default,
-            env[CLOUDKIT_STORAGE_URI] || 'sqlite3::memory:'),
+          :adapter     => env[CLOUDKIT_STORAGE],
           :collections => @collections)
       end unless @store
 
@@ -57,7 +57,7 @@ module CloudKit
 
     def get(request)
       response = @store.get(
-        request.path_info,
+        request.uri,
         {}.filter_merge!(
           :remote_user => request.current_user,
           :offset      => request['offset'],
@@ -71,14 +71,14 @@ module CloudKit
         return send(request['_method'].downcase)
       end
       @store.post(
-        request.path_info,
+        request.uri,
         {:json => request.json}.filter_merge!(
           :remote_user => request.current_user)).to_rack
     end
 
     def put(request)
       @store.put(
-        request.path_info,
+        request.uri,
         {:json => request.json}.filter_merge!(
           :remote_user => request.current_user,
           :etag        => request.if_match)).to_rack
@@ -86,7 +86,7 @@ module CloudKit
 
     def delete(request)
       @store.delete(
-        request.path_info,
+        request.uri,
         {}.filter_merge!(
           :remote_user => request.current_user,
           :etag        => request.if_match)).to_rack
@@ -94,7 +94,7 @@ module CloudKit
 
     def head(request)
       response = @store.head(
-        request.path_info,
+        request.uri,
         {}.filter_merge!(
           :remote_user => request.current_user,
           :offset      => request['offset'],
@@ -104,15 +104,15 @@ module CloudKit
     end
 
     def options(request)
-      @store.options(request.path_info).to_rack
+      @store.options(request.uri).to_rack
     end
 
     def inject_link_headers(request, response)
-      response['Link'] = versions_link_header(request) if @store.resource_uri?(request.path_info)
-      response['Link'] = resolved_link_header(request) if @store.resource_collection_uri?(request.path_info)
-      response['Link'] = index_link_header(request)    if @store.resolved_resource_collection_uri?(request.path_info)
-      response['Link'] = resolved_link_header(request) if @store.version_collection_uri?(request.path_info)
-      response['Link'] = index_link_header(request)    if @store.resolved_version_collection_uri?(request.path_info)
+      response['Link'] = versions_link_header(request) if request.uri.resource_uri?
+      response['Link'] = resolved_link_header(request) if request.uri.resource_collection_uri?
+      response['Link'] = index_link_header(request)    if request.uri.resolved_resource_collection_uri?
+      response['Link'] = resolved_link_header(request) if request.uri.version_collection_uri?
+      response['Link'] = index_link_header(request)    if request.uri.resolved_version_collection_uri?
     end
 
     def versions_link_header(request)
@@ -149,7 +149,7 @@ module CloudKit
 
     def bypass?(request)
       collection = @collections.detect{|type| request.path_info.match("/#{type.to_s}")}
-      !collection && !@store.meta_uri?(request.path_info)
+      !collection && !request.uri.meta_uri?
     end
   end
 end

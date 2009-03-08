@@ -14,27 +14,28 @@ module CloudKit
           :cloudkit_oauth_nonces,
           :cloudkit_oauth_tokens,
           :cloudkit_oauth_request_tokens,
-          :cloudkit_oauth_consumers],
-        :adapter => DataMapper.setup(
-          :default,
-          uri || 'sqlite3::memory:')) unless @@store
+          :cloudkit_oauth_consumers]
+        # :adapter => DataMapper.setup(
+        #           :default,
+        #           uri || 'sqlite3::memory:')
+        ) unless @@store
       load_static_consumer
     end
 
     def get(uri, options={}) #:nodoc:
-      @@store.get(uri, options)
+      @@store.get(CloudKit::URI.new(uri), options)
     end
 
     def post(uri, options={}) #:nodoc:
-      @@store.post(uri, options)
+      @@store.post(CloudKit::URI.new(uri), options)
     end
 
     def put(uri, options={}) #:nodoc:
-      @@store.put(uri, options)
+      @@store.put(CloudKit::URI.new(uri), options)
     end
 
     def delete(uri, options={}) #:nodoc:
-      @@store.delete(uri, options)
+      @@store.delete(CloudKit::URI.new(uri), options)
     end
 
     # Return the version number for this store.
@@ -44,7 +45,7 @@ module CloudKit
     # See the OAuth Discovery spec for more info on static consumers.
     def load_static_consumer
       json = JSON.generate(:secret => '')
-      @@store.put('/cloudkit_oauth_consumers/cloudkitconsumer', :json => json)
+      @@store.put(CloudKit::URI.new('/cloudkit_oauth_consumers/cloudkitconsumer'), :json => json)
     end
   end
 end

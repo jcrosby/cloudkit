@@ -4,7 +4,7 @@ describe "An OpenIDStore" do
 
   before(:each) do
     @store = CloudKit::OpenIDStore.new
-    DataMapper.auto_migrate!
+    # DataMapper.auto_migrate!
     @server = 'http://openid.claimid.com/server'
     @handle = "{HMAC-SHA1}{736kwv3j}{wbhwEK==}"
     @secret = "\350\068\753\436\567\8327\232\241\025\254\3117&\016\031\355#sV"
@@ -13,7 +13,11 @@ describe "An OpenIDStore" do
     @type = "HMAC-SHA1"
     @association = OpenID::Association.new(@handle, @secret, @issued, @lifetime, @type)
     @store.store_association(@server, @association)
-    @result = JSON.parse(CloudKit::Document.first.content)
+    @result = CloudKit::Resource.all.first.parsed_json
+  end
+  
+  after(:each) do
+    JANITOR.clear_store
   end
 
   it "should know its version" do
@@ -45,12 +49,10 @@ describe "An OpenIDStore" do
     it "should remove previous associations with the given server_url and association handle" do
       association = OpenID::Association.new(@handle, @secret, @issued, @lifetime, @type)
       @store.store_association(@server, association)
-      associations = CloudKit::Document.all(
-        :collection_reference => "/cloudkit_openid_associations",
-        :deleted              => false,
-        :conditions           => ["uri = resource_reference"])
+      associations = CloudKit::Resource.current(
+        :collection_reference => "/cloudkit_openid_associations")
       associations.size.should == 1
-      result = JSON.parse(associations.first.content)
+      result = associations.first.parsed_json
       result['secret'].should == Base64.encode64(@secret)
     end
   end
@@ -59,10 +61,8 @@ describe "An OpenIDStore" do
 
     it "should succeed" do
       @store.remove_association(@server, @association.handle)
-      associations = CloudKit::Document.all(
-        :collection_reference => "/cloudkit_openid_associations",
-        :deleted              => false,
-        :conditions           => ["uri = resource_reference"])
+      associations = CloudKit::Resource.current(
+        :collection_reference => "/cloudkit_openid_associations")
       associations.size.should == 0
     end
   end
@@ -84,19 +84,17 @@ describe "An OpenIDStore" do
     end
 
     it "should store the nonce" do
-      nonce = CloudKit::Document.first(
+      nonce = CloudKit::Resource.first(
         :collection_reference => "/cloudkit_openid_nonces",
-        :deleted              => false,
-        :conditions           => ["uri = resource_reference"])
+        :deleted              => false)
       nonce.should_not be_nil
     end
 
     it "should reject the nonce if it has already been used" do
       @store.use_nonce(@server, @time, @salt).should_not be_nil
-      nonces = CloudKit::Document.all(
+      nonces = CloudKit::Resource.all(
         :collection_reference => "/cloudkit_openid_nonces",
-        :deleted              => false,
-        :conditions           => ["uri = resource_reference"])
+        :deleted              => false)
       nonces.size.should == 1
     end
   end

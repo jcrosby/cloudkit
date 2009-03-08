@@ -3,9 +3,7 @@ require 'erb'
 require 'json'
 require 'md5'
 require 'openid'
-require 'dm-core'
-require 'dm-aggregates'
-require 'dm-validations'
+require 'rufus/tokyo'
 require 'time'
 require 'uuid'
 require 'rack'
@@ -16,9 +14,11 @@ require 'oauth/request_proxy/rack_request'
 require 'oauth/server'
 require 'oauth/signature'
 require 'cloudkit/constants'
+require 'cloudkit/exceptions'
 require 'cloudkit/util'
-require 'cloudkit/store/document'
-require 'cloudkit/store/extraction_view'
+require 'cloudkit/uri'
+require 'cloudkit/store/memory_table'
+require 'cloudkit/store/resource'
 require 'cloudkit/store/response'
 require 'cloudkit/store/response_helpers'
 require 'cloudkit/store'
@@ -37,6 +37,14 @@ include CloudKit::Constants
 
 module CloudKit
   VERSION = '0.11.0'
+
+  def self.setup_storage_adapter(tc_table_instance=nil)
+    @storage_adapter = tc_table_instance || CloudKit::MemoryTable.new # Rufus::Tokyo::Table.new('cloudkit.tdb') #
+  end
+
+  def self.storage_adapter
+    @storage_adapter
+  end
 end
 
 class Object

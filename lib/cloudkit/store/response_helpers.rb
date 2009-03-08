@@ -68,7 +68,6 @@ module CloudKit::ResponseHelpers
   end
 
   def json_error_response(status, message)
-    "trying to throw a json error message for #{status} #{message}"
     response(status, json_error(message), nil, nil, :cache => false)
   end
 end

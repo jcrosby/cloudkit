@@ -23,14 +23,8 @@ module CloudKit
     # The 'via' key for the OpenID filter.
     CLOUDKIT_OPENID_FILTER_KEY = 'cloudkit.filter.openid'.freeze
 
-    # The key used to store the shared storage URI for the stack.
-    CLOUDKIT_STORAGE_URI = 'cloudkit.storage.uri'.freeze
-
-    # This key references the same piece of configuration as
-    # CLOUDKIT_STORAGE_URI. Because DataMapper can use either a URI or an
-    # options hash, this key is provided for code clarity when using
-    # Rack::Config.
-    CLOUDKIT_STORAGE_OPTIONS = 'cloudkit.storage.uri'.freeze
+    # The key used to store the shared Rufus Tokyo instance for the stack.
+    CLOUDKIT_STORAGE = 'cloudkit.storage'.freeze
 
     # The key for the login URL used in OpenID and OAuth middleware
     # components.
@@ -39,8 +33,5 @@ module CloudKit
     # The key for the logout URL used in OpenID and OAuth middleware
     # components.
     CLOUDKIT_LOGOUT_URL = 'cloudkit.filter.openid.url.logout'.freeze
-
-    # The outer namespace key for the JSON store.
-    CLOUDKIT_STORE = :cloudkit_json_store.freeze
   end
 end

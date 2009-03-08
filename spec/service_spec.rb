@@ -33,13 +33,15 @@ describe "A CloudKit::Service" do
       inner_app = echo_text('martino')
       service = CloudKit::Service.new(
         inner_app, :collections => [:items, :things])
+      service.call({}) # prime storage
+      @adapter = service.store.storage_adapter
       config = Rack::Config.new(service, &mock_auth)
       authed_service = Rack::Lint.new(config)
       @request = Rack::MockRequest.new(authed_service)
     end
 
     after(:each) do
-      DataMapper.auto_migrate!
+      @adapter.clear
     end
 
     it "should allow requests for / to pass through" do
@@ -604,24 +606,6 @@ describe "A CloudKit::Service" do
         response.status.should == 422
       end
 
-      it "should insert into its views" do
-        view = CloudKit::ExtractionView.new(
-          :fruits,
-          :observe => :items,
-          :extract => [:apple, :lemon])
-        store = CloudKit::Store.new(
-          :collections => [:items],
-          :views       => [view])
-        json = JSON.generate(:apple => 'green')
-        store.put('/items/123', :json => json)
-        json = JSON.generate(:apple => 'red')
-        store.put('/items/456', :json => json)
-        result = store.get('/fruits', :apple => 'green')
-        uris = result.parsed_content['uris']
-        uris.size.should == 1
-        uris.include?('/items/123').should be_true
-      end
-
     end
 
     describe "on PUT /:collection/:id" do 
@@ -753,28 +737,6 @@ describe "A CloudKit::Service" do
         new_etag.should_not == etag
       end
 
-      it "should update its views" do
-        view = CloudKit::ExtractionView.new(
-          :fruits,
-          :observe => :items,
-          :extract => [:apple, :lemon])
-        store = CloudKit::Store.new(
-          :collections => [:items],
-          :views       => [view])
-        json = JSON.generate(:apple => 'green')
-        result = store.put('/items/123', :json => json)
-        json = JSON.generate(:apple => 'red')
-        store.put(
-          '/items/123', :etag => result.parsed_content['etag'], :json => json)
-        result = store.get('/fruits', :apple => 'green')
-        uris = result.parsed_content['uris']
-        uris.size.should == 0
-        result = store.get('/fruits', :apple => 'red')
-        uris = result.parsed_content['uris']
-        uris.size.should == 1
-        uris.include?('/items/123').should be_true
-      end
-
     end
 
     describe "on DELETE /:collection/:id" do
@@ -885,22 +847,6 @@ describe "A CloudKit::Service" do
           VALID_TEST_AUTH)
         json = JSON.parse(response.body)
         json['total'].should == 1
-      end
-
-      it "should remove records from its views" do
-        view = CloudKit::ExtractionView.new(
-          :fruits,
-          :observe => :items,
-          :extract => [:apple, :lemon])
-        store = CloudKit::Store.new(
-          :collections => [:items],
-          :views       => [view])
-        json = JSON.generate(:apple => 'green')
-        result = store.put('/items/123', :json => json)
-        store.delete('/items/123', :etag => result.parsed_content['etag'])
-        result = store.get('/fruits', :apple => 'green')
-        uris = result.parsed_content['uris']
-        uris.should == []
       end
 
     end

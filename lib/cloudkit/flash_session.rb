@@ -14,9 +14,7 @@ module CloudKit
 
     # Access a value, then forget it.
     def [](k)
-      v = @values[k]
-      @values[k] = nil
-      v
+      @values.delete(k)
     end
   end
 end

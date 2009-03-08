@@ -1,22 +1,23 @@
 module CloudKit
 
   # A thin layer on top of CloudKit::Store providing consistent URIs and
-  # automatic schema upgrades if required for future releases.
+  # automatic upgrades if required for future releases.
   class UserStore
     @@store = nil
 
     def initialize(uri=nil)
       unless @@store
-        login_view = ExtractionView.new(
-          :cloudkit_login_view,
-          :observe => :cloudkit_users,
-          :extract => [:identity_url, :remember_me_token, :remember_me_expiration])
+        # login_view = ExtractionView.new(
+        #           :cloudkit_login_view,
+        #           :observe => :cloudkit_users,
+        #           :extract => [:identity_url, :remember_me_token, :remember_me_expiration])
         @@store = Store.new(
           :collections => [:cloudkit_users],
-          :views       => [login_view],
-          :adapter => DataMapper.setup(
-            :default,
-            uri || 'sqlite3::memory:'))
+          :adapter => uri)
+          # :views       => [login_view],
+          # :adapter => DataMapper.setup(
+            # :default,
+            # uri || 'sqlite3::memory:'))
       end
     end
 

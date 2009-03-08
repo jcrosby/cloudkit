@@ -9,23 +9,16 @@ module CloudKit
     # Initialize an OpenIDStore and its required views.
     def initialize(uri=nil)
       unless @@store
-        association_view = ExtractionView.new(
-          :cloudkit_openid_server_handles,
-          :observe => :cloudkit_openid_associations,
-          :extract => [:server_url, :handle])
         @@store = Store.new(
           :collections => [:cloudkit_openid_associations, :cloudkit_openid_nonces],
-          :views       => [association_view],
-          :adapter     => DataMapper.setup(
-            :default,
-            uri || 'sqlite3::memory:'))
+          :adapter     => uri)
       end
     end
 
     def get_association(server_url, handle=nil) #:nodoc:
       options = {:server_url => server_url}
       options.merge!(:handle => Base64.encode64(handle)) if (handle && handle != '')
-      result = @@store.get('/cloudkit_openid_server_handles', options)
+      result = @@store.get(CloudKit::URI.new('/cloudkit_openid_associations'), options)
       return nil unless result.status == 200
       return nil if result.parsed_content['total'] == 0
 
@@ -44,7 +37,7 @@ module CloudKit
 
     def remove_association(server_url, handle) #:nodoc:
       result = @@store.get(
-        '/cloudkit_openid_server_handles',
+        CloudKit::URI.new('/cloudkit_openid_associations'),
         :server_url => server_url,
         :handle     => Base64.encode64(handle))
       return nil unless result.status == 200
@@ -54,7 +47,7 @@ module CloudKit
 
       uris = result.parsed_content['uris']
       responses.each_with_index do |r, index|
-        @@store.delete(uris[index], :etag => r.etag)
+        @@store.delete(CloudKit::URI.new(uris[index]), :etag => r.etag)
       end
     end
 
@@ -67,18 +60,18 @@ module CloudKit
         :issued     => association.issued.to_i,
         :lifetime   => association.lifetime,
         :assoc_type => association.assoc_type)
-      result = @@store.post('/cloudkit_openid_associations', :json => json)
+      result = @@store.post(CloudKit::URI.new('/cloudkit_openid_associations'), :json => json)
       return (result.status == 201)
     end
 
     def use_nonce(server_url, timestamp, salt) #:nodoc:
       return false if (timestamp - Time.now.to_i).abs > OpenID::Nonce.skew
 
-      fragment = URI.escape(
+      fragment = ::URI.escape(
         [server_url, timestamp, salt].join('-'), 
-        Regexp.union(URI::REGEXP::UNSAFE, '/', ':'))
+        Regexp.union(::URI::REGEXP::UNSAFE, '/', ':'))
       uri    = "/cloudkit_openid_nonces/#{fragment}"
-      result = @@store.put(uri, :json => '{}')
+      result = @@store.put(CloudKit::URI.new(uri), :json => '{}')
       return (result.status == 201)
     end
 
@@ -100,7 +93,7 @@ module CloudKit
     protected
 
     def resolve_associations(parsed_content) #:nodoc:
-      uri_list = parsed_content['uris']
+      uri_list = parsed_content['uris'].map! { |u| CloudKit::URI.new(u) }
       association_responses = @@store.resolve_uris(uri_list)
       return association_responses, association_responses.map{|a| a.parsed_content}
     end

@@ -31,7 +31,7 @@ module CloudKit
 
     def call(env)
       @@lock.synchronize do
-        @@store = OAuthStore.new(env[CLOUDKIT_STORAGE_URI])
+        @@store = OAuthStore.new#(env[CLOUDKIT_STORAGE_URI])
       end unless @@store
 
       request = Request.new(env)
@@ -82,8 +82,7 @@ module CloudKit
     def create_request_token(request)
       return challenge(request, 'invalid nonce') unless valid_nonce?(request)
 
-      consumer_result = @@store.get(
-        "/cloudkit_oauth_consumers/#{request[:oauth_consumer_key]}")
+      consumer_result = @@store.get("/cloudkit_oauth_consumers/#{request[:oauth_consumer_key]}")
       unless consumer_result.status == 200
         return challenge(request, 'invalid consumer')
       end
@@ -105,8 +104,7 @@ module CloudKit
     def request_authorization(request)
       return login_redirect(request) unless request.current_user
 
-      request_token_result = @@store.get(
-        "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}")
+      request_token_result = @@store.get("/cloudkit_oauth_request_tokens/#{request[:oauth_token]}")
       unless request_token_result.status == 200
         return challenge(request, 'invalid request token')
       end
@@ -118,8 +116,7 @@ module CloudKit
     def authorize_request_token(request)
       return login_redirect(request) unless request.current_user
 
-      request_token_response = @@store.get(
-        "/cloudkit_oauth_request_tokens/#{request.last_path_element}")
+      request_token_response = @@store.get("/cloudkit_oauth_request_tokens/#{request.last_path_element}")
       request_token = request_token_response.parsed_content
       if request_token['authorized_at']
         return challenge(request, 'invalid request token')
@@ -138,8 +135,7 @@ module CloudKit
     def deny_request_token(request)
       return login_redirect(request) unless request.current_user
 
-      request_token_response = @@store.get(
-        "/cloudkit_oauth_request_tokens/#{request.last_path_element}")
+      request_token_response = @@store.get("/cloudkit_oauth_request_tokens/#{request.last_path_element}")
       @@store.delete(
         "/cloudkit_oauth_request_tokens/#{request.last_path_element}",
         :etag => request_token_response.etag)
@@ -149,15 +145,13 @@ module CloudKit
     def create_access_token(request)
       return challenge(request, 'invalid nonce') unless valid_nonce?(request)
 
-      consumer_response = @@store.get(
-        "/cloudkit_oauth_consumers/#{request[:oauth_consumer_key]}")
+      consumer_response = @@store.get("/cloudkit_oauth_consumers/#{request[:oauth_consumer_key]}")
       unless consumer_response.status == 200
         return challenge(request, 'invalid consumer')
       end
 
       consumer = consumer_response.parsed_content
-      request_token_response = @@store.get(
-        "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}")
+      request_token_response = @@store.get("/cloudkit_oauth_request_tokens/#{request[:oauth_token]}")
       unless request_token_response.status == 200
         return challenge(request, 'invalid request token')
       end
@@ -180,9 +174,7 @@ module CloudKit
         :consumer_key    => request[:oauth_consumer_key],
         :consumer_secret => consumer['secret'],
         :user_id         => request_token['user_id'])
-      @@store.put(
-        "/cloudkit_oauth_tokens/#{token_id}",
-        :json => token_data)
+      @@store.put("/cloudkit_oauth_tokens/#{token_id}", :json => token_data)
       @@store.delete(
         "/cloudkit_oauth_request_tokens/#{request[:oauth_token]}",
         :etag => request_token_response.etag)
