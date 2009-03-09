@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
   s.version           = "0.11.0"
-  s.date              = "2008-02-09"
+  s.date              = "2008-03-08"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
   s.authors           = ["Jon Crosby"]
@@ -74,10 +74,9 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "cloudkit"
   s.rubygems_version  = "1.1.1"
   s.add_dependency 'rack', '~> 0.9'
-  s.add_dependency 'rack-config', '>= 0.9'
   s.add_dependency 'uuid', '= 2.0.1'
   s.add_dependency 'oauth', '~> 0.3'
   s.add_dependency 'ruby-openid', '= 2.1.2'
   s.add_dependency 'json', '= 1.1.3'
-  s.add_dependency 'sqlite3-ruby', '= 1.2.4'
+  s.add_dependency 'rufus-tokyo', '= 0.1.9'
 end

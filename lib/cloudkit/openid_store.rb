@@ -6,12 +6,11 @@ module CloudKit
   class OpenIDStore < OpenID::Store::Interface
     @@store = nil
 
-    # Initialize an OpenIDStore and its required views.
-    def initialize(uri=nil)
+    # Initialize an OpenIDStore.
+    def initialize
       unless @@store
         @@store = Store.new(
-          :collections => [:cloudkit_openid_associations, :cloudkit_openid_nonces],
-          :adapter     => uri)
+          :collections => [:cloudkit_openid_associations, :cloudkit_openid_nonces])
       end
     end
 

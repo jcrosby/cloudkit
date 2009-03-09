@@ -7,7 +7,6 @@ require 'rufus/tokyo'
 require 'time'
 require 'uuid'
 require 'rack'
-require 'rack/config'
 require 'oauth'
 require 'oauth/consumer'
 require 'oauth/request_proxy/rack_request'
@@ -38,8 +37,8 @@ include CloudKit::Constants
 module CloudKit
   VERSION = '0.11.0'
 
-  def self.setup_storage_adapter(tc_table_instance=nil)
-    @storage_adapter = tc_table_instance || CloudKit::MemoryTable.new # Rufus::Tokyo::Table.new('cloudkit.tdb') #
+  def self.setup_storage_adapter(adapter_instance=nil)
+    @storage_adapter = adapter_instance || CloudKit::MemoryTable.new
   end
 
   def self.storage_adapter

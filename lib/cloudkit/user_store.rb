@@ -7,17 +7,7 @@ module CloudKit
 
     def initialize(uri=nil)
       unless @@store
-        # login_view = ExtractionView.new(
-        #           :cloudkit_login_view,
-        #           :observe => :cloudkit_users,
-        #           :extract => [:identity_url, :remember_me_token, :remember_me_expiration])
-        @@store = Store.new(
-          :collections => [:cloudkit_users],
-          :adapter => uri)
-          # :views       => [login_view],
-          # :adapter => DataMapper.setup(
-            # :default,
-            # uri || 'sqlite3::memory:'))
+        @@store = Store.new(:collections => [:cloudkit_users])
       end
     end
 

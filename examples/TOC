@@ -12,6 +12,4 @@ removed.
 
 4. Notes with OAuth  - Same as #1 using only OAuth.
 
-5. SQLite Notes      - Same as #2 with a SQLite file store.
-
-6. MySQL Notes       - Same as #2 with MySQL store.
+5. Tokyo Notes       - Same as #2 with a Tokyo Cabinet Table store.

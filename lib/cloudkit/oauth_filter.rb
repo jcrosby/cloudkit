@@ -31,7 +31,7 @@ module CloudKit
 
     def call(env)
       @@lock.synchronize do
-        @@store = OAuthStore.new#(env[CLOUDKIT_STORAGE_URI])
+        @@store = OAuthStore.new
       end unless @@store
 
       request = Request.new(env)

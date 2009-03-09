@@ -1,23 +1,20 @@
 module CloudKit
 
   # An OAuthStore is a thin abstraction around CloudKit::Store, providing
-  # consistent collection names, and allowing automatic migrations in later
+  # consistent collection names, and allowing automatic upgrades in later
   # releases if needed.
   class OAuthStore
     @@store = nil
 
     # Initialize a Store for use with OAuth middleware. Load the static consumer
     # resource if it does not exist.
-    def initialize(uri=nil)
+    def initialize
       @@store = Store.new(
         :collections => [
           :cloudkit_oauth_nonces,
           :cloudkit_oauth_tokens,
           :cloudkit_oauth_request_tokens,
           :cloudkit_oauth_consumers]
-        # :adapter => DataMapper.setup(
-        #           :default,
-        #           uri || 'sqlite3::memory:')
         ) unless @@store
       load_static_consumer
     end

@@ -26,9 +26,8 @@ module CloudKit
 
     def call(env)
       @@lock.synchronize do
-        @@store = OpenIDStore.new#(env[CLOUDKIT_STORAGE_URI])
-        @users  = UserStore.new#(env[CLOUDKIT_STORAGE_URI])
-        # @@store.get_association('x') rescue nil # refresh sqlite3
+        @@store = OpenIDStore.new
+        @users  = UserStore.new
       end unless @@store
 
       request = Request.new(env)

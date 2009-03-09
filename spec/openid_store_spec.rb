@@ -3,8 +3,8 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe "An OpenIDStore" do
 
   before(:each) do
+    CloudKit.setup_storage_adapter unless CloudKit.storage_adapter
     @store = CloudKit::OpenIDStore.new
-    # DataMapper.auto_migrate!
     @server = 'http://openid.claimid.com/server'
     @handle = "{HMAC-SHA1}{736kwv3j}{wbhwEK==}"
     @secret = "\350\068\753\436\567\8327\232\241\025\254\3117&\016\031\355#sV"
@@ -17,7 +17,7 @@ describe "An OpenIDStore" do
   end
   
   after(:each) do
-    JANITOR.clear_store
+    CloudKit.storage_adapter.clear
   end
 
   it "should know its version" do

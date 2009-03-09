@@ -3,6 +3,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 describe "An OAuthFilter" do
 
   before(:each) do
+    CloudKit.setup_storage_adapter unless CloudKit.storage_adapter
     @oauth_filtered_app = CloudKit::OAuthFilter.new(echo_env(CLOUDKIT_AUTH_KEY))
     token = JSON.generate(
       :secret          => 'pfkkdhi9sl3r4s00',
@@ -16,7 +17,7 @@ describe "An OAuthFilter" do
   end
 
   after(:each) do
-    JANITOR.clear_store
+    CloudKit.storage_adapter.clear
     @store.load_static_consumer
   end
 

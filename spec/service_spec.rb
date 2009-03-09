@@ -33,15 +33,14 @@ describe "A CloudKit::Service" do
       inner_app = echo_text('martino')
       service = CloudKit::Service.new(
         inner_app, :collections => [:items, :things])
-      service.call({}) # prime storage
-      @adapter = service.store.storage_adapter
+      CloudKit.setup_storage_adapter unless CloudKit.storage_adapter
       config = Rack::Config.new(service, &mock_auth)
       authed_service = Rack::Lint.new(config)
       @request = Rack::MockRequest.new(authed_service)
     end
 
     after(:each) do
-      @adapter.clear
+      CloudKit.storage_adapter.clear
     end
 
     it "should allow requests for / to pass through" do

@@ -7,7 +7,7 @@ describe "A Resource" do
   end
 
   after(:each) do
-    JANITOR.clear_store
+    CloudKit.storage_adapter.clear
   end
 
   describe "on initialization" do

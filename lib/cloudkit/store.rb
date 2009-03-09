@@ -9,17 +9,10 @@ module CloudKit
     # versioned.
     #
     # ===Options
-    # - :adapter - Optional. A Moneta instance. Defaults to Moneta::Memory.
     # - :collections - Array of resource collections to manage.
     #
     # ===Example
     #   store = CloudKit::Store.new(:collections => [:foos, :bars])
-    #
-    # ===Example
-    #   adapter = Moneta::Tyrant.new(:host => "localhost", :port => 1978)
-    #   store = CloudKit::Store.new(
-    #     :adapter     => moneta_instance,
-    #     :collections => [:foos, :fruits])
     #
     # See also: Response
     #

@@ -38,9 +38,7 @@ module CloudKit
 
     def call(env)
       @@lock.synchronize do
-        @store = Store.new(
-          :adapter     => env[CLOUDKIT_STORAGE],
-          :collections => @collections)
+        @store = Store.new(:collections => @collections)
       end unless @store
 
       request = Request.new(env)
