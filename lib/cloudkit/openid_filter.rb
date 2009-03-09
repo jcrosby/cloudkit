@@ -108,7 +108,8 @@ module CloudKit
       end
 
       result = @users.get(
-        '/cloudkit_login_view',
+        '/cloudkit_users',
+        # '/cloudkit_login_view',
         :identity_url => idp_response.endpoint.claimed_id)
       user_uris = result.parsed_content['uris']
 
@@ -188,7 +189,8 @@ module CloudKit
     def valid_remember_me_token?(request)
       return false unless token = request.cookies['remember_me']
 
-      result = @users.get('/cloudkit_login_view', :remember_me_token => token)
+      # result = @users.get('/cloudkit_login_view', :remember_me_token => token)
+      result = @users.get('/cloudkit_users', :remember_me_token => token)
       return false unless result.status == 200
 
       user_uris = result.parsed_content['uris']

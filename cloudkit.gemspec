@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
   s.version           = "0.11.0"
-  s.date              = "2008-03-08"
+  s.date              = "2008-03-09"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
   s.authors           = ["Jon Crosby"]
@@ -29,10 +29,10 @@ Gem::Specification.new do |s|
     examples/3.ru
     examples/4.ru
     examples/5.ru
-    examples/6.ru
     examples/TOC
     lib/cloudkit.rb
     lib/cloudkit/constants.rb
+    lib/cloudkit/exceptions.rb
     lib/cloudkit/flash_session.rb
     lib/cloudkit/oauth_filter.rb
     lib/cloudkit/oauth_store.rb
@@ -43,8 +43,8 @@ Gem::Specification.new do |s|
     lib/cloudkit/request.rb
     lib/cloudkit/service.rb
     lib/cloudkit/store.rb
-    lib/cloudkit/store/document.rb
-    lib/cloudkit/store/extraction_view.rb
+    lib/cloudkit/store/memory_table.rb
+    lib/cloudkit/store/resource.rb
     lib/cloudkit/store/response.rb
     lib/cloudkit/store/response_helpers.rb
     lib/cloudkit/templates/authorize_request_token.erb
@@ -53,24 +53,27 @@ Gem::Specification.new do |s|
     lib/cloudkit/templates/openid_login.erb
     lib/cloudkit/templates/request_authorization.erb
     lib/cloudkit/templates/request_token_denied.erb
+    lib/cloudkit/uri.rb
     lib/cloudkit/user_store.rb
     lib/cloudkit/util.rb
-    test/document_test.rb
-    test/ext_test.rb
-    test/flash_session_test.rb
-    test/helper.rb
-    test/oauth_filter_test.rb
-    test/oauth_store_test.rb
-    test/openid_filter_test.rb
-    test/openid_store_test.rb
-    test/rack_builder_test.rb
-    test/request_test.rb
-    test/service_test.rb
-    test/store_test.rb
-    test/user_store_test.rb
-    test/util_test.rb
+    spec/ext_spec.rb
+    spec/flash_session_spec.rb
+    spec/memory_table_spec.rb
+    spec/oauth_filter_spec.rb
+    spec/oauth_store_spec.rb
+    spec/openid_filter_spec.rb
+    spec/openid_store_spec.rb
+    spec/rack_builder_spec.rb
+    spec/request_spec.rb
+    spec/resource_spec.rb
+    spec/service_spec.rb
+    spec/spec_helper.rb
+    spec/store_spec.rb
+    spec/uri_spec.rb
+    spec/user_store_spec.rb
+    spec/util_spec.rb
   ]
-  s.test_files        = s.files.select {|path| path =~ /^test\/.*_test.rb/}
+  s.test_files        = s.files.select {|path| path =~ /^spec\/.*_spec.rb/}
   s.rubyforge_project = "cloudkit"
   s.rubygems_version  = "1.1.1"
   s.add_dependency 'rack', '~> 0.9'
@@ -78,5 +81,4 @@ Gem::Specification.new do |s|
   s.add_dependency 'oauth', '~> 0.3'
   s.add_dependency 'ruby-openid', '= 2.1.2'
   s.add_dependency 'json', '= 1.1.3'
-  s.add_dependency 'rufus-tokyo', '= 0.1.9'
 end

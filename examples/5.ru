@@ -1,5 +1,6 @@
 $:.unshift File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require 'cloudkit'
+require 'rufus/tokyo' # gem install rufus-tokyo
 CloudKit.setup_storage_adapter(Rufus::Tokyo::Table.new('cloudkit.tdb'))
 use Rack::Session::Pool
 use CloudKit::OAuthFilter

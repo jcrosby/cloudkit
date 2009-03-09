@@ -12,23 +12,23 @@ module CloudKit
     end
 
     def get(uri, options={}) #:nodoc:
-      @@store.get(uri, options)
+      @@store.get(CloudKit::URI.new(uri), options)
     end
 
     def post(uri, options={}) #:nodoc:
-      @@store.post(uri, options)
+      @@store.post(CloudKit::URI.new(uri), options)
     end
 
     def put(uri, options={}) #:nodoc:
-      @@store.put(uri, options)
+      @@store.put(CloudKit::URI.new(uri), options)
     end
 
     def delete(uri, options={}) #:nodoc:
-      @@store.delete(uri, options)
+      @@store.delete(CloudKit::URI.new(uri), options)
     end
 
     def resolve_uris(uris) #:nodoc:
-      @@store.resolve_uris(uris)
+      @@store.resolve_uris(uris.map { |uri| CloudKit::URI.new(uri) })
     end
 
     # Return the version for this UserStore
