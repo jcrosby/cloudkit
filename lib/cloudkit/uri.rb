@@ -75,7 +75,7 @@ module CloudKit
       elsif resource_uri?
         @string
       else
-        raise InvalidURIFormat # TODO
+        raise CloudKit::InvalidURIFormat
       end
     end
   end

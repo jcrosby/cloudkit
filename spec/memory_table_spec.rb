@@ -43,7 +43,7 @@ describe "A MemoryTable" do
     @table['a'] = {'foo' => 'baz'}
     @table.keys.should == ['b', 'a']
   end
-  
+
   it "should generate incrementing ids" do
     ids = []
     4.times { ids << @table.generate_unique_id }

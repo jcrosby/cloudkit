@@ -46,7 +46,7 @@ describe "A Resource" do
     it "should default its last-modified date to nil" do
       @resource.last_modified.should be_nil
     end
-    
+
     it "should know if it is current" do
       @resource.should be_current
     end
@@ -84,7 +84,7 @@ describe "A Resource" do
       hash = CloudKit.storage_adapter.query.first
       hash.keys.include?('foo').should be_true
     end
-    
+
     it "should know it is current" do
       @resource.should be_current
     end
@@ -135,13 +135,13 @@ describe "A Resource" do
     it "should set a new last modified date" do
       @resource.last_modified.should_not == @original_resource.last_modified
     end
-    
+
     it "should fail on archived resource versions" do
       lambda {
         @resource.versions[-1].update({:foo => 'box'})
       }.should raise_error(CloudKit::HistoricalIntegrityViolation)
     end
-    
+
     it "should fail on deleted resource versions" do
       lambda {
         @resource.delete
@@ -222,9 +222,9 @@ describe "A Resource" do
     end
 
   end
-  
+
   describe "when finding" do
-    
+
     before(:each) do
       ['bar', 'baz'].each do |value|
         CloudKit::Resource.create(
@@ -246,11 +246,11 @@ describe "A Resource" do
         result.size.should == 2
         result.map { |item| item.remote_user.should == 'http://eric.dolphy.info/bar_user' }
       end
-    
+
       it "should return all elements if no restrictions are given" do 
         CloudKit::Resource.all.size.should == 3
       end
-    
+
       it "should return an empty array if no resources are found" do
         CloudKit::Resource.all(:uri => 'fail').should be_empty
       end
@@ -266,26 +266,26 @@ describe "A Resource" do
     end
 
     describe "on #first" do
-    
+
       it "should find the first matching resource" do
         result = CloudKit::Resource.first(:remote_user => 'http://eric.dolphy.info/bar_user')
         result.should_not === Array
         result.remote_user.should == 'http://eric.dolphy.info/bar_user'
         result.parsed_json['foo'].should == 'box' # all listings are reverse ordered
       end
-    
+
     end
-  
+
     describe "on #current" do
-    
+
       it "should find only current matching resources" do
         resource = CloudKit::Resource.first(:remote_user => 'http://eric.dolphy.info/bar_user')
         resource.update(JSON.generate({:foo => 'x'}))
         CloudKit::Resource.current(:collection_reference => '/items').size.should == 3
       end
-    
+
     end
-    
+
   end
 
 end
