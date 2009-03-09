@@ -20,6 +20,7 @@ module CloudKit
       self.body.read
     end
 
+    # Return a CloudKit::URI instance representing the rack request's path info.
     def uri
       @uri ||= CloudKit::URI.new(self.path_info)
     end

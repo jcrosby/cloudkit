@@ -1,3 +1,14 @@
+0.11.0
+- Added Tokyo Cabinet storage
+- Added MemoryTable development-time storage
+- Improved router performance
+- Added CloudKit::Resource model
+- Added custom URIs for OpenID bypass
+- Removed internal undocumented ExtractionViews
+- Removed SQL backends
+- Removed Sequel and Rack::Config dependencies
+- Switched test framework to RSpec
+
 0.10.1
 - Updated oauth and sequel gem dependencies
 - Fixed 410 responses for stale PUT operations

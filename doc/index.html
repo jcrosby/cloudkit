@@ -24,7 +24,7 @@
   </div>
   <div class="meta">
     <p class="wrapper">
-      Version 0.10.1 released. Install with <em>gem install cloudkit</em>.
+      Version 0.11 released with Tokyo Cabinet support. Install with <em>gem install cloudkit</em>.
     </p>
   </div>
   <div class="wrapper intro-row">
@@ -36,13 +36,11 @@
     </div>
     <div class="column-two">
       <p>
-        CloudKit provides RESTful JSON storage with optional OpenID and OAuth
-        support, including OAuth Discovery. Stored entities are versioned.
-        Services manage their own storage and do not require schema updates
-        when models change.
+        CloudKit provides schema-free, auto-versioned, RESTful JSON storage with optional OpenID and OAuth
+        support, including OAuth Discovery.
       </p>
       <p>
-        CloudKit is Rack middleware and as such can be used on its own or
+        CloudKit is Rack middleware. It can be used on its own or
         alongside other Rack-based applications or middleware components such
         as Rails, Merb or Sinatra.
       </p>

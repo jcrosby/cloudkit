@@ -1,8 +1,19 @@
 module CloudKit
+
+  # A CloudKit::Resource represents a "resource" in the REST/HTTP sense of the
+  # word. It encapsulates a JSON document and its metadata such as it URI, ETag,
+  # Last-Modified date, remote user, and its historical versions.
   class Resource
 
     attr_reader :uri, :etag, :last_modified, :json, :remote_user
 
+    # Initialize a new instance of a resource.
+    #
+    # === Parameters
+    # - uri - A CloudKit::URI for the resource or its parent collection.
+    # - json - A string representing a valid JSON object.
+    # - remote_user - Optional. The URI for the user creating the resource.
+    # - options - Optional. A hash of other internal properties to set, mostly for internal use.
     def initialize(uri, json, remote_user=nil, options={})
       load_from_options(options.merge(
         :uri         => uri,
@@ -10,6 +21,9 @@ module CloudKit
         :remote_user => remote_user))
     end
 
+    # Save the resource. If this is a new resource with only a resource
+    # collection URI, its full URI will be generated. ETags and Last-Modified
+    # dates are also generated upon saving. No manual reloads are required.
     def save
       @id ||= '%064d' % CloudKit.storage_adapter.generate_unique_id
       @etag = UUID.generate unless @deleted
@@ -29,6 +43,10 @@ module CloudKit
       reload
     end
 
+    # Update the json and optionally the remote_user for the current resource.
+    # Automatically archives the previous version, generating new ETag and
+    # Last-Modified dates. Raises HistoricalIntegrityViolation for attempts to
+    # modify resources that are not current.
     def update(json, remote_user=nil)
       raise HistoricalIntegrityViolation unless current?
       CloudKit.storage_adapter.transaction do
@@ -41,6 +59,10 @@ module CloudKit
       reload
     end
 
+    # Delete the given resource. This is a soft delete, archiving the previous
+    # resource and inserted a deleted resource placeholder at the old URI.
+    # Raises HistoricalIntegrityViolation for attempts to delete resources that
+    # are not current.
     def delete
       raise HistoricalIntegrityViolation unless current?
       CloudKit.storage_adapter.transaction do
@@ -56,6 +78,8 @@ module CloudKit
       reload
     end
 
+    # Returns all versions of the given resource, reverse ordered by
+    # Last-Modified date, including the current version of the resource.
     def versions
       # TODO make this a collection proxy, only loading the first, then the
       # rest as needed during iteration (possibly in chunks)
@@ -66,40 +90,57 @@ module CloudKit
       }.reverse.map { |hash| self.class.build_from_hash(hash) })
     end
 
+    # Returns all previous versions of a resource, reverse ordered by
+    # Last-Modified date.
     def previous_versions
       @previous_versions ||= versions[1..-1] rescue []
     end
 
+    # Returns the most recent previous version of the given resource.
     def previous_version
       @previous_version ||= previous_versions[0]
     end
 
+    # Returns true if the resource has been deleted.
     def deleted?
       @deleted
     end
 
+    # Returns true if the resource is archived i.e. not the current version.
     def archived?
       @archived
     end
-    
+
+    # Returns true if the resource is not archived and not deleted.
     def current?
       !@deleted && !@archived
     end
 
+    # Returns and caches the parsed JSON representation for this resource.
     def parsed_json
       @parsed_json ||= JSON.parse(@json)
     end
 
+    # Create a new resource. Intializes and saves in one step.
+    #
+    # === Parameters
+    # - uri - A CloudKit::URI for the resource or its parent collection.
+    # - json - A string representing a valid JSON object.
+    # - remote_user - Optional. The URI for the user creating the resource.
     def self.create(uri, json, remote_user=nil)
       resource = new(uri, json, remote_user)
       resource.save
       resource
     end
 
+    # Find all current resources with the given properties. Expectes a hash
+    # specifying the search parameters. Returns an array of Resources.
     def self.current(spec={})
       all({:deleted => false, :archived => false}.merge(spec))
     end
 
+    # Find all resources with the given properties. Expects a hash specifying
+    # the search parameters. Returns an array of Resources.
     def self.all(spec={})
       CloudKit.storage_adapter.query { |q|
         spec.keys.each { |k|
@@ -108,6 +149,8 @@ module CloudKit
       }.reverse.map { |hash| build_from_hash(hash) }
     end
 
+    # Find the first matching resource or nil. Expects a hash specifying the
+    # search parameters.
     def self.first(spec)
       all(spec)[0]
     end

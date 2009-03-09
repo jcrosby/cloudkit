@@ -2,9 +2,9 @@
 
 CloudKit is an Open Web JSON Appliance.
 
-More specifically, CloudKit provides RESTful JSON storage with optional OpenID and OAuth support, including OAuth Discovery. Stored entities are versioned. Services manage their own storage and do not require schema updates when models change.
+CloudKit provides schema-free, auto-versioned, RESTful JSON storage with optional OpenID and OAuth support, including OAuth Discovery.
 
-CloudKit is Rack middleware and as such can be used on its own or alongside other Rack-based applications or middleware components like Rails, Merb or Sinatra.
+CloudKit is Rack middleware. It can be used on its own or alongside other Rack-based applications or middleware components like Rails, Merb or Sinatra.
 
 ===Install
 
@@ -35,12 +35,10 @@ An explicit version of example 2, minus the default developer landing page:
   use CloudKit::Service, :collections => [:notes, :todos]
   run lambda {|env| [200, {'Content-Type' => 'text/html', 'Content-Length' => '5'}, ['HELLO']]}
 
-The same as above, using MySQL:
+The same as above, using Tokyo Cabinet:
 
   require 'cloudkit'
-  use Rack::Config do |env|
-    env[CLOUDKIT_STORAGE_URI] = 'mysql://user:pass@localhost/cloudkit_example'
-  end
+  CloudKit.setup_storage_adapter(Rufus::Tokyo::Table.new('cloudkit.tdb'))
   use Rack::Pool::Session
   use CloudKit::OAuthFilter
   use CloudKit::OpenIDFilter
@@ -58,6 +56,8 @@ Blog: http://blog.joncrosby.me
 Google Group: http://groups.google.com/group/cloudkit
 
 Source: http://github.com/jcrosby/cloudkit
+
+IRC: #cloudkit on freenode
 
 ===License
 

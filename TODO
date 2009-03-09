@@ -3,19 +3,21 @@
 - oauth token management
 - oauth consumer registration
 - acls i.e. allowed methods per user per uri
-- complete user data export
-- method filtering on collections
-- js functions as observers (validation, mapping, etc.)
+- jsonpath
+- jsonquery
+- jsonschema
+- user lookup via a block for integration with existing stores
 - custom templates for openid / oauth
 
 Backlog
+- method filtering on collections
+- js functions as observers (validation, mapping, etc.)
+- complete user data export
 - batch updates (post, put, delete)
 - expect header/100-continue
 - deployable gem + admin app
 - cappuccino adapter
 - sproutcore adapter
-- tokyocabinet
-- ldap adapter for UserStore
 - titanium middleware
     version/upgrade middleware
     rake automation

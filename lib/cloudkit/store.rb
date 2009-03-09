@@ -31,7 +31,7 @@ module CloudKit
     # - :remote_user - Optional. Scopes the dataset if provided.
     # - :limit - Optional. Default is unlimited. Limit the number of records returned by a collection request.
     # - :offset - Optional. Start the list of resources in a collection at offset (0-based).
-    # - :any - Optional. Not a literal ":any", but any key or keys defined as extrations from a view.
+    # - :any - Optional. Not a literal ":any", but any key or keys that are top level JSON keys. This is a starting point for future JSONPath/JSONQuery support.
     #
     # ===URI Types
     #   /cloudkit-meta
