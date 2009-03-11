@@ -257,6 +257,77 @@ describe "A Resource" do
         "http://eric.dolphy.info/bar_user")
     end
 
+    describe "using JSONQuery" do
+
+      it "should find using =" do
+        pending
+        # /items/?foo=bar
+      end
+
+      it "should find using <" do
+        pending
+        # /items/?rating<3
+      end
+
+      it "should find using >" do
+        pending
+        # /items/?rating>3
+      end
+
+      it "should find using limit using a range" do
+        pending
+        # /items/[0:10]
+      end
+
+      it "should limit using a range while honoring a step number" do
+        pending
+        # /items/[0:10:2]
+      end
+
+      it "should sort ascending" do
+        pending
+        # /items/[/rating]
+      end
+
+      it "should sort descending" do
+        pending
+        # /items/[\rating]
+      end
+
+      it "should sort using subsorts" do
+        pending
+        # /items/[\rating, \duration]
+      end
+
+      it "should sort using mixed subsorts" do
+        pending
+        # /items/[\rating, /duration]
+        # /items/[/rating, \duration]
+      end
+
+      it "should extract property values" do
+        pending
+        # /items/[=name]
+      end
+
+      it "should extract property values and evaluate them in the context of their extractor" do
+        pending
+        # /customers/[={name:firstName + ' ' + lastName, address: street + state}]
+      end
+
+      it "should understand recursive decent finders" do
+        pending
+        # /items/objectid..name # uris == ids. objectid -> uri in the case of CloudKit.
+      end
+
+      it "should find using the object id literal syntax" do
+        # consider that /items/33 can just be the URI and not interpreted as a collection/id
+        pending
+        # /items/?bestReview=/items/33
+      end
+
+    end
+
     describe "using #all" do
 
       it "should find matching resources" do
