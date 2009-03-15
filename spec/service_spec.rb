@@ -736,6 +736,21 @@ describe "A CloudKit::Service" do
         new_etag.should_not == etag
       end
 
+      describe "using POST method tunneling" do
+
+        it "should behave like a PUT" do
+          json = JSON.generate(:this => 'thing')
+          response = @request.post(
+            '/items/xyz?_method=PUT',
+            {:input => json}.merge(VALID_TEST_AUTH))
+          response.status.should == 201
+          result = @request.get('/items/xyz', VALID_TEST_AUTH)
+          result.status.should == 200
+          JSON.parse(result.body)['this'].should == 'thing'
+        end
+
+      end
+
     end
 
     describe "on DELETE /:collection/:id" do
@@ -848,6 +863,20 @@ describe "A CloudKit::Service" do
         json['total'].should == 1
       end
 
+      describe "using POST method tunneling" do
+
+        it "should behave like a DELETE" do
+          response = @request.post(
+            '/items/abc?_method=DELETE',
+            'HTTP_IF_MATCH'   => @etag,
+            CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
+          response.status.should == 200
+          result = @request.get('/items/abc', VALID_TEST_AUTH)
+          result.status.should == 410
+        end
+
+      end
+
     end
 
     describe "on OPTIONS /:collection" do
@@ -864,6 +893,16 @@ describe "A CloudKit::Service" do
         @response['Allow'].should_not be_nil
         methods = @response['Allow'].split(', ')
         methods.sort.should == ['GET', 'HEAD', 'OPTIONS', 'POST']
+      end
+
+      describe "using POST method tunneling" do
+
+        it "should behave like an OPTIONS request" do
+          response = @request.post('/items?_method=OPTIONS', VALID_TEST_AUTH)
+          response['Allow'].should_not be_nil
+          methods = response['Allow'].split(', ')
+          methods.sort.should == ['GET', 'HEAD', 'OPTIONS', 'POST']
+        end
       end
 
     end

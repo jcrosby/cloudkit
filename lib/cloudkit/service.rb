@@ -66,7 +66,7 @@ module CloudKit
 
     def post(request)
       if tunnel_methods.include?(request['_method'].try(:upcase))
-        return send(request['_method'].downcase)
+        return send(request['_method'].downcase, request)
       end
       @store.post(
         request.uri,
