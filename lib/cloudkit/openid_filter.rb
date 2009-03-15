@@ -19,9 +19,10 @@ module CloudKit
     @@lock  = Mutex.new
     @@store = nil
 
-    def initialize(app, options={})
+    def initialize(app, options={}, &bypass_route_callback)
       @app     = app
       @options = options
+      @bypass_route_callback = bypass_route_callback || Proc.new {|url| url == '/'}
     end
 
     def call(env)
@@ -213,12 +214,12 @@ module CloudKit
     end
 
     def allow?(uri)
-      @options[:allow] && @options[:allow].include?(uri)
+      @bypass_route_callback.call(uri) || 
+        @options[:allow] && @options[:allow].include?(uri)
     end
 
     def bypass?(request)
-      root_request?(request) ||
-        allow?(request.path_info) ||
+      allow?(request.path_info) ||
         valid_auth_key?(request) ||
         logged_in?(request)
     end
