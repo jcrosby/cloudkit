@@ -259,31 +259,6 @@ describe "A Resource" do
 
     describe "using JSONQuery" do
 
-      it "should find using =" do
-        pending
-        # /items/?foo=bar
-      end
-
-      it "should find using <" do
-        pending
-        # /items/?rating<3
-      end
-
-      it "should find using >" do
-        pending
-        # /items/?rating>3
-      end
-
-      it "should find using limit using a range" do
-        pending
-        # /items/[0:10]
-      end
-
-      it "should limit using a range while honoring a step number" do
-        pending
-        # /items/[0:10:2]
-      end
-
       it "should sort ascending" do
         pending
         # /items/[/rating]
@@ -324,6 +299,87 @@ describe "A Resource" do
         # consider that /items/33 can just be the URI and not interpreted as a collection/id
         pending
         # /items/?bestReview=/items/33
+      end
+
+      it "should interpret comma-delimited expressions as unions" do
+        pending
+        # [expr, expr]
+      end
+
+      describe "with array operations" do
+
+        it "should limit using a range" do
+          pending
+          # /items/[0:10]
+        end
+
+        it "should limit using a range while honoring a step number" do
+          pending
+          # /items/[0:10:2]
+        end
+
+      end
+
+      describe "with JavaScript operators" do
+
+        it "should match using =" do
+          pending
+          # /items/?foo=bar
+
+          # This is the single exception in JSONQuery around JavaScript operators.
+          # In the case of equality checks, = is used instead of ==
+        end
+
+        it "should match using +"
+
+        it "should match using -"
+
+        it "should match using /"
+
+        it "should match using *"
+
+        it "should match using &"
+
+        it "should match using |"
+
+        it "should match using %"
+
+        it "should match using ( and )"
+
+        it "should find using <" do
+          pending
+          # /items/?rating<3
+        end
+
+        it "should find using >" do
+          pending
+          # /items/?rating>3
+        end
+
+        it "should match using <"
+
+        it "should match using >"
+
+        it "should match using <="
+
+        it "should match using >="
+
+        it "should match using !="
+
+      end
+
+      describe "with a date function" do
+
+        it "should understand ISO date strings" do
+          pending
+          # date("Sat, 07 Feb 2009 22:51:26 GMT")
+        end
+
+        it "should understand epoch seconds" do
+          pending
+          # date(1234047109376)
+        end
+
       end
 
     end
