@@ -149,6 +149,21 @@ module CloudKit
       }.reverse.map { |hash| build_from_hash(hash) }
     end
 
+    # Find all current resources using JSONQuery. The minimum requirement to
+    def self.query(spec={})
+      raise InvalidQueryException unless spec[:match]
+      spec.merge!({:deleted => false, :archived => false})
+      json_query_conditions = build_conditions(spec.delete(:match))
+      CloudKit.storage_adapter.query { |q|
+        spec.keys.each { |k|
+          q.add_condition(k.to_s, :eql, escape(spec[k]))
+        }
+        json_query_conditions.each { |condition|
+          q.add_condition(condition[0], condition[1], condition[2]) # TODO make a condition object
+        }
+      }.reverse.map { |hash| build_from_hash(hash) }
+    end
+
     # Find the first matching resource or nil. Expects a hash specifying the
     # search parameters.
     def self.first(spec)
@@ -192,6 +207,24 @@ module CloudKit
           :id                   => data[:pk],
           :deleted              => data['deleted'],
           :archived             => data['archived']))
+    end
+
+    def self.build_conditions(text)
+      text.gsub!(/^\?/, '')
+      operator = text.match(%r{=|<(?!=)|>(?!=)|<=|>=})[0] # TODO pull these out into a map and use that map in map_operator
+      parts = text.split(operator)
+      [[parts[0].to_s, map_operator(operator), escape(parts[1])]]
+    end
+
+    def self.map_operator(operator) # TODO pull out into shared mixin between memory table and this, with a reverse method
+      case operator
+      when '='; :eql
+      when '<'; :lt
+      when '>'; :gt
+      when '<='; :lte
+      when '>='; :gte
+      else; raise InvalidQueryException
+      end
     end
 
     def wrap_uri(uri)

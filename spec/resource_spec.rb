@@ -245,19 +245,25 @@ describe "A Resource" do
   describe "when finding" do
 
     before(:each) do
-      ['bar', 'baz'].each do |value|
+      ['bar', 'baz'].each_with_index do |value, index|
         CloudKit::Resource.create(
           CloudKit::URI.new('/items'),
-          JSON.generate({:foo => value}),
+          JSON.generate({:foo => value, :rating => index}),
           "http://eric.dolphy.info/#{value}_user")
       end
       CloudKit::Resource.create(
         CloudKit::URI.new('/items'),
-        JSON.generate({:foo => 'box'}),
+        JSON.generate({:foo => 'box', :rating => 2}),
         "http://eric.dolphy.info/bar_user")
     end
 
     describe "using JSONQuery" do
+
+      it "should require a matcher" do
+        lambda {
+          CloudKit::Resource.query(:collection_reference => '/items')
+        }.should raise_error(CloudKit::InvalidQueryException)
+      end
 
       it "should sort ascending" do
         pending
@@ -282,7 +288,7 @@ describe "A Resource" do
 
       it "should extract property values" do
         pending
-        # /items/[=name]
+        # /items/[=foo]
       end
 
       it "should extract property values and evaluate them in the context of their extractor" do
@@ -323,11 +329,14 @@ describe "A Resource" do
       describe "with JavaScript operators" do
 
         it "should match using =" do
-          pending
           # /items/?foo=bar
-
           # This is the single exception in JSONQuery around JavaScript operators.
           # In the case of equality checks, = is used instead of ==
+          result = CloudKit::Resource.query(
+            :collection_reference => '/items',
+            :match                => '?foo=bar')
+          result.size.should == 1
+          result.first.parsed_json['foo'].should == 'bar'
         end
 
         it "should match using +"
@@ -347,24 +356,63 @@ describe "A Resource" do
         it "should match using ( and )"
 
         it "should find using <" do
-          pending
           # /items/?rating<3
+          4.times { |index|
+            result = CloudKit::Resource.query(
+              :collection_reference => '/items',
+              :match                => "?rating<#{index}")
+            result.size.should == index
+          }
         end
 
         it "should find using >" do
-          pending
           # /items/?rating>3
+          3.times { |index|
+            result = CloudKit::Resource.query(
+              :collection_reference => '/items',
+              :match                => "?rating>#{index}")
+            result.size.should == (index-2).abs
+          }
         end
 
-        it "should match using <"
+        it "should match using <=" do
+          # /items/?rating<=3
+          3.times { |index|
+            result = CloudKit::Resource.query(
+              :collection_reference => '/items',
+              :match                => "?rating<=#{index}")
+            result.size.should == index+1
+          }
+          result = CloudKit::Resource.query(
+            :collection_reference => '/items',
+            :match                => '?rating<=-1')
+          result.size.should == 0
+        end
 
-        it "should match using >"
+        it "should match using >=" do
+          # /items/?rating>=3
+          result = CloudKit::Resource.query(
+            :collection_reference => '/items',
+            :match                => '?rating>=3')
+          result.size.should == 0
+          3.times { |index|
+            result = CloudKit::Resource.query(
+              :collection_reference => '/items',
+              :match                => "?rating>=#{index}")
+            result.size.should == (index-3).abs
+          }
+        end
 
-        it "should match using <="
-
-        it "should match using >="
-
-        it "should match using !="
+        it "should match using !=" do
+          # /items?rating!=2
+          pending "Does not appear in Rufus::Tokyo"
+          3.times { |index|
+            result = CloudKit::Resource.query(
+              :collection_reference => '/items',
+              :match                => "?rating!=#{index}")
+            result.size.should == 2
+          }
+        end
 
       end
 
@@ -393,7 +441,7 @@ describe "A Resource" do
         result.map { |item| item.remote_user.should == 'http://eric.dolphy.info/bar_user' }
       end
 
-      it "should return all elements if no restrictions are given" do 
+      it "should return all elements if no restrictions are given" do
         CloudKit::Resource.all.size.should == 3
       end
 
@@ -404,9 +452,9 @@ describe "A Resource" do
       it "should find with query parameters referencing JSON elements" do
         resources = CloudKit::Resource.all(
           :collection_reference => '/items',
-          :foo => 'bar')
+          :foo                  => 'bar')
         resources.size.should == 1
-        resources.first.json.should == "{\"foo\":\"bar\"}"
+        resources.first.parsed_json.should == {'foo' => 'bar', 'rating' => 0}
       end
 
     end

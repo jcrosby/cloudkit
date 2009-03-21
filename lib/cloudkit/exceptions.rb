@@ -7,4 +7,7 @@ module CloudKit
   # InvalidURIFormat exceptions are raised during attempts to get or generate
   # cannonical URIs from non-collection or non-resource URIs.
   class InvalidURIFormat < Exception; end
+
+  # Represents a malformatted or missing JSONQuery matcher.
+  class InvalidQueryException < Exception; end
 end
