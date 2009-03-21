@@ -223,6 +223,8 @@ module CloudKit
         "null"
       when Fixnum, Bignum, Float
         value.to_s
+      when Array, Hash
+        JSON.generate(value) # temporary bug fix prior to JSONQuery support
       else
         value
       end

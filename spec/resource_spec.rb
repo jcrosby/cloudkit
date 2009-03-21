@@ -93,19 +93,38 @@ describe "A Resource" do
 
   describe "on create" do
 
-    before(:each) do
-      resource = CloudKit::Resource.create(
+    def store_json(hash)
+      CloudKit::Resource.create(
         CloudKit::URI.new('/items/123'),
-        JSON.generate({:foo => 'bar'}),
+        JSON.generate(hash),
         'http://eric.dolphy.info')
-      @result = CloudKit.storage_adapter.query { |q|
+      CloudKit.storage_adapter.query { |q|
         q.add_condition 'uri', :eql, '/items/123'
       }
     end
 
     it "should save the resource" do
-      @result.size.should == 1
-      @result.first['json'].should == "{\"foo\":\"bar\"}"
+      result = store_json({:foo => 'bar'})
+      result.size.should == 1
+      result.first['json'].should == "{\"foo\":\"bar\"}"
+    end
+
+    it "should accept nested array values" do
+      result = store_json({:foo => [1,2]})
+      result.size.should == 1
+      result.first['json'].should == '{"foo":[1,2]}'
+    end
+
+    it "should accept nested hash values" do
+      result = store_json({:foo => {:bar => 'baz'}})
+      result.size.should == 1
+      result.first['json'].should == '{"foo":{"bar":"baz"}}'
+    end
+
+    it "should accept recursively nested array/hash values" do
+      result = store_json({:foo => [1,{:bar => [2,3]}]})
+      result.size.should == 1
+      result.first['json'].should == '{"foo":[1,{"bar":[2,3]}]}'
     end
 
   end
