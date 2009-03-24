@@ -4,7 +4,7 @@ Index of Examples
 When using the gem version of CloudKit, the first line of each example can be
 removed.
 
-1. Expose Notes      - Mount a JSON "notes" API. Uses in-memory SQLite.
+1. Expose Notes      - Mount a JSON "notes" API. Uses in-memory store.
 
 2. Contain Notes     - Same as #1, adding OpenID and OAuth.
 
@@ -13,3 +13,5 @@ removed.
 4. Notes with OAuth  - Same as #1 using only OAuth.
 
 5. Tokyo Notes       - Same as #2 with a Tokyo Cabinet Table store.
+
+6. Tyrant Notes      - Same as #2 with a Tokyo Tyrant Table store.
