@@ -59,12 +59,6 @@ module CloudKit
       q.run(self)
     end
 
-    # Simulate a transaction. This development-mode transaction merely yields
-    # to its block.
-    def transaction
-      yield
-    end
-
     protected 
 
     def valid?(record)

@@ -49,7 +49,7 @@ module CloudKit
     # modify resources that are not current.
     def update(json, remote_user=nil)
       raise HistoricalIntegrityViolation unless current?
-      CloudKit.storage_adapter.transaction do
+      transaction do
         record = CloudKit.storage_adapter[@id]
         record['uri'] = "#{@uri.string}/versions/#{@etag}"
         record['archived'] = escape(true)
@@ -65,7 +65,7 @@ module CloudKit
     # are not current.
     def delete
       raise HistoricalIntegrityViolation unless current?
-      CloudKit.storage_adapter.transaction do
+      transaction do
         original_uri = @uri
         record = CloudKit.storage_adapter[@id]
         record['uri'] = "#{@uri.string}/versions/#{@etag}"
@@ -253,6 +253,17 @@ module CloudKit
 
     def escape_values(hash)
       hash.inject({}) { |memo, pair| memo.merge({pair[0] => escape(pair[1])}) }
+    end
+
+    def transaction
+      open('.lock', 'w+') do |f|
+        f.flock(File::LOCK_EX)
+        begin 
+          yield
+        ensure
+          f.flock(File::LOCK_UN)
+        end
+      end
     end
   end
 end
