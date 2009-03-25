@@ -34,11 +34,11 @@ require 'cloudkit/user_store'
 include CloudKit::Constants
 
 module CloudKit
-  VERSION = '0.11.0'
+  VERSION = '0.11.1'
 
   # Sets up the storage adapter. Defaults to development-time
   # CloudKit::MemoryTable. Also supports Rufus Tokyo Table instances. See the
-  # examples directory for a demonstration.
+  # examples directory for Cabinet and Tyrant Table examples.
   def self.setup_storage_adapter(adapter_instance=nil)
     @storage_adapter = adapter_instance || CloudKit::MemoryTable.new
   end

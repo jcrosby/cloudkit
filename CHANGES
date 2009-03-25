@@ -1,3 +1,10 @@
+0.11.1
+- Added a block option for configuring OpenID bypassed routes (Devlin Daley)
+- Added write locks for Tokyo Tyrant Tables
+- Added Tokyo Tyrant Table example
+- Fixed POST method tunneling bug (Saimon Moore)
+- Fixed escaping of nested JSON Objects and Arrays
+
 0.11.0
 - Added Tokyo Cabinet storage
 - Added MemoryTable development-time storage

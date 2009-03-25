@@ -2,8 +2,8 @@ Gem::Specification.new do |s|
   s.specification_version = 2 if s.respond_to? :specification_version=
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.name              = "cloudkit"
-  s.version           = "0.11.0"
-  s.date              = "2008-03-09"
+  s.version           = "0.11.1"
+  s.date              = "2008-03-24"
   s.summary           = "An Open Web JSON Appliance."
   s.description       = "An Open Web JSON Appliance."
   s.authors           = ["Jon Crosby"]
@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
     examples/3.ru
     examples/4.ru
     examples/5.ru
+    examples/6.ru
     examples/TOC
     lib/cloudkit.rb
     lib/cloudkit/constants.rb

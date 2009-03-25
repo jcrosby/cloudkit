@@ -21,7 +21,7 @@ describe "An OpenIDFilter" do
     response = @request.get('/foo')
     response.status.should == 200
   end
-  
+
   it "should allow pass through of URIs defined in bypass route callback" do
     openid_app = Rack::Builder.new {
       use Rack::Lint
@@ -75,4 +75,5 @@ describe "An OpenIDFilter" do
     end
 
   end
+
 end
