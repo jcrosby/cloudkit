@@ -105,6 +105,7 @@ module CloudKit
       when :gt; :>
       when :lte; :<=
       when :gte; :>=
+      when :match; :match
       else; raise CloudKit::InvalidQueryException
       end
     end

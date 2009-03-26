@@ -405,7 +405,6 @@ describe "A Resource" do
 
         it "should match using !=" do
           # /items?rating!=2
-          pending "Does not appear in Rufus::Tokyo"
           3.times { |index|
             result = CloudKit::Resource.query(
               :collection_reference => '/items',

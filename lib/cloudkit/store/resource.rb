@@ -211,9 +211,14 @@ module CloudKit
 
     def self.build_conditions(text)
       text.gsub!(/^\?/, '')
-      operator = text.match(%r{=|<(?!=)|>(?!=)|<=|>=})[0] # TODO pull these out into a map and use that map in map_operator
+      operator = text.match(%r{=|<(?!=)|>(?!=)|<=|>=|!=})[0] # TODO pull these out into a map and use that map in map_operator
       parts = text.split(operator)
-      [[parts[0].to_s, map_operator(operator), escape(parts[1])]]
+      value = escape(parts[1])
+      condition_operator = map_operator(operator)
+      if condition_operator == :match
+        value = '[^' + value + ']'
+      end
+      [[parts[0].to_s, condition_operator, value]]
     end
 
     def self.map_operator(operator) # TODO pull out into shared mixin between memory table and this, with a reverse method
@@ -223,6 +228,7 @@ module CloudKit
       when '>'; :gt
       when '<='; :lte
       when '>='; :gte
+      when '!='; :match
       else; raise InvalidQueryException
       end
     end
