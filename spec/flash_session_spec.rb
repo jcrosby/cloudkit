@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper'
 
 describe "A FlashSession" do
 
-  setup do
+  before do
     @flash = CloudKit::FlashSession.new
   end
 
