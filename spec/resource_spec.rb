@@ -312,6 +312,10 @@ describe "A Resource" do
         # [expr, expr]
       end
 
+      it "should assume an outer [] if none exist"
+
+      it "should allow chaining of queries using multiple [] blocks"
+
       describe "with array operations" do
 
         it "should limit using a range" do
@@ -339,13 +343,45 @@ describe "A Resource" do
           result.first.parsed_json['foo'].should == 'bar'
         end
 
-        it "should match using +"
+        it "should match using + in a value" do
+          # /items/?rating=3+0
+          pending
+        end
 
-        it "should match using -"
+        it "should match using + in a path" do
+          # /items/?rating+id=3
+          pending
+        end
 
-        it "should match using /"
+        it "should match using - in a value" do
+          # /items/?rating=3-1
+          pending
+        end
 
-        it "should match using *"
+        it "should match using - in a path" do
+          # /items/?rating-1=2
+          pending
+        end
+
+        it "should match using / in a value" do
+          # /items/?rating=4/2
+          pending
+        end
+
+        it "should match using / in a path" do
+          # /items/?rating/2=2
+          pending
+        end
+
+        it "should match using * in a value" do
+          # /items/?rating=2*1
+          pending
+        end
+
+        it "should match using * in a path" do
+          # /items/?rating*2=4
+          pending
+        end
 
         it "should match using &"
 
