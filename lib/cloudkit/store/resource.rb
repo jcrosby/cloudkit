@@ -7,9 +7,6 @@ module CloudKit
 
     attr_reader :uri, :etag, :last_modified, :json, :remote_user
 
-    @@lock = Mutex.new
-    @@javascript_runtime = nil
-
     # Initialize a new instance of a resource.
     #
     # === Parameters
@@ -18,7 +15,6 @@ module CloudKit
     # - remote_user - Optional. The URI for the user creating the resource.
     # - options - Optional. A hash of other internal properties to set, mostly for internal use.
     def initialize(uri, json, remote_user=nil, options={})
-      @@lock.synchronize { load_javascript_runtime } unless @@javascript_runtime
       load_from_options(options.merge(
         :uri         => uri,
         :json        => json,
@@ -153,19 +149,22 @@ module CloudKit
       }.reverse.map { |hash| build_from_hash(hash) }
     end
 
-    # Find all current resources using JSONQuery. The minimum requirement to
+    # Find all current resources using JSONQuery.
     def self.query(spec={})
       raise InvalidQueryException unless spec[:match]
       spec.merge!({:deleted => false, :archived => false})
-      json_query_conditions = build_conditions(spec.delete(:match))
-      CloudKit.storage_adapter.query { |q|
+      json_query_conditions = spec.delete(:match)
+      results = CloudKit.storage_adapter.query { |q|
         spec.keys.each { |k|
           q.add_condition(k.to_s, :eql, escape(spec[k]))
         }
-        json_query_conditions.each { |condition|
-          q.add_condition(condition[0], condition[1], condition[2]) # TODO make a condition object
-        }
-      }.reverse.map { |hash| build_from_hash(hash) }
+      }
+      filtered_json_array = filter_using_jsonquery(json_query_conditions, results)
+      collection = []
+      filtered_json_array.each do |json_object|
+        collection << results[json_object['___index___']]
+      end
+      collection.reverse.map { |hash| build_from_hash(hash) }
     end
 
     # Find the first matching resource or nil. Expects a hash specifying the
@@ -213,28 +212,14 @@ module CloudKit
           :archived             => data['archived']))
     end
 
-    def self.build_conditions(text)
-      text.gsub!(/^\?/, '')
-      operator = text.match(%r{=|<(?!=)|>(?!=)|<=|>=|!=})[0] # TODO pull these out into a map and use that map in map_operator
-      parts = text.split(operator)
-      value = escape(parts[1])
-      condition_operator = map_operator(operator)
-      if condition_operator == :match
-        value = '[^' + value + ']'
+    def self.filter_using_jsonquery(query, collection)
+      json_objects = []
+      collection.each_with_index do |result, index|
+        json_objects << JSON.generate(
+          JSON.parse(result['json']).merge('___index___' => index))
       end
-      [[parts[0].to_s, condition_operator, value]]
-    end
-
-    def self.map_operator(operator) # TODO pull out into shared mixin between memory table and this, with a reverse method
-      case operator
-      when '='; :eql
-      when '<'; :lt
-      when '>'; :gt
-      when '<='; :lte
-      when '>='; :gte
-      when '!='; :match
-      else; raise InvalidQueryException
-      end
+      json = '[' + json_objects.join(',') + ']'.gsub('"', "'")
+      CloudKit.javascript_runtime.evaluate("window['JSONQuery'](\"#{query}\", #{json});")
     end
 
     def wrap_uri(uri)
@@ -309,14 +294,5 @@ module CloudKit
       end
     end
 
-    def load_javascript_runtime
-      @@javascript_runtime = Johnson::Runtime.new
-      libs = 'window = {};' # fake top level DOM element
-      prefix = File.expand_path(File.dirname(__FILE__)) + '/'
-      ['json2.js', 'query.js'].each do |file|
-        File.open(prefix + file, 'r') { |f| libs << f.read }
-      end
-      @@javascript_runtime.evaluate(libs);
-    end
   end
 end

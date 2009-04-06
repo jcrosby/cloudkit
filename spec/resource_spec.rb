@@ -338,7 +338,7 @@ describe "A Resource" do
           # In the case of equality checks, = is used instead of ==
           result = CloudKit::Resource.query(
             :collection_reference => '/items',
-            :match                => '?foo=bar')
+            :match                => "?foo='bar'")
           result.size.should == 1
           result.first.parsed_json['foo'].should == 'bar'
         end

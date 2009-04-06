@@ -48,6 +48,19 @@ module CloudKit
   def self.storage_adapter
     @storage_adapter
   end
+
+  def self.javascript_runtime
+    unless @javascript_runtime
+      @javascript_runtime = Johnson::Runtime.new
+      libs = 'window = {};' # fake top level JS namespace
+      prefix = File.expand_path(File.dirname(__FILE__)) + '/cloudkit/store/'
+      ['json2.js', 'query.js'].each do |file|
+        File.open(prefix + file, 'r') { |f| libs << f.read }
+      end
+      @javascript_runtime.evaluate(libs);
+    end
+    @javascript_runtime
+  end
 end
 
 class Object
