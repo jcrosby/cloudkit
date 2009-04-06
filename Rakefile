@@ -40,3 +40,11 @@ task :rdoc do
     --op=doc/api
   SH
 end
+
+desc 'pull in external jsonquery dependencies'
+task :deps do
+  # Pull JSONQuery.js from the jcrosby/jsonquery GitHub fork
+  FileUtils.cp('../jsonquery/JSONQuery.js', 'lib/cloudkit/store/query.js')
+  # Pull Crockford's JSON library from jcrosby/jquery-cloudkit on GitHub
+  FileUtils.cp('../jquery-cloudkit/vendor/json2.js', 'lib/cloudkit/store/json2.js')
+end
