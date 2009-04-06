@@ -7,6 +7,9 @@ module CloudKit
 
     attr_reader :uri, :etag, :last_modified, :json, :remote_user
 
+    @@lock = Mutex.new
+    @@javascript_runtime = nil
+
     # Initialize a new instance of a resource.
     #
     # === Parameters
@@ -15,6 +18,7 @@ module CloudKit
     # - remote_user - Optional. The URI for the user creating the resource.
     # - options - Optional. A hash of other internal properties to set, mostly for internal use.
     def initialize(uri, json, remote_user=nil, options={})
+      @@lock.synchronize { load_javascript_runtime } unless @@javascript_runtime
       load_from_options(options.merge(
         :uri         => uri,
         :json        => json,
@@ -303,6 +307,16 @@ module CloudKit
           f.flock(File::LOCK_UN)
         end
       end
+    end
+
+    def load_javascript_runtime
+      @@javascript_runtime = Johnson::Runtime.new
+      libs = 'window = {};' # fake top level DOM element
+      prefix = File.expand_path(File.dirname(__FILE__)) + '/'
+      ['json2.js', 'query.js'].each do |file|
+        File.open(prefix + file, 'r') { |f| libs << f.read }
+      end
+      @@javascript_runtime.evaluate(libs);
     end
   end
 end
