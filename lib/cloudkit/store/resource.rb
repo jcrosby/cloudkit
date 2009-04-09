@@ -164,7 +164,7 @@ module CloudKit
       filtered_json_array.each do |json_object|
         collection << results[json_object['___index___']]
       end
-      collection.reverse.map { |hash| build_from_hash(hash) }
+      collection.map { |hash| build_from_hash(hash) }
     end
 
     # Find the first matching resource or nil. Expects a hash specifying the
