@@ -90,4 +90,38 @@ describe "A URI" do
       CloudKit::URI.new('/items/123/versions/abc').cannonical_uri_string
     }.should raise_error(CloudKit::InvalidURIFormat)
   end
+
+  it "should extract JSONQuery element(s) from the path" do
+    json_query = '[?foo>3]'
+    escaped_query = Rack::Utils.escape(json_query)
+    request = CloudKit::URI.new("/abc/#{escaped_query}")
+    request.json_query.should == json_query
+    request = CloudKit::URI.new("/abc#{escaped_query}")
+    request.json_query.should == json_query
+  end
+
+  it "should extract chained JSONQuery matchers from the path" do
+    json_query = '[?foo>3][=bar]'
+    escaped_query = Rack::Utils.escape(json_query)
+    request = CloudKit::URI.new("/abc/#{escaped_query}")
+    request.json_query.should == json_query
+    request = CloudKit::URI.new("/abc#{escaped_query}")
+    request.json_query.should == json_query
+  end
+
+  it "should not include JSONQuery elements in its components" do
+    json_query = '[?foo>3][=bar]'
+    escaped_query = Rack::Utils.escape(json_query)
+    ['/items', '/items/_resolved', '/items/123', '/items/123/versions', '/items/123/versions/_resolved', '/items/123/versions/abc'].each { |uri|
+      uri_with_query = uri + escaped_query
+      CloudKit::URI.new(uri_with_query).components.each do |component|
+        component.should_not match(/escaped_query/)
+      end
+      uri << "/#{escaped_query}"
+      CloudKit::URI.new(uri).components.each do |component|
+        component.should_not match(/escaped_query/)
+      end
+    }
+  end
+
 end

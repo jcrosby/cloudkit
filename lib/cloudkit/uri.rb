@@ -7,8 +7,12 @@ module CloudKit
     # The string form of a URI.
     attr_reader :string
 
+    # The JSONQuery expression(s) in this URI.
+    attr_reader :json_query
+
     # Create a new URI with the given string.
     def initialize(string)
+      @json_query = Rack::Utils.unescape(string).match(/\[.*\]$/)[0] rescue nil
       @string = string
     end
 

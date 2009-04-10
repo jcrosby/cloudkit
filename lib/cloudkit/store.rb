@@ -190,7 +190,7 @@ module CloudKit
       end
       result
     end
-    
+
     def storage_adapter
       CloudKit.storage_adapter
     end
