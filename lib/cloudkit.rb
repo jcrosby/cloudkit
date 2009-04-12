@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'erb'
 require 'json'
-require 'md5'
+require 'digest/md5'
 require 'openid'
 require 'time'
 require 'uuid'

@@ -337,7 +337,7 @@ module CloudKit
     # optimization for GETs. This method is used for collections of resources
     # where the optimization is not practical.
     def build_etag(data)
-      MD5::md5(data.to_s).hexdigest
+      Digest::MD5.hexdigest(data.to_s)
     end
 
     # Returns true if the collection type is valid for this Store.
