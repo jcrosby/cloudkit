@@ -170,6 +170,12 @@ describe "A CloudKit::Service" do
           parsed_response['total'].should == 3
         end
 
+        it "should not include JSONQuery in the Link header" do
+          json_query = Rack::Utils.escape('[0:2]')
+          response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
+          response['Link'].should_not include(json_query)
+        end
+
       end
 
     end
@@ -253,6 +259,12 @@ describe "A CloudKit::Service" do
           parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
           parsed_response['offset'].should == 1
           parsed_response['total'].should == 3
+        end
+
+        it "should not include JSONQuery in the Link header" do
+          json_query = Rack::Utils.escape('[1:3]')
+          response = @request.get("/items/_resolved/#{json_query}", VALID_TEST_AUTH)
+          response['Link'].should_not include(json_query)
         end
 
       end
@@ -401,6 +413,12 @@ describe "A CloudKit::Service" do
           parsed_response['total'].should == 4
         end
 
+        it "should not include JSONQuery in the Link header" do
+          json_query = Rack::Utils.escape('[1:4]')
+          response = @request.get("/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
+          response['Link'].should_not include(json_query)
+        end
+
       end
 
     end
@@ -500,6 +518,13 @@ describe "A CloudKit::Service" do
           parsed_response['documents'].map{|d| d['uri']}.should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
           parsed_response['offset'].should == 1
           parsed_response['total'].should == 4
+        end
+
+        it "should not include JSONQuery in the Link header" do
+          json_query = Rack::Utils.escape('[1:4]')
+          response = @request.get(
+            "/items/abc/versions/_resolved/#{json_query}", VALID_TEST_AUTH)
+          response['Link'].should_not include(json_query)
         end
 
       end

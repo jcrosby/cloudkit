@@ -89,11 +89,11 @@ module CloudKit
       end
     end
 
-    protected
-
     def uri_without_json_query
       @string.sub(safe_query, '')
     end
+
+    protected
 
     def safe_query
       return '' unless @json_query

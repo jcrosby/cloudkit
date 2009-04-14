@@ -110,17 +110,17 @@ module CloudKit
     end
 
     def versions_link_header(request)
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.path_info}"
+      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.uri.uri_without_json_query}"
       "<#{base_url}/versions>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/versions\""
     end
 
     def resolved_link_header(request)
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.path_info}"
+      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.uri.uri_without_json_query}"
       "<#{base_url}/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\""
     end
 
     def index_link_header(request)
-      index_path = request.path_info.sub(/\/_resolved(\/)*$/, '')
+      index_path = request.uri.uri_without_json_query.sub(/\/_resolved(\/)*$/, '')
       base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{index_path}"
       "<#{base_url}>; rel=\"index\""
     end
