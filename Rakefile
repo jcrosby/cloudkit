@@ -48,3 +48,9 @@ task :deps do
   # Pull Crockford's JSON library from jcrosby/jquery-cloudkit on GitHub
   FileUtils.cp('../jquery-cloudkit/vendor/json2.js', 'lib/cloudkit/store/json2.js')
 end
+
+desc 'load test data into local running instance of examples/1.ru'
+task :load do
+  `curl -XPUT -d'{"foo":"bar"}' http://localhost:9292/notes/abc`
+  `curl -XPUT -d'{"foo":"baz"}' http://localhost:9292/notes/def`
+end
