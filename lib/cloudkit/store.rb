@@ -210,7 +210,7 @@ module CloudKit
     # Last-Modified date in descending order.
     def resource_collection(uri, options)
       if query = uri.json_query
-        query = query.has_trailing_slice_operator? ? query.chopped : query
+        query = query.has_trailing_slice_operator? ? query.chopped : query.string
         result = CloudKit::Resource.query(
           options.merge(
             :collection_reference => uri.collection_uri_fragment,
@@ -229,7 +229,7 @@ module CloudKit
     # collection URI.
     def resolved_resource_collection(uri, options)
       if query = uri.json_query
-        query = query.has_trailing_slice_operator? ? query.chopped : query
+        query = query.has_trailing_slice_operator? ? query.chopped : query.string
         result = CloudKit::Resource.query(
           options.merge(
             :collection_reference => uri.collection_uri_fragment,
@@ -260,7 +260,7 @@ module CloudKit
           :uri => uri.current_resource_uri))
       return status_404 unless found
       if query = uri.json_query
-        query = query.has_trailing_slice_operator? ? query.chopped : query
+        query = query.has_trailing_slice_operator? ? query.chopped : query.string
         result = CloudKit::Resource.query(
           options.merge(
             :resource_reference => uri.current_resource_uri,
@@ -284,7 +284,7 @@ module CloudKit
           :uri => uri.current_resource_uri))
       return status_404 unless found
       if query = uri.json_query
-        query = query.has_trailing_slice_operator? ? query.chopped : query
+        query = query.has_trailing_slice_operator? ? query.chopped : query.string
         result = CloudKit::Resource.query(
           options.merge(
             :resource_reference => uri.current_resource_uri,
