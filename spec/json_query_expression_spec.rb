@@ -46,5 +46,41 @@ describe "A JSONQueryExpression" do
     expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
     expression[1].should == '[=foo]'
   end
+  
+  it "should remove its last expression with chopped" do
+    path = "/items/" + Rack::Utils.escape('[1:100][=foo][0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.chopped.should == '[1:100][=foo]'
+  end
+
+  it "should know if it is an array slice operator" do
+    path = "/items/" + Rack::Utils.escape('[0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.array_slice_operator?.should be_true
+    path = "/items/" + Rack::Utils.escape('[=foo]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.array_slice_operator?.should be_false
+  end
+
+  it "should know its last element" do
+    path = "/items/" + Rack::Utils.escape('[0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.last.should == '[0:10]'
+    path = "/items/" + Rack::Utils.escape('[1:100][=foo][0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.last.should == '[0:10]'
+  end
+
+  it "should know if it has a trailing slice operator" do
+    path = "/items/" + Rack::Utils.escape('[1:100][=foo][0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.has_trailing_slice_operator?.should be_true
+    path = "/items/" + Rack::Utils.escape('[0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.has_trailing_slice_operator?.should be_true
+    path = "/items/" + Rack::Utils.escape('[1:100][=foo]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.has_trailing_slice_operator?.should be_false
+  end
 
 end

@@ -12,7 +12,7 @@ module CloudKit
 
     # Create a new URI with the given string.
     def initialize(string)
-      @json_query = Rack::Utils.unescape(string).match(/\[.*\]$/)[0] rescue nil
+      @json_query = JSONQueryExpression.from_escaped_path(string)
       @string = string
     end
 
@@ -22,9 +22,9 @@ module CloudKit
       "/#{components[0]}" rescue nil
     end
 
-    # Splits a URI into its components
+    # Split a URI into its components, excluding JSONQuery matchers
     def components
-      @components ||= @string.split('/').reject{|x| x == '' || x == nil} rescue []
+      @components ||= uri_without_json_query.split('/').reject { |x| x == '' || x == nil } rescue []
     end
 
     # Return the resource collection referenced by a URI.
@@ -83,10 +83,21 @@ module CloudKit
       @cannonical_uri_string ||= if resource_collection_uri?
         "#{@string}/#{UUID.generate}"
       elsif resource_uri?
-        @string
+        @string[-1..-1] == '/' ? @string[0..-2] : @string
       else
         raise CloudKit::InvalidURIFormat
       end
+    end
+
+    protected
+
+    def uri_without_json_query
+      @string.sub(safe_query, '')
+    end
+
+    def safe_query
+      return '' unless @json_query
+      @json_query.escaped_string
     end
   end
 end

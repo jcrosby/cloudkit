@@ -209,20 +209,36 @@ module CloudKit
     # Return a list of resource URIs for the given collection URI. Sorted by
     # Last-Modified date in descending order.
     def resource_collection(uri, options)
-      filter = options.excluding(:offset, :limit).merge(
-        :deleted              => false,
-        :collection_reference => uri.collection_uri_fragment,
-        :archived             => false)
-      result = CloudKit::Resource.current(filter)
-      bundle_collection_result(uri.string, options, result)
+      if query = uri.json_query
+        query = query.has_trailing_slice_operator? ? query.chopped : query
+        result = CloudKit::Resource.query(
+          options.merge(
+            :collection_reference => uri.collection_uri_fragment,
+            :match                => query))
+      else
+        filter = options.merge(
+          :deleted              => false,
+          :collection_reference => uri.collection_uri_fragment,
+          :archived             => false)
+        result = CloudKit::Resource.current(filter)
+      end
+      bundle_collection_result(uri, options, result)
     end
 
     # Return all documents and their associated metadata for the given
     # collection URI.
     def resolved_resource_collection(uri, options)
-      result = CloudKit::Resource.current(
-        options.excluding(:offset, :limit).merge(
-          :collection_reference => uri.collection_uri_fragment))
+      if query = uri.json_query
+        query = query.has_trailing_slice_operator? ? query.chopped : query
+        result = CloudKit::Resource.query(
+          options.merge(
+            :collection_reference => uri.collection_uri_fragment,
+            :match                => query))
+      else
+        result = CloudKit::Resource.current(
+          options.merge(
+            :collection_reference => uri.collection_uri_fragment))
+      end
       bundle_resolved_collection_result(uri, options, result)
     end
 
@@ -240,14 +256,23 @@ module CloudKit
     # current version. Sorted by Last-Modified date in descending order.
     def version_collection(uri, options)
       found = CloudKit::Resource.first(
-        options.excluding(:offset, :limit).merge(
+        options.merge(
           :uri => uri.current_resource_uri))
       return status_404 unless found
-      result = CloudKit::Resource.all( # TODO - just use found.versions
-        options.excluding(:offset, :limit).merge(
-          :resource_reference => uri.current_resource_uri,
-          :deleted            => false))
-      bundle_collection_result(uri.string, options, result)
+      if query = uri.json_query
+        query = query.has_trailing_slice_operator? ? query.chopped : query
+        result = CloudKit::Resource.query(
+          options.merge(
+            :resource_reference => uri.current_resource_uri,
+            :archived           => :maybe, # sorry
+            :match              => query))
+      else
+        result = CloudKit::Resource.all( # TODO - just use found.versions
+          options.merge(
+            :resource_reference => uri.current_resource_uri,
+            :deleted            => false))
+      end
+      bundle_collection_result(uri, options, result)
     end
 
     # Return all document versions and their associated metadata for a given
@@ -255,13 +280,22 @@ module CloudKit
     # descending order.
     def resolved_version_collection(uri, options)
       found = CloudKit::Resource.first(
-        options.excluding(:offset, :limit).merge(
+        options.merge(
           :uri => uri.current_resource_uri))
       return status_404 unless found
-      result = CloudKit::Resource.all(
-        options.excluding(:offset, :limit).merge(
-          :resource_reference => uri.current_resource_uri,
-          :deleted            => false))
+      if query = uri.json_query
+        query = query.has_trailing_slice_operator? ? query.chopped : query
+        result = CloudKit::Resource.query(
+          options.merge(
+            :resource_reference => uri.current_resource_uri,
+            :archived           => :maybe, # sorry
+            :match              => query))
+      else
+        result = CloudKit::Resource.all(
+          options.merge(
+            :resource_reference => uri.current_resource_uri,
+            :deleted            => false))
+      end
       bundle_resolved_collection_result(uri, options, result)
     end
 
@@ -294,12 +328,26 @@ module CloudKit
     # Bundle a collection of results as a list of URIs for the response.
     def bundle_collection_result(uri, options, result)
       total  = result.size
-      offset = options[:offset].try(:to_i) || 0
-      max    = options[:limit] ? offset + options[:limit].to_i : total
-      list   = result.to_a[offset...max].map{|r| r.uri}
+      offset = extract_offset(uri)
+      max    = extract_max(uri, total)
+      list   = result.to_a[offset...max].map{|r| r.uri.string}
       json   = uri_list(list, total, offset)
       last_modified = result.first.try(:last_modified) if result.any?
       response(200, json, build_etag(json), last_modified)
+    end
+
+    def extract_offset(uri)
+      if uri.json_query && uri.json_query.has_trailing_slice_operator?
+        return CloudKit::JSONQueryExpression.extract_start(uri.json_query.last)
+      end
+      0
+    end
+
+    def extract_max(uri, total)
+      if uri.json_query && uri.json_query.has_trailing_slice_operator?
+        return CloudKit::JSONQueryExpression.extract_end(uri.json_query.last)
+      end
+      total
     end
 
     # Bundle a collection of results as a list of documents and the associated
@@ -307,8 +355,8 @@ module CloudKit
     # to their singular request.
     def bundle_resolved_collection_result(uri, options, result)
       total  = result.size
-      offset = options[:offset].try(:to_i) || 0
-      max    = options[:limit] ? offset + options[:limit].to_i : total
+      offset = extract_offset(uri)
+      max    = extract_max(uri, total)
       list   = result.to_a[offset...max]
       json   = resource_list(list, total, offset)
       last_modified = result.first.last_modified if result.any?
@@ -317,7 +365,7 @@ module CloudKit
 
     # Generate a JSON URI list.
     def uri_list(list, total, offset)
-      JSON.generate(:total => total, :offset => offset, :uris => list.map { |u| u.string })
+      JSON.generate(:total => total, :offset => offset, :uris => list.map { |u| u })
     end
 
     # Generate a JSON document list.

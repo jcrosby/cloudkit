@@ -152,7 +152,12 @@ module CloudKit
     # Find all current resources using JSONQuery.
     def self.query(spec={})
       raise InvalidQueryException unless spec[:match]
-      spec.merge!({:deleted => false, :archived => false})
+      spec.merge!(:deleted => false)
+      if spec[:archived] == :maybe
+        spec.delete(:archived)
+      else
+        spec.merge!(:archived => false)
+      end
       json_query_conditions = spec.delete(:match)
       results = CloudKit.storage_adapter.query { |q|
         spec.keys.each { |k|
@@ -164,7 +169,7 @@ module CloudKit
       filtered_json_array.each do |json_object|
         collection << results[json_object['___index___']]
       end
-      collection.map { |hash| build_from_hash(hash) }
+      collection.reverse.map { |hash| build_from_hash(hash) }
     end
 
     # Find the first matching resource or nil. Expects a hash specifying the

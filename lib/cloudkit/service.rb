@@ -57,9 +57,7 @@ module CloudKit
       response = @store.get(
         request.uri,
         {}.filter_merge!(
-          :remote_user => request.current_user,
-          :offset      => request['offset'],
-          :limit       => request['limit']))
+          :remote_user => request.current_user))
       inject_link_headers(request, response)
       response.to_rack
     end
@@ -94,9 +92,7 @@ module CloudKit
       response = @store.head(
         request.uri,
         {}.filter_merge!(
-          :remote_user => request.current_user,
-          :offset      => request['offset'],
-          :limit       => request['limit']))
+          :remote_user => request.current_user))
       inject_link_headers(request, response)
       response.to_rack
     end

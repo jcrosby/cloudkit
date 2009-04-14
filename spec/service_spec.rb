@@ -138,29 +138,6 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should_not be_nil
       end
 
-      it "should accept a limit parameter" do
-        response = @request.get('/items?limit=2', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == ['/items/2', '/items/1']
-        parsed_response['total'].should == 3
-      end
-
-      it "should accept an offset parameter" do
-        response = @request.get('/items?offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == ['/items/1', '/items/0']
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 3
-      end
-
-      it "should accept combined limit and offset parameters" do
-        response = @request.get('/items?limit=1&offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == ['/items/1']
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 3
-      end
-
       it "should return an empty list if no resources are found" do
         response = @request.get('/things', VALID_TEST_AUTH)
         parsed_response = JSON.parse(response.body)
@@ -172,6 +149,27 @@ describe "A CloudKit::Service" do
       it "should return a resolved link header" do
         @response['Link'].should_not be_nil
         @response['Link'].match("<http://example.org/items/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"").should_not be_nil
+      end
+
+      describe "using JSONQuery" do
+
+        it "should accept a 0-offset array slice operator" do
+          json_query = Rack::Utils.escape('[0:2]')
+          response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['uris'].should == ['/items/2', '/items/1']
+          parsed_response['total'].should == 3
+        end
+
+        it "should accept an array slice operator with an offset" do
+          json_query = Rack::Utils.escape('[1:2]')
+          response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['uris'].should == ['/items/1']
+          parsed_response['offset'].should == 1
+          parsed_response['total'].should == 3
+        end
+
       end
 
     end
@@ -225,29 +223,6 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should_not be_nil
       end
 
-      it "should accept a limit parameter" do
-        response = @request.get('/items/_resolved?limit=2', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/2', '/items/1']
-        parsed_response['total'].should == 3
-      end
-
-      it "should accept an offset parameter" do
-        response = @request.get('/items/_resolved?offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 3
-      end
-
-      it "should accept combined limit and offset parameters" do
-        response = @request.get('/items/_resolved?limit=1&offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 3
-      end
-
       it "should return an empty list if no documents are found" do
         response = @request.get('/things/_resolved', VALID_TEST_AUTH)
         parsed_response = JSON.parse(response.body)
@@ -259,6 +234,27 @@ describe "A CloudKit::Service" do
       it "should return an index link header" do
         @response['Link'].should_not be_nil
         @response['Link'].match("<http://example.org/items>; rel=\"index\"").should_not be_nil
+      end
+
+      describe "using JSONQuery" do
+
+        it "should accept a 0-offset array slice operator" do
+          json_query = Rack::Utils.escape('[0:2]')
+          response = @request.get("/items/_resolved/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['documents'].map{|d| d['uri']}.should == ['/items/2', '/items/1']
+          parsed_response['total'].should == 3
+        end
+
+        it "should accept an array slice operator with an offset" do
+          json_query = Rack::Utils.escape('[1:3]')
+          response = @request.get("/items/_resolved/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
+          parsed_response['offset'].should == 1
+          parsed_response['total'].should == 3
+        end
+
       end
 
     end
@@ -381,32 +377,30 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should_not be_nil
       end
 
-      it "should accept a limit parameter" do
-        response = @request.get('/items/abc/versions?limit=2', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == ['/items/abc', "/items/abc/versions/#{@etags[-2]}"]
-        parsed_response['total'].should == 4
-      end
-
-      it "should accept an offset parameter" do
-        response = @request.get('/items/abc/versions?offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 4
-      end
-
-      it "should accept combined limit and offset parameters" do
-        response = @request.get('/items/abc/versions?limit=1&offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == ["/items/abc/versions/#{@etags[-2]}"]
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 4
-      end
-
       it "should return a resolved link header" do
         @response['Link'].should_not be_nil
         @response['Link'].match("<http://example.org/items/abc/versions/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"").should_not be_nil
+      end
+
+      describe "using JSONQuery" do
+
+        it "should accept a 0-offset array slice operation" do
+          json_query = Rack::Utils.escape('[0:2]')
+          response = @request.get("/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['uris'].should == ['/items/abc', "/items/abc/versions/#{@etags[-2]}"]
+          parsed_response['total'].should == 4
+        end
+
+        it "should accept an offset parameter" do
+          json_query = Rack::Utils.escape('[1:4]')
+          response = @request.get("/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['uris'].should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
+          parsed_response['offset'].should == 1
+          parsed_response['total'].should == 4
+        end
+
       end
 
     end
@@ -482,35 +476,32 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should_not be_nil
       end
 
-      it "should accept a limit parameter" do
-        response = @request.get(
-          '/items/abc/versions/_resolved?limit=2', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/abc', "/items/abc/versions/#{@etags[-2]}"]
-        parsed_response['total'].should == 4
-      end
-
-      it "should accept an offset parameter" do
-        response = @request.get(
-          '/items/abc/versions/_resolved?offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].map{|d| d['uri']}.should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 4
-      end
-
-      it "should accept combined limit and offset parameters" do
-        response = @request.get(
-          '/items/abc/versions/_resolved?limit=1&offset=1', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].map{|d| d['uri']}.should == ["/items/abc/versions/#{@etags[-2]}"]
-        parsed_response['offset'].should == 1
-        parsed_response['total'].should == 4
-      end
-
       it "should return an index link header" do
         @response['Link'].should_not be_nil
         @response['Link'].match("<http://example.org/items/abc/versions>; rel=\"index\"").should_not be_nil
+      end
+
+      describe "using JSONQuery" do
+
+        it "should accept a 0-offset array slice operator" do
+          json_query = Rack::Utils.escape('[0:2]')
+          response = @request.get(
+            "/items/abc/versions/_resolved/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['documents'].map{|d| d['uri']}.should == ['/items/abc', "/items/abc/versions/#{@etags[-2]}"]
+          parsed_response['total'].should == 4
+        end
+
+        it "should accept an array slice operator with an offset" do
+          json_query = Rack::Utils.escape('[1:4]')
+          response = @request.get(
+            "/items/abc/versions/_resolved/#{json_query}", VALID_TEST_AUTH)
+          parsed_response = JSON.parse(response.body)
+          parsed_response['documents'].map{|d| d['uri']}.should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
+          parsed_response['offset'].should == 1
+          parsed_response['total'].should == 4
+        end
+
       end
 
     end
