@@ -36,7 +36,7 @@ describe "A URI" do
   end
 
   it "should know if it is a resource collection URI" do
-    ['/items/123', '/items/123/versions', '/items/123/versions/abc'].each { |uri|
+    ['/cloudkit-meta', '/items/123', '/items/123/versions', '/items/123/versions/abc'].each { |uri|
       CloudKit::URI.new(uri).should_not be_resource_collection_uri
     }
     CloudKit::URI.new('/items').should be_resource_collection_uri

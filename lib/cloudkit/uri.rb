@@ -42,7 +42,7 @@ module CloudKit
 
     # Returns true if URI matches /{collection}
     def resource_collection_uri?
-      return components.size == 1
+      return components.size == 1 && components[0] != 'cloudkit-meta'
     end
 
     # Returns true if URI matches /{collection}/_resolved
