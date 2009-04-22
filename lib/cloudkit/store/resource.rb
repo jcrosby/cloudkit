@@ -60,7 +60,7 @@ module CloudKit
     end
 
     # Delete the given resource. This is a soft delete, archiving the previous
-    # resource and inserted a deleted resource placeholder at the old URI.
+    # resource and inserting a deleted resource placeholder at the old URI.
     # Raises HistoricalIntegrityViolation for attempts to delete resources that
     # are not current.
     def delete

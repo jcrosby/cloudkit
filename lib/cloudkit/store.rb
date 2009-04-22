@@ -117,7 +117,8 @@ module CloudKit
       return status_412 if resource.etag != options[:etag]
 
       resource.delete
-      return json_meta_response(200, resource.uri.string, resource.etag, resource.last_modified)
+      archived_resource = resource.previous_version
+      return json_meta_response(200, archived_resource.uri.string, archived_resource.etag, resource.last_modified)
     end
 
     # Build a response containing the allowed methods for a given URI.

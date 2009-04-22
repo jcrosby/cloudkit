@@ -782,6 +782,24 @@ describe "A CloudKit::Service" do
         json.keys.sort.should == ['etag', 'last_modified', 'ok', 'uri']
       end
 
+      it "should use the archived URI in the JSON result" do
+        response = @request.delete(
+          '/items/abc',
+          'HTTP_IF_MATCH' => @etag,
+          CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
+        json = JSON.parse(response.body)
+        json['uri'].should match(/\/items\/abc\/versions\/.+/)
+      end
+
+      it "should not change the ETag for the archived version" do
+        response = @request.delete(
+          '/items/abc',
+          'HTTP_IF_MATCH' => @etag,
+          CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
+        json = JSON.parse(response.body)
+        json['etag'].should == @etag
+      end
+
       it "should set the Content-Type header" do
         response = @request.delete(
           '/items/abc',
