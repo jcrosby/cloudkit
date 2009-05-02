@@ -118,7 +118,7 @@ module CloudKit
 
       resource.delete
       archived_resource = resource.previous_version
-      return json_meta_response(200, archived_resource.uri.string, archived_resource.etag, resource.last_modified)
+      return json_meta_response(archived_resource.uri.string, archived_resource.etag, resource.last_modified)
     end
 
     # Build a response containing the allowed methods for a given URI.
@@ -277,7 +277,7 @@ module CloudKit
     def create_resource(uri, options)
       JSON.parse(options[:json]) rescue (return status_422)
       resource = CloudKit::Resource.create(uri, options[:json], options[:remote_user])
-      json_meta_response(201, resource.uri.string, resource.etag, resource.last_modified)
+      json_create_response(resource.uri.string, resource.etag, resource.last_modified)
     end
 
     # Update the resource at the specified URI. Requires the :etag option.
@@ -289,7 +289,7 @@ module CloudKit
       return etag_required unless options[:etag]
       return status_412    unless options[:etag] == resource.etag
       resource.update(options[:json])
-      return json_meta_response(200, uri.string, resource.etag, resource.last_modified)
+      return json_meta_response(uri.string, resource.etag, resource.last_modified)
     end
 
     # Bundle a collection of results as a list of URIs for the response.

@@ -182,4 +182,10 @@ describe "A Request" do
     request.last_path_element.should == 'def'
   end
 
+  it "should know its domain root" do
+    request = CloudKit::Request.new(Rack::MockRequest.env_for(
+      '/', 'HTTP_HOST' => 'example.com'))
+    request.domain_root.should == "http://example.com"
+  end
+
 end

@@ -68,18 +68,22 @@ module CloudKit
       if tunnel_methods.include?(request['_method'].try(:upcase))
         return send(request['_method'].downcase, request)
       end
-      @store.post(
+      response = @store.post(
         request.uri,
         {:json => request.json}.filter_merge!(
-          :remote_user => request.current_user)).to_rack
+          :remote_user => request.current_user))
+      update_location_header(request, response)
+      response.to_rack
     end
 
     def put(request)
-      @store.put(
+      response = @store.put(
         request.uri,
         {:json => request.json}.filter_merge!(
           :remote_user => request.current_user,
-          :etag        => request.if_match)).to_rack
+          :etag        => request.if_match))
+      update_location_header(request, response)
+      response.to_rack
     end
 
     def delete(request)
@@ -114,19 +118,24 @@ module CloudKit
     end
 
     def versions_link_header(request)
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.path_info}"
+      base_url = "#{request.domain_root}#{request.path_info}"
       "<#{base_url}/versions>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/versions\""
     end
 
     def resolved_link_header(request)
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.path_info}"
+      base_url = "#{request.domain_root}#{request.path_info}"
       "<#{base_url}/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\""
     end
 
     def index_link_header(request)
       index_path = request.path_info.sub(/\/_resolved(\/)*$/, '')
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{index_path}"
+      base_url = "#{request.domain_root}#{index_path}"
       "<#{base_url}>; rel=\"index\""
+    end
+
+    def update_location_header(request, response)
+      return unless response['Location']
+      response['Location'] = "#{request.domain_root}#{response['Location']}"
     end
 
     def auth_missing?(request)

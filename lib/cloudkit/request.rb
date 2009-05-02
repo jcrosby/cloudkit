@@ -168,5 +168,10 @@ module CloudKit
     def flash
       session[CLOUDKIT_FLASH] ||= CloudKit::FlashSession.new
     end
+
+    # Return the host and scheme
+    def domain_root
+      "#{scheme}://#{@env['HTTP_HOST']}"
+    end
   end
 end

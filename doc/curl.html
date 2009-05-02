@@ -120,6 +120,7 @@ Let's move on, creating a note using <a href="http://tools.ietf.org/html/rfc2616
     $ curl -i -XPOST -d'{"title":"projects"}' http://localhost:9292/notes<br/>
     HTTP/1.1 201 Created<br/>
     Cache-Control: no-cache<br/>
+    Location: http://localhost:9292/notes/0dda06f0-b134-012b-a2d8-0017f2c62348<br/>
     Content-Type: application/json<br/>
     Content-Length: 159<br/><br/>
 
@@ -139,6 +140,7 @@ so that we can specify its location:
     $ curl -i -XPUT -d'{"title":"reminders"}' http://localhost:9292/notes/abc<br/>
     HTTP/1.1 201 Created<br/>
     Cache-Control: no-cache<br/>
+    Location: http://localhost:9292/notes/abc<br/>
     Content-Type: application/json<br/>
     Content-Length: 126<br/><br/>
 

@@ -570,7 +570,7 @@ describe "A CloudKit::Service" do
       before(:each) do
         json = JSON.generate(:this => 'that')
         @response = @request.post(
-          '/items', {:input => json}.merge(VALID_TEST_AUTH))
+          '/items', {:input => json, 'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
         @body = JSON.parse(@response.body)
       end
 
@@ -600,6 +600,10 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should be_nil
       end
 
+      it "should return a Location header" do
+        @response['Location'].should match(/http:\/\/example.org#{@body['uri']}/)
+      end
+
       it "should return a 422 if parsing fails" do
         response = @request.post('/items', {:input => 'fail'}.merge(VALID_TEST_AUTH))
         response.status.should == 422
@@ -607,7 +611,7 @@ describe "A CloudKit::Service" do
 
     end
 
-    describe "on PUT /:collection/:id" do 
+    describe "on PUT /:collection/:id" do
 
       before(:each) do
         json = JSON.generate(:this => 'that')
@@ -626,11 +630,15 @@ describe "A CloudKit::Service" do
       it "should create a document if it does not already exist" do
         json = JSON.generate(:this => 'thing')
         response = @request.put(
-          '/items/xyz', {:input => json}.merge(VALID_TEST_AUTH))
+          '/items/xyz', {
+            :input      => json,
+            'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
         response.status.should == 201
         result = @request.get('/items/xyz', VALID_TEST_AUTH)
         result.status.should == 200
-        JSON.parse(result.body)['this'].should == 'thing'
+        parsed_json = JSON.parse(result.body)['this']
+        parsed_json.should == 'thing'
+        response['Location'].should match(/http:\/\/example.org#{parsed_json['uri']}/)
       end
 
       it "should not create new resources using deleted resource URIs" do

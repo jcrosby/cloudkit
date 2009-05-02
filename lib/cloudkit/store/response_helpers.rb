@@ -46,21 +46,32 @@ module CloudKit::ResponseHelpers
 
   def response(status, content='', etag=nil, last_modified=nil, options={})
     cache_control = options[:cache] == false ? 'no-cache' : 'proxy-revalidate'
-    headers = {
+    etag = "\"#{etag}\"" if etag
+    headers = {}.filter_merge!(
       'Content-Type'  => 'application/json',
-      'Cache-Control' =>  cache_control}
-    headers.merge!('ETag' => "\"#{etag}\"") if etag
-    headers.merge!('Last-Modified' => last_modified) if last_modified
+      'Cache-Control' =>  cache_control,
+      'Last-Modified' => last_modified,
+      'Location'      => options[:location],
+      'ETag'          => etag)
     CloudKit::Response.new(status, headers, content)
   end
 
-  def json_meta_response(status, uri, etag, last_modified)
-    json = JSON.generate(
+  def json_meta_response(uri, etag, last_modified)
+    json = json_metadata(uri, etag, last_modified)
+    response(200, json, nil, nil, :cache => false)
+  end
+
+  def json_create_response(uri, etag, last_modified)
+    json = json_metadata(uri, etag, last_modified)
+    response(201, json, nil, nil, {:cache => false, :location => uri})
+  end
+
+  def json_metadata(uri, etag, last_modified)
+    JSON.generate(
       :ok            => true,
       :uri           => uri,
       :etag          => etag,
       :last_modified => last_modified)
-    response(status, json, nil, nil, :cache => false)
   end
 
   def json_error(message)
