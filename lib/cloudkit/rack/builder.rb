@@ -4,7 +4,7 @@ module Rack #:nodoc:
 
     # Extends Rack::Builder's to_app method to detect if the last piece of
     # middleware in the stack is a CloudKit shortcut (contain or expose), adding
-    # adding a default developer page at the root and a 404 everywhere else.
+    # a default developer page at the root and a 404 everywhere else.
     def to_app
       default_app = lambda do |env|
         if (env['PATH_INFO'] == '/')

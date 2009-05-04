@@ -34,7 +34,7 @@ require 'cloudkit/user_store'
 include CloudKit::Constants
 
 module CloudKit
-  VERSION = '0.11.1'
+  VERSION = '0.11.2'
 
   # Sets up the storage adapter. Defaults to development-time
   # CloudKit::MemoryTable. Also supports Rufus Tokyo Table instances. See the

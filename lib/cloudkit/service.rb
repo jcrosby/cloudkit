@@ -1,7 +1,7 @@
 module CloudKit
 
   # A CloudKit Service is Rack middleware providing a REST/HTTP 1.1 interface to
-  # a Store. Its primary purpose is initialize and adapt a Store for use in a
+  # a Store. Its primary purpose is to initialize and adapt a Store for use in a
   # Rack middleware stack.
   #
   # ==Examples

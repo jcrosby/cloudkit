@@ -34,6 +34,8 @@ describe "An OpenIDFilter" do
     request = Rack::MockRequest.new(openid_app)
     response = request.get('/bar')
     response.status.should == 200
+    response = request.get('/foo')
+    response.status.should == 200
   end
 
   it "should redirect to the login page if authorization is required" do

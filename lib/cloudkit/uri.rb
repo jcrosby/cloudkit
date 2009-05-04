@@ -1,6 +1,6 @@
 module CloudKit
 
-  # A CloudKit::URI wraps a URI string, added methods useful for routing
+  # A CloudKit::URI wraps a URI string, adding methods useful for routing
   # in CloudKit as well as caching URI components for future comparisons.
   class URI
 

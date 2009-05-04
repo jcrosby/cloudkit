@@ -6,7 +6,16 @@ module CloudKit
   # The root URI, "/", is always bypassed. More URIs can also be bypassed using
   # the :allow option:
   #
+  #   use Rack::Session::Pool
   #   use OpenIDFilter, :allow => ['/foo', '/bar']
+  #
+  # In addition to the :allow option, a block can also be used for more complex
+  # decisions:
+  #
+  #   use Rack::Session::Pool
+  #   use OpenIDFilter, :allow => ['/foo'] do |url|
+  #     bar(url) # some method returning true or false
+  #   end
   #
   # Responds to the following URIs:
   #   /login

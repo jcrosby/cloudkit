@@ -1,8 +1,8 @@
 module CloudKit
 
   # A CloudKit::Resource represents a "resource" in the REST/HTTP sense of the
-  # word. It encapsulates a JSON document and its metadata such as it URI, ETag,
-  # Last-Modified date, remote user, and its historical versions.
+  # word. It encapsulates a JSON document and its metadata such as its URI, ETag,
+  # Last-Modified date, remote user, and historical versions.
   class Resource
 
     attr_reader :uri, :etag, :last_modified, :json, :remote_user

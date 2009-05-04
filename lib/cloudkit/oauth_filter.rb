@@ -9,7 +9,7 @@ module CloudKit
   #   /oauth/authorized_request_tokens/{id}
   #   /oauth/access_tokens
   #
-  # Responds to the following URIs are part of OAuth Discovery:
+  # Responds to the following URIs as part of OAuth Discovery:
   #   /oauth
   #   /oauth/meta
   #

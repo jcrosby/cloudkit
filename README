@@ -17,7 +17,7 @@ In a rackup file called config.ru:
   require 'cloudkit'
   expose :notes, :todos
 
-The above creates a versioned HTTP service using JSON to represent two types of resource collections -- Notes and ToDos.
+The above creates a versioned HTTP/REST service using JSON to represent two types of resource collections -- Notes and ToDos.
 
 In a different rackup file:
 
