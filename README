@@ -29,7 +29,7 @@ The above provides the same API as example 1 with added authentication and autho
 An explicit version of example 2, minus the default developer landing page:
 
   require 'cloudkit'
-  use Rack::Pool::Session
+  use Rack::Session::Pool
   use CloudKit::OAuthFilter
   use CloudKit::OpenIDFilter
   use CloudKit::Service, :collections => [:notes, :todos]
@@ -40,7 +40,7 @@ The same as above, using Tokyo Cabinet:
   require 'cloudkit'
   require 'rufus/tokyo' # gem install rufus-tokyo
   CloudKit.setup_storage_adapter(Rufus::Tokyo::Table.new('cloudkit.tdb'))
-  use Rack::Pool::Session
+  use Rack::Session::Pool
   use CloudKit::OAuthFilter
   use CloudKit::OpenIDFilter
   use CloudKit::Service, :collections => [:notes, :todos]
