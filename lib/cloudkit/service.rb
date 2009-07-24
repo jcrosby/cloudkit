@@ -45,7 +45,7 @@ module CloudKit
       unless bypass?(request)
         return auth_config_error if (request.using_auth? && auth_missing?(request))
         return not_implemented unless @store.implements?(request.request_method)
-        send(request.request_method.downcase, request) rescue internal_server_error
+        send(request.request_method.downcase, request) rescue internal_server_error.to_rack
       else
         @app.call(env)
       end
