@@ -121,7 +121,7 @@ module CloudKit
       @parsed_json ||= JSON.parse(@json)
     end
 
-    # Create a new resource. Intializes and saves in one step.
+    # Create a new resource. Initializes and saves in one step.
     #
     # === Parameters
     # - uri - A CloudKit::URI for the resource or its parent collection.
@@ -224,7 +224,7 @@ module CloudKit
           JSON.parse(result['json']).merge('___index___' => index))
       end
       json = '[' + json_objects.join(',') + ']'.gsub('"', "'")
-      CloudKit.javascript_runtime.evaluate("window['JSONQuery'](\"#{query}\", #{json});")
+      CloudKit.javascript_context.eval("window['JSONQuery'](\"#{query}\", #{json})")
     end
 
     def wrap_uri(uri)

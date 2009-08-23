@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
     lib/cloudkit/constants.rb
     lib/cloudkit/exceptions.rb
     lib/cloudkit/flash_session.rb
+    lib/cloudkit/javascript_context.rb
     lib/cloudkit/oauth_filter.rb
     lib/cloudkit/oauth_store.rb
     lib/cloudkit/openid_filter.rb
@@ -44,7 +45,10 @@ Gem::Specification.new do |s|
     lib/cloudkit/request.rb
     lib/cloudkit/service.rb
     lib/cloudkit/store.rb
+    lib/cloudkit/store/json2.js
+    lib/cloudkit/store/json_query_expression.rb
     lib/cloudkit/store/memory_table.rb
+    lib/cloudkit/store/query.js
     lib/cloudkit/store/resource.rb
     lib/cloudkit/store/response.rb
     lib/cloudkit/store/response_helpers.rb
@@ -57,8 +61,11 @@ Gem::Specification.new do |s|
     lib/cloudkit/uri.rb
     lib/cloudkit/user_store.rb
     lib/cloudkit/util.rb
+    lib/js.jar
     spec/ext_spec.rb
     spec/flash_session_spec.rb
+    spec/javascript_context_spec.rb
+    spec/json_query_expression_spec.rb
     spec/memory_table_spec.rb
     spec/oauth_filter_spec.rb
     spec/oauth_store_spec.rb
@@ -81,6 +88,5 @@ Gem::Specification.new do |s|
   s.add_dependency 'uuid', '= 2.0.1'
   s.add_dependency 'oauth', '~> 0.3'
   s.add_dependency 'ruby-openid', '= 2.1.2'
-  s.add_dependency 'json', '= 1.1.3'
-  s.add_dependency 'johnson', '~> 1.1'
+  s.add_dependency 'json-jruby', '= 1.1.3'
 end

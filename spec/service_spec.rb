@@ -151,32 +151,221 @@ describe "A CloudKit::Service" do
         @response['Link'].match("<http://example.org/items/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"").should_not be_nil
       end
 
-      describe "using JSONQuery" do
+    end
 
-        it "should accept a 0-offset array slice operator" do
-          json_query = Rack::Utils.escape('[0:2]')
-          response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
-          parsed_response = JSON.parse(response.body)
-          parsed_response['uris'].should == ['/items/2', '/items/1']
-          parsed_response['total'].should == 3
-        end
+    describe "using JSONQuery" do
 
-        it "should accept an array slice operator with an offset" do
-          json_query = Rack::Utils.escape('[1:2]')
-          response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
-          parsed_response = JSON.parse(response.body)
-          parsed_response['uris'].should == ['/items/1']
-          parsed_response['offset'].should == 1
-          parsed_response['total'].should == 3
-        end
-
-        it "should not include JSONQuery in the Link header" do
-          json_query = Rack::Utils.escape('[0:2]')
-          response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
-          response['Link'].should_not include(json_query)
-        end
-
+      before(:each) do
+        @request.put("/items/0", {:input => JSON.generate(:foo => "bar", :rating => 4)}.merge(VALID_TEST_AUTH))
+        @request.put("/items/1", {:input => JSON.generate(:foo => "baz", :rating => 2)}.merge(VALID_TEST_AUTH))
       end
+
+      def response_for_query(query)
+        json_query = Rack::Utils.escape(query)
+        response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
+        JSON.parse(response.body)
+      end
+
+      it "should accept a 0-offset array slice operator" do
+        @request.put("/items/2", {:input => '{}'}.merge(VALID_TEST_AUTH))
+        parsed_response = response_for_query('[0:2]')
+        parsed_response['uris'].should == ['/items/2', '/items/1']
+        parsed_response['total'].should == 3
+      end
+
+      it "should accept an array slice operator with an offset" do
+        @request.put("/items/2", {:input => '{}'}.merge(VALID_TEST_AUTH))
+        parsed_response = response_for_query('[1:2]')
+        parsed_response['uris'].should == ['/items/1']
+        parsed_response['offset'].should == 1
+        parsed_response['total'].should == 3
+      end
+
+      it "should not include JSONQuery in the Link header" do
+        json_query = Rack::Utils.escape('[0:2]')
+        response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
+        response['Link'].should_not include(json_query)
+      end
+
+      # The JSONQuery specs below mimic the full test suite from
+      # http://github.com/jcrosby/jsonquery which is also vendored in this
+      # project via Rhino.
+      #
+      # This may seem like overkill, but it is important to know if there are
+      # any subtle issues related to crossing the JavaScript bridge
+      # provided by Rhino.
+
+      it "should understand [?property='value'] queries" do
+        # hit
+        parsed_response = response_for_query("[?foo='bar']")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/0']
+
+        # value miss
+        parsed_response = response_for_query("[?foo='x']")
+        parsed_response['total'].should == 0
+
+        # property and value miss
+        parsed_response = response_for_query("[?doesnotexist='x']")
+        parsed_response['total'].should == 0
+      end
+
+      it "should understand [?property=value] using a number for comparison" do
+        # hit
+        parsed_response = response_for_query("[?rating=4]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/0']
+
+        # value miss
+        parsed_response = response_for_query("[?rating=7]")
+        parsed_response['total'].should == 0
+
+        # property and value miss
+        parsed_response = response_for_query("[?x=7]")
+        parsed_response['total'].should == 0
+      end
+
+      it "should understand [?property>=value] when value and target are equal" do
+        parsed_response = response_for_query("[?rating>=4]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/0']
+      end
+
+      it "should understand [?property>=value] when target is less than value" do
+        parsed_response = response_for_query("[?rating>=3]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/0']
+      end
+
+      it "should understand [?property>=value] when target is greater than value" do
+        parsed_response = response_for_query("[?rating>=5]")
+        parsed_response['total'].should == 0
+        parsed_response['uris'].should == []
+      end
+
+      it "should understand [?property<=value] when value and target are equal" do
+        parsed_response = response_for_query("[?rating<=2]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/1']
+      end
+
+      it "should understand [?property<=value] when target is greater than value" do
+        parsed_response = response_for_query("[?rating<=1]")
+        parsed_response['total'].should == 0
+        parsed_response['uris'].should == []
+      end
+
+      it "should understand [?property<=value] when target is less than value" do
+        parsed_response = response_for_query("[?rating<=5]")
+        parsed_response['total'].should == 2
+        parsed_response['uris'].should == ['/items/1', '/items/0']
+      end
+
+      it "should understand [?property>value] when target is greater than value" do
+        parsed_response = response_for_query("[?rating>3]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/0']
+      end
+
+      it "should understand [?property>value] when target is equal to value" do
+        parsed_response = response_for_query("[?rating>4]")
+        parsed_response['total'].should == 0
+        parsed_response['uris'].should == []
+      end
+
+      it "should understand [?property>value] when target is less than value" do
+        parsed_response = response_for_query("[?rating>5]")
+        parsed_response['total'].should == 0
+        parsed_response['uris'].should == []
+      end
+
+      it "should understand [?property<value] when target is greater than value" do
+        parsed_response = response_for_query("[?rating<3]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/1']
+      end
+
+      it "should understand [?property<value] when target is equal to value" do
+        parsed_response = response_for_query("[?rating<2]")
+        parsed_response['total'].should == 0
+        parsed_response['uris'].should == []
+      end
+
+      it "should understand [?property<value] when target is less than value" do
+        parsed_response = response_for_query("[?rating<5]")
+        parsed_response['total'].should == 2
+        parsed_response['uris'].should == ['/items/1', '/items/0']
+      end
+
+      it "should understand [?property!='value'] using a string for comparison" do
+        parsed_response = response_for_query("[?foo!='bar']")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/1']
+      end
+
+      it "should understand [?property!=value]" do
+        parsed_response = response_for_query("[?rating!=4]")
+        parsed_response['total'].should == 1
+        parsed_response['uris'].should == ['/items/1']
+
+        parsed_response = response_for_query("[?rating!=5]")
+        parsed_response['total'].should == 2
+        parsed_response['uris'].should == ['/items/1', '/items/0']
+      end
+
+      it "should understand value extraction with [=property]"
+
+      it "should understand [index]"
+
+      it "should understand array slicing with [start:end]"
+
+      it "should understand array slicing with [start:end:step]"
+
+      it "should understand unions with [expr,expr]"
+
+      it "should understand filter chaining with [expr][expr]..."
+
+      it "should understand +"
+
+      it "should understand -"
+
+      it "should understand /"
+
+      it "should understand *"
+
+      it "should understand bitwise AND with &"
+
+      it "should understand bitwise OR with |"
+
+      it "should understand %"
+
+      it "should understand ( and )"
+
+      it "should understand accessing the current object with @"
+
+      it "should understand accessing the root object with $"
+
+      it "should understand accessing all properties with [*]"
+
+      it "should understand accessing all properties with .*"
+
+      it "should understand recursive find with ..property"
+
+      it "should understand creating new object literals with [={new object literal}]"
+
+      it "should understand case insensitive matching with [expr ~ expr]"
+
+      it "should understand partial string matching with *"
+
+      it "should understand value substitution with $1 $2 etc."
+
+      it "should understand ascending sort with [/expr]"
+
+      it "should understand descending sort with [\\expr]"
+
+      it "should understand prioritized sorting with [/expr, /expr]"
+
+      it "should understand mixed direction, prioritized sorting with [/expr, \\expr]"
 
     end
 

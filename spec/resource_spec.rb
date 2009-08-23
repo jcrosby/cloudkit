@@ -262,7 +262,8 @@ describe "A Resource" do
       # JSONQuery usage is delegated to query.js via
       # Johnson.
       # See http://github.com/jcrosby/jsonquery
-      # for the complete set of tests.
+      #
+      # Integration tests are in spec/service_spec.rb
 
       it "should require a matcher" do
         lambda {

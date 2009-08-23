@@ -1,4 +1,6 @@
 require 'rubygems'
+require 'java'
+require 'lib/js.jar'
 require 'erb'
 require 'json'
 require 'digest/md5'
@@ -6,7 +8,6 @@ require 'openid'
 require 'time'
 require 'uuid'
 require 'rack'
-require 'johnson'
 require 'oauth'
 require 'oauth/consumer'
 require 'oauth/request_proxy/rack_request'
@@ -32,6 +33,7 @@ require 'cloudkit/rack/router'
 require 'cloudkit/request'
 require 'cloudkit/service'
 require 'cloudkit/user_store'
+require 'cloudkit/javascript_context'
 
 include CloudKit::Constants
 
@@ -50,17 +52,13 @@ module CloudKit
     @storage_adapter
   end
 
-  def self.javascript_runtime
-    unless @javascript_runtime
-      @javascript_runtime = Johnson::Runtime.new
-      libs = 'window = {};' # fake top level JS namespace
+  def self.javascript_context
+    unless @javascript_context
+      @javascript_context = JavascriptContext.new
       prefix = File.expand_path(File.dirname(__FILE__)) + '/cloudkit/store/'
-      ['json2.js', 'query.js'].each do |file|
-        File.open(prefix + file, 'r') { |f| libs << f.read }
-      end
-      @javascript_runtime.evaluate(libs);
+      ['json2.js', 'query.js'].each { |file| @javascript_context.load(prefix+file) }
     end
-    @javascript_runtime
+    @javascript_context
   end
 end
 
