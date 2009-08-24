@@ -49,11 +49,6 @@ module CloudKit
       return components.size == 1 && components[0] != 'cloudkit-meta'
     end
 
-    # Returns true if URI matches /{collection}/_resolved
-    def resolved_resource_collection_uri?
-      return components.size == 2 && components[1] == '_resolved'
-    end
-
     # Returns true if URI matches /{collection}/{uuid}
     def resource_uri?
       return components.size == 2 && components[1] != '_resolved'
@@ -62,11 +57,6 @@ module CloudKit
     # Returns true if URI matches /{collection}/{uuid}/versions
     def version_collection_uri?
       return components.size == 3 && components[2] == 'versions'
-    end
-
-    # Returns true if URI matches /{collection}/{uuid}/versions/_resolved
-    def resolved_version_collection_uri?
-      return components.size == 4 && components[2] == 'versions' && components[3] == '_resolved'
     end
 
     # Returns true if URI matches /{collection}/{uuid}/versions/{etag}

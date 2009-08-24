@@ -36,10 +36,8 @@ module CloudKit
     # ===URI Types
     #   /cloudkit-meta
     #   /{collection}
-    #   /{collection}/_resolved
     #   /{collection}/{uuid}
     #   /{collection}/{uuid}/versions
-    #   /{collection}/{uuid}/versions/_resolved
     #   /{collection}/{uuid}/versions/{etag}
     #
     # ===Examples
@@ -56,11 +54,9 @@ module CloudKit
     def get(uri, options={})
       return invalid_entity_type                        if !valid_collection_type?(uri.collection_type)
       return meta                                       if uri.meta_uri?
-      return resource_collection(uri, options)          if uri.resource_collection_uri?
-      return resolved_resource_collection(uri, options) if uri.resolved_resource_collection_uri?
+      return resource_collection(uri, options) if uri.resource_collection_uri?
       return resource(uri, options)                     if uri.resource_uri?
-      return version_collection(uri, options)           if uri.version_collection_uri?
-      return resolved_version_collection(uri, options)  if uri.resolved_version_collection_uri?
+      return version_collection(uri, options)  if uri.version_collection_uri?
       return resource_version(uri, options)             if uri.resource_version_uri?
       status_404
     end
@@ -130,10 +126,8 @@ module CloudKit
     def methods_for_uri(uri)
       return meta_methods                         if uri.meta_uri?
       return resource_collection_methods          if uri.resource_collection_uri?
-      return resolved_resource_collection_methods if uri.resolved_resource_collection_uri?
       return resource_methods                     if uri.resource_uri?
       return version_collection_methods           if uri.version_collection_uri?
-      return resolved_version_collection_methods  if uri.resolved_version_collection_uri?
       return resource_version_methods             if uri.resource_version_uri?
     end
 
@@ -147,11 +141,6 @@ module CloudKit
       @resource_collection_methods ||= http_methods.excluding('PUT', 'DELETE')
     end
 
-    # Return the list of methods allowed on a resolved resource collection.
-    def resolved_resource_collection_methods
-      @resolved_resource_collection_methods ||= http_methods.excluding('POST', 'PUT', 'DELETE')
-    end
-
     # Return the list of methods allowed on an individual resource.
     def resource_methods
       @resource_methods ||= http_methods.excluding('POST')
@@ -160,11 +149,6 @@ module CloudKit
     # Return the list of methods allowed on a version history collection.
     def version_collection_methods
       @version_collection_methods ||= http_methods.excluding('POST', 'PUT', 'DELETE')
-    end
-
-    # Return the list of methods allowed on a resolved version history collection.
-    def resolved_version_collection_methods
-      @resolved_version_collection_methods ||= http_methods.excluding('POST', 'PUT', 'DELETE')
     end
 
     # Return the list of methods allowed on a resource version.
@@ -206,28 +190,9 @@ module CloudKit
       response(200, json, build_etag(json))
     end
 
-    # Return a list of resource URIs for the given collection URI. Sorted by
-    # Last-Modified date in descending order.
-    def resource_collection(uri, options)
-      if query = uri.json_query
-        query = query.has_trailing_slice_operator? ? query.chopped : query.string
-        result = CloudKit::Resource.query(
-          options.merge(
-            :collection_reference => uri.collection_uri_fragment,
-            :match                => query))
-      else
-        filter = options.merge(
-          :deleted              => false,
-          :collection_reference => uri.collection_uri_fragment,
-          :archived             => false)
-        result = CloudKit::Resource.current(filter)
-      end
-      bundle_collection_result(uri, options, result)
-    end
-
     # Return all documents and their associated metadata for the given
-    # collection URI.
-    def resolved_resource_collection(uri, options)
+    # collection URI. Sorted by Last-Modified date in descending order.
+    def resource_collection(uri, options)
       if query = uri.json_query
         query = query.has_trailing_slice_operator? ? query.chopped : query.string
         result = CloudKit::Resource.query(
@@ -237,9 +202,11 @@ module CloudKit
       else
         result = CloudKit::Resource.current(
           options.merge(
+            :deleted              => false,
+            :archived             => false,
             :collection_reference => uri.collection_uri_fragment))
       end
-      bundle_resolved_collection_result(uri, options, result)
+      bundle_collection_result(uri, options, result)
     end
 
     # Return the resource for the given URI. Return 404 if not found or if
@@ -252,33 +219,10 @@ module CloudKit
       status_404
     end
 
-    # Return a collection of URIs for all versions of a resource including the
-    # current version. Sorted by Last-Modified date in descending order.
-    def version_collection(uri, options)
-      found = CloudKit::Resource.first(
-        options.merge(
-          :uri => uri.current_resource_uri))
-      return status_404 unless found
-      if query = uri.json_query
-        query = query.has_trailing_slice_operator? ? query.chopped : query.string
-        result = CloudKit::Resource.query(
-          options.merge(
-            :resource_reference => uri.current_resource_uri,
-            :archived           => :maybe, # sorry
-            :match              => query))
-      else
-        result = CloudKit::Resource.all( # TODO - just use found.versions
-          options.merge(
-            :resource_reference => uri.current_resource_uri,
-            :deleted            => false))
-      end
-      bundle_collection_result(uri, options, result)
-    end
-
     # Return all document versions and their associated metadata for a given
     # resource including the current version. Sorted by Last-Modified date in
     # descending order.
-    def resolved_version_collection(uri, options)
+    def version_collection(uri, options)
       found = CloudKit::Resource.first(
         options.merge(
           :uri => uri.current_resource_uri))
@@ -296,7 +240,7 @@ module CloudKit
             :resource_reference => uri.current_resource_uri,
             :deleted            => false))
       end
-      bundle_resolved_collection_result(uri, options, result)
+      bundle_collection_result(uri, options, result)
     end
 
     # Return a specific version of a resource.
@@ -325,17 +269,6 @@ module CloudKit
       return json_meta_response(200, uri.string, resource.etag, resource.last_modified)
     end
 
-    # Bundle a collection of results as a list of URIs for the response.
-    def bundle_collection_result(uri, options, result)
-      total  = result.size
-      offset = extract_offset(uri)
-      max    = extract_max(uri, total)
-      list   = result.to_a[offset...max].map{|r| r.uri.string}
-      json   = uri_list(list, total, offset)
-      last_modified = result.first.try(:last_modified) if result.any?
-      response(200, json, build_etag(json), last_modified)
-    end
-
     def extract_offset(uri)
       if uri.json_query && uri.json_query.has_trailing_slice_operator?
         return CloudKit::JSONQueryExpression.extract_start(uri.json_query.last)
@@ -350,10 +283,10 @@ module CloudKit
       total
     end
 
-    # Bundle a collection of results as a list of documents and the associated
+    # Bundle a collection of results as a list of documents and their associated
     # metadata (last_modified, uri, etag) that would have accompanied a response
     # to their singular request.
-    def bundle_resolved_collection_result(uri, options, result)
+    def bundle_collection_result(uri, options, result)
       total  = result.size
       offset = extract_offset(uri)
       max    = extract_max(uri, total)

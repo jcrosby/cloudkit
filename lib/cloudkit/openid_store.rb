@@ -21,7 +21,7 @@ module CloudKit
       return nil unless result.status == 200
       return nil if result.parsed_content['total'] == 0
 
-      ignore, associations = resolve_associations(result.parsed_content)
+      associations = result.parsed_content['documents'].map {|data| JSON.parse(data['document'])}
       return nil if associations.empty?
 
       associations.sort_by{|a| a['issued']}
@@ -41,12 +41,12 @@ module CloudKit
         :handle     => Base64.encode64(handle))
       return nil unless result.status == 200
 
-      responses, associations = resolve_associations(result.parsed_content)
+      associations = result.parsed_content['documents'].map {|data| data['document']}
       return nil if associations.empty?
 
-      uris = result.parsed_content['uris']
-      responses.each_with_index do |r, index|
-        @@store.delete(CloudKit::URI.new(uris[index]), :etag => r.etag)
+      uris = result.parsed_content['documents'].map {|data| data['uri']}
+      result.parsed_content['documents'].each_with_index do |r, index|
+        @@store.delete(CloudKit::URI.new(uris[index]), :etag => r['etag'])
       end
     end
 
@@ -89,12 +89,5 @@ module CloudKit
     # Return the version number for this store.
     def version; 1; end
 
-    protected
-
-    def resolve_associations(parsed_content) #:nodoc:
-      uri_list = parsed_content['uris'].map! { |u| CloudKit::URI.new(u) }
-      association_responses = @@store.resolve_uris(uri_list)
-      return association_responses, association_responses.map{|a| a.parsed_content}
-    end
   end
 end

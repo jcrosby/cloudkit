@@ -46,17 +46,8 @@ describe "A URI" do
     CloudKit::URI.new('/items/').should be_resource_collection_uri
   end
 
-  it "should know if it is a resolved resource collection URI" do
-    ['/items', '/items/123', '/items/123/versions', '/items/123/versions/_resolved', '/items/123/versions/abc'].each { |uri|
-      CloudKit::URI.new(uri).should_not be_resolved_resource_collection_uri
-      CloudKit::URI.new(uri+'/').should_not be_resolved_resource_collection_uri
-    }
-    CloudKit::URI.new('/items/_resolved').should be_resolved_resource_collection_uri
-    CloudKit::URI.new('/items/_resolved/').should be_resolved_resource_collection_uri
-  end
-
   it "should know if it is a resource URI" do
-    ['/items', '/items/_resolved', '/items/123/versions', '/items/123/versions/_resolved', '/items/123/versions/abc'].each { |uri|
+    ['/items', '/items/123/versions', '/items/123/versions/abc'].each { |uri|
       CloudKit::URI.new(uri).should_not be_resource_uri
       CloudKit::URI.new(uri+'/').should_not be_resource_uri
     }
@@ -65,7 +56,7 @@ describe "A URI" do
   end
 
   it "should know if it is a version collection URI" do
-    ['/items', '/items/_resolved', '/items/123', '/items/123/versions/_resolved', '/items/123/versions/abc'].each { |uri|
+    ['/items', '/items/123', '/items/123/versions/abc'].each { |uri|
       CloudKit::URI.new(uri).should_not be_version_collection_uri
       CloudKit::URI.new(uri+'/').should_not be_version_collection_uri
     }
@@ -73,17 +64,8 @@ describe "A URI" do
     CloudKit::URI.new('/items/123/versions/').should be_version_collection_uri
   end
 
-  it "should know if it is a resolved version collection URI" do
-    ['/items', '/items/_resolved', '/items/123', '/items/123/versions', '/items/123/versions/abc'].each { |uri|
-      CloudKit::URI.new(uri).should_not be_resolved_version_collection_uri
-      CloudKit::URI.new(uri+'/').should_not be_resolved_version_collection_uri
-    }
-    CloudKit::URI.new('/items/123/versions/_resolved').should be_resolved_version_collection_uri
-    CloudKit::URI.new('/items/123/versions/_resolved/').should be_resolved_version_collection_uri
-  end
-
   it "should know if it is a resource version URI" do
-    ['/items', '/items/_resolved', '/items/123', '/items/123/versions', '/items/123/versions/_resolved'].each { |uri|
+    ['/items', '/items/123', '/items/123/versions'].each { |uri|
       CloudKit::URI.new(uri).should_not be_resource_version_uri
       CloudKit::URI.new(uri+'/').should_not be_resource_version_uri
     }
@@ -128,7 +110,7 @@ describe "A URI" do
   it "should not include JSONQuery elements in its components" do
     json_query = '[?foo>3][=bar]'
     escaped_query = Rack::Utils.escape(json_query)
-    ['/items', '/items/_resolved', '/items/123', '/items/123/versions', '/items/123/versions/_resolved', '/items/123/versions/abc'].each { |uri|
+    ['/items', '/items/123', '/items/123/versions', '/items/123/versions/abc'].each { |uri|
       uri_with_query = uri + escaped_query
       CloudKit::URI.new(uri_with_query).components.each do |component|
         component.should_not match(/escaped_query/)

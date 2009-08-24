@@ -96,9 +96,9 @@ describe "A CloudKit::Service" do
           json = JSON.generate(:this => i.to_s)
           @request.put("/items/#{i}", {:input => json}.merge(VALID_TEST_AUTH))
         end
-        json = JSON.generate(:this => '4')
+        json = JSON.generate(:this => '3')
         @request.put(
-          '/items/4', {:input => json}.merge(CLOUDKIT_AUTH_KEY => 'someoneelse'))
+          '/items/3', {:input => json}.merge(CLOUDKIT_AUTH_KEY => 'someoneelse'))
         @response = @request.get(
           '/items', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
         @parsed_response = JSON.parse(@response.body)
@@ -108,15 +108,15 @@ describe "A CloudKit::Service" do
         @response.status.should == 200
       end
 
-      it "should return a list of URIs for all owner-originated resources" do
-        @parsed_response['uris'].sort.should == ['/items/0', '/items/1', '/items/2']
+      it "should return all owner-originated documents" do
+        @parsed_response['documents'].map{|d| d['uri']}.sort.should == ['/items/0', '/items/1', '/items/2']
       end
 
       it "should sort descending on last_modified date" do
-        @parsed_response['uris'].should == ['/items/2', '/items/1', '/items/0']
+        @parsed_response['documents'].map{|d| d['uri']}.should == ['/items/2', '/items/1', '/items/0']
       end
 
-      it "should return the total number of uris" do
+      it "should return the total number of documents" do
         @parsed_response['total'].should_not be_nil
         @parsed_response['total'].should == 3
       end
@@ -138,17 +138,25 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should_not be_nil
       end
 
-      it "should return an empty list if no resources are found" do
+      it "should return an empty list if no documents are found" do
         response = @request.get('/things', VALID_TEST_AUTH)
         parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].should == []
+        parsed_response['documents'].should == []
         parsed_response['total'].should == 0
         parsed_response['offset'].should == 0
       end
 
-      it "should return a resolved link header" do
-        @response['Link'].should_not be_nil
-        @response['Link'].match("<http://example.org/items/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"").should_not be_nil
+      it "should not include deleted items" do
+        response = @request.get('/items/1', VALID_TEST_AUTH)
+        etag = response['ETag']
+        response = @request.delete(
+          '/items/1',
+          'HTTP_IF_MATCH'   => etag,
+          CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER)
+        response.status.should == 200
+        response = @request.get('/items', VALID_TEST_AUTH)
+        parsed_response = JSON.parse(response.body)
+        parsed_response['total'].should == 2
       end
 
     end
@@ -169,22 +177,16 @@ describe "A CloudKit::Service" do
       it "should accept a 0-offset array slice operator" do
         @request.put("/items/2", {:input => '{}'}.merge(VALID_TEST_AUTH))
         parsed_response = response_for_query('[0:2]')
-        parsed_response['uris'].should == ['/items/2', '/items/1']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/2', '/items/1']
         parsed_response['total'].should == 3
       end
 
       it "should accept an array slice operator with an offset" do
         @request.put("/items/2", {:input => '{}'}.merge(VALID_TEST_AUTH))
         parsed_response = response_for_query('[1:2]')
-        parsed_response['uris'].should == ['/items/1']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
         parsed_response['offset'].should == 1
         parsed_response['total'].should == 3
-      end
-
-      it "should not include JSONQuery in the Link header" do
-        json_query = Rack::Utils.escape('[0:2]')
-        response = @request.get("/items/#{json_query}", VALID_TEST_AUTH)
-        response['Link'].should_not include(json_query)
       end
 
       # The JSONQuery specs below mimic the full test suite from
@@ -199,7 +201,7 @@ describe "A CloudKit::Service" do
         # hit
         parsed_response = response_for_query("[?foo='bar']")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/0']
 
         # value miss
         parsed_response = response_for_query("[?foo='x']")
@@ -214,7 +216,7 @@ describe "A CloudKit::Service" do
         # hit
         parsed_response = response_for_query("[?rating=4]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/0']
 
         # value miss
         parsed_response = response_for_query("[?rating=7]")
@@ -228,89 +230,89 @@ describe "A CloudKit::Service" do
       it "should understand [?property>=value] when value and target are equal" do
         parsed_response = response_for_query("[?rating>=4]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/0']
       end
 
       it "should understand [?property>=value] when target is less than value" do
         parsed_response = response_for_query("[?rating>=3]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/0']
       end
 
       it "should understand [?property>=value] when target is greater than value" do
         parsed_response = response_for_query("[?rating>=5]")
         parsed_response['total'].should == 0
-        parsed_response['uris'].should == []
+        parsed_response['documents'].map{|d| d['uri']}.should == []
       end
 
       it "should understand [?property<=value] when value and target are equal" do
         parsed_response = response_for_query("[?rating<=2]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/1']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
       end
 
       it "should understand [?property<=value] when target is greater than value" do
         parsed_response = response_for_query("[?rating<=1]")
         parsed_response['total'].should == 0
-        parsed_response['uris'].should == []
+        parsed_response['documents'].map{|d| d['uri']}.should == []
       end
 
       it "should understand [?property<=value] when target is less than value" do
         parsed_response = response_for_query("[?rating<=5]")
         parsed_response['total'].should == 2
-        parsed_response['uris'].should == ['/items/1', '/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
       end
 
       it "should understand [?property>value] when target is greater than value" do
         parsed_response = response_for_query("[?rating>3]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/0']
       end
 
       it "should understand [?property>value] when target is equal to value" do
         parsed_response = response_for_query("[?rating>4]")
         parsed_response['total'].should == 0
-        parsed_response['uris'].should == []
+        parsed_response['documents'].map{|d| d['uri']}.should == []
       end
 
       it "should understand [?property>value] when target is less than value" do
         parsed_response = response_for_query("[?rating>5]")
         parsed_response['total'].should == 0
-        parsed_response['uris'].should == []
+        parsed_response['documents'].map{|d| d['uri']}.should == []
       end
 
       it "should understand [?property<value] when target is greater than value" do
         parsed_response = response_for_query("[?rating<3]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/1']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
       end
 
       it "should understand [?property<value] when target is equal to value" do
         parsed_response = response_for_query("[?rating<2]")
         parsed_response['total'].should == 0
-        parsed_response['uris'].should == []
+        parsed_response['documents'].map{|d| d['uri']}.should == []
       end
 
       it "should understand [?property<value] when target is less than value" do
         parsed_response = response_for_query("[?rating<5]")
         parsed_response['total'].should == 2
-        parsed_response['uris'].should == ['/items/1', '/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
       end
 
       it "should understand [?property!='value'] using a string for comparison" do
         parsed_response = response_for_query("[?foo!='bar']")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/1']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
       end
 
       it "should understand [?property!=value]" do
         parsed_response = response_for_query("[?rating!=4]")
         parsed_response['total'].should == 1
-        parsed_response['uris'].should == ['/items/1']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
 
         parsed_response = response_for_query("[?rating!=5]")
         parsed_response['total'].should == 2
-        parsed_response['uris'].should == ['/items/1', '/items/0']
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
       end
 
       it "should understand value extraction with [=property]"
@@ -366,97 +368,6 @@ describe "A CloudKit::Service" do
       it "should understand prioritized sorting with [/expr, /expr]"
 
       it "should understand mixed direction, prioritized sorting with [/expr, \\expr]"
-
-    end
-
-    describe "on GET /:collection/_resolved" do
-
-      before(:each) do
-        3.times do |i|
-          json = JSON.generate(:this => i.to_s)
-          @request.put("/items/#{i}", {:input => json}.merge(VALID_TEST_AUTH))
-        end
-        json = JSON.generate(:this => '4')
-        @request.put(
-          '/items/4', {:input => json}.merge(CLOUDKIT_AUTH_KEY => 'someoneelse'))
-        @response = @request.get(
-          '/items/_resolved', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
-        @parsed_response = JSON.parse(@response.body)
-      end
-
-      it "should be successful" do
-        @response.status.should == 200
-      end
-
-      it "should return all owner-originated documents" do
-        @parsed_response['documents'].map{|d| d['uri']}.sort.should == ['/items/0', '/items/1', '/items/2']
-      end
-
-      it "should sort descending on last_modified date" do
-        @parsed_response['documents'].map{|d| d['uri']}.should == ['/items/2', '/items/1', '/items/0']
-      end
-
-      it "should return the total number of documents" do
-        @parsed_response['total'].should_not be_nil
-        @parsed_response['total'].should == 3
-      end
-
-      it "should return the offset" do
-        @parsed_response['offset'].should_not be_nil
-        @parsed_response['offset'].should == 0
-      end
-
-      it "should return a Content-Type header" do
-        @response['Content-Type'].should == 'application/json'
-      end
-
-      it "should return an ETag" do
-        @response['ETag'].should_not be_nil
-      end
-
-      it "should return a Last-Modified date" do
-        @response['Last-Modified'].should_not be_nil
-      end
-
-      it "should return an empty list if no documents are found" do
-        response = @request.get('/things/_resolved', VALID_TEST_AUTH)
-        parsed_response = JSON.parse(response.body)
-        parsed_response['documents'].should == []
-        parsed_response['total'].should == 0
-        parsed_response['offset'].should == 0
-      end
-
-      it "should return an index link header" do
-        @response['Link'].should_not be_nil
-        @response['Link'].match("<http://example.org/items>; rel=\"index\"").should_not be_nil
-      end
-
-      describe "using JSONQuery" do
-
-        it "should accept a 0-offset array slice operator" do
-          json_query = Rack::Utils.escape('[0:2]')
-          response = @request.get("/items/_resolved/#{json_query}", VALID_TEST_AUTH)
-          parsed_response = JSON.parse(response.body)
-          parsed_response['documents'].map{|d| d['uri']}.should == ['/items/2', '/items/1']
-          parsed_response['total'].should == 3
-        end
-
-        it "should accept an array slice operator with an offset" do
-          json_query = Rack::Utils.escape('[1:3]')
-          response = @request.get("/items/_resolved/#{json_query}", VALID_TEST_AUTH)
-          parsed_response = JSON.parse(response.body)
-          parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1', '/items/0']
-          parsed_response['offset'].should == 1
-          parsed_response['total'].should == 3
-        end
-
-        it "should not include JSONQuery in the Link header" do
-          json_query = Rack::Utils.escape('[1:3]')
-          response = @request.get("/items/_resolved/#{json_query}", VALID_TEST_AUTH)
-          response['Link'].should_not include(json_query)
-        end
-
-      end
 
     end
 
@@ -528,114 +439,9 @@ describe "A CloudKit::Service" do
       end
 
       it "should be successful even if the current resource has been deleted" do
-        @request.delete('/items/abc', {'HTTP_IF_MATCH' => @etags.last}.merge(VALID_TEST_AUTH))
-        response = @request.get('/items/abc/versions', VALID_TEST_AUTH)
-        @response.status.should == 200
-        parsed_response = JSON.parse(response.body)
-        parsed_response['uris'].size.should == 4
-      end
-
-      it "should return a list of URIs for all versions of a resource" do
-        uris = @parsed_response['uris']
-        uris.should_not be_nil
-        uris.size.should == 4
-      end
-
-      it "should return a 404 if the resource does not exist" do
-        response = @request.get('/items/nothing/versions', VALID_TEST_AUTH)
-        response.status.should == 404
-      end
-
-      it "should return a 404 for non-owner-originated requests" do
-        response = @request.get(
-          '/items/abc/versions', CLOUDKIT_AUTH_KEY => 'someoneelse')
-        response.status.should == 404
-      end
-
-      it "should sort descending on last_modified date" do
-        @parsed_response['uris'].should == ['/items/abc'].concat(@etags[0..-2].reverse.map{|e| "/items/abc/versions/#{e}"})
-      end
-
-      it "should return the total number of uris" do
-        @parsed_response['total'].should_not be_nil
-        @parsed_response['total'].should == 4
-      end
-
-      it "should return the offset" do
-        @parsed_response['offset'].should_not be_nil
-        @parsed_response['offset'].should == 0
-      end
-
-      it "should return a Content-Type header" do
-        @response['Content-Type'].should == 'application/json'
-      end
-
-      it "should return an ETag" do
-        @response['ETag'].should_not be_nil
-      end
-
-      it "should return a Last-Modified date" do
-        @response['Last-Modified'].should_not be_nil
-      end
-
-      it "should return a resolved link header" do
-        @response['Link'].should_not be_nil
-        @response['Link'].match("<http://example.org/items/abc/versions/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\"").should_not be_nil
-      end
-
-      describe "using JSONQuery" do
-
-        it "should accept a 0-offset array slice operation" do
-          json_query = Rack::Utils.escape('[0:2]')
-          response = @request.get("/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
-          parsed_response = JSON.parse(response.body)
-          parsed_response['uris'].should == ['/items/abc', "/items/abc/versions/#{@etags[-2]}"]
-          parsed_response['total'].should == 4
-        end
-
-        it "should accept an offset parameter" do
-          json_query = Rack::Utils.escape('[1:4]')
-          response = @request.get("/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
-          parsed_response = JSON.parse(response.body)
-          parsed_response['uris'].should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
-          parsed_response['offset'].should == 1
-          parsed_response['total'].should == 4
-        end
-
-        it "should not include JSONQuery in the Link header" do
-          json_query = Rack::Utils.escape('[1:4]')
-          response = @request.get("/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
-          response['Link'].should_not include(json_query)
-        end
-
-      end
-
-    end
-
-    describe "on GET /:collections/:id/versions/_resolved" do
-
-      before(:each) do
-        @etags = []
-        4.times do |i|
-          json = JSON.generate(:this => i)
-          options = {:input => json}.merge(VALID_TEST_AUTH)
-          options.filter_merge!('HTTP_IF_MATCH' => @etags.try(:last))
-          result = @request.put('/items/abc', options)
-          @etags << JSON.parse(result.body)['etag']
-        end
-        @response = @request.get(
-          '/items/abc/versions/_resolved', {'HTTP_HOST' => 'example.org'}.merge(VALID_TEST_AUTH))
-        @parsed_response = JSON.parse(@response.body)
-      end
-
-      it "should be successful" do
-        @response.status.should == 200
-      end
-
-      it "should be successful even if the current resource has been deleted" do
         @request.delete(
           '/items/abc', {'HTTP_IF_MATCH' => @etags.last}.merge(VALID_TEST_AUTH))
-        response = @request.get('/items/abc/versions/_resolved', VALID_TEST_AUTH)
+        response = @request.get('/items/abc/versions', VALID_TEST_AUTH)
         @response.status.should == 200
         parsed_response = JSON.parse(response.body)
         parsed_response['documents'].size.should == 4
@@ -648,12 +454,12 @@ describe "A CloudKit::Service" do
       end
 
       it "should return a 404 if the resource does not exist" do
-        response = @request.get('/items/nothing/versions/_resolved', VALID_TEST_AUTH)
+        response = @request.get('/items/nothing/versions', VALID_TEST_AUTH)
         response.status.should == 404
       end
 
       it "should return a 404 for non-owner-originated requests" do
-        response = @request.get('/items/abc/versions/_resolved', CLOUDKIT_AUTH_KEY => 'someoneelse')
+        response = @request.get('/items/abc/versions', CLOUDKIT_AUTH_KEY => 'someoneelse')
         response.status.should == 404
       end
 
@@ -683,17 +489,12 @@ describe "A CloudKit::Service" do
         @response['Last-Modified'].should_not be_nil
       end
 
-      it "should return an index link header" do
-        @response['Link'].should_not be_nil
-        @response['Link'].match("<http://example.org/items/abc/versions>; rel=\"index\"").should_not be_nil
-      end
-
       describe "using JSONQuery" do
 
         it "should accept a 0-offset array slice operator" do
           json_query = Rack::Utils.escape('[0:2]')
           response = @request.get(
-            "/items/abc/versions/_resolved/#{json_query}", VALID_TEST_AUTH)
+            "/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           parsed_response['documents'].map{|d| d['uri']}.should == ['/items/abc', "/items/abc/versions/#{@etags[-2]}"]
           parsed_response['total'].should == 4
@@ -702,18 +503,11 @@ describe "A CloudKit::Service" do
         it "should accept an array slice operator with an offset" do
           json_query = Rack::Utils.escape('[1:4]')
           response = @request.get(
-            "/items/abc/versions/_resolved/#{json_query}", VALID_TEST_AUTH)
+            "/items/abc/versions/#{json_query}", VALID_TEST_AUTH)
           parsed_response = JSON.parse(response.body)
           parsed_response['documents'].map{|d| d['uri']}.should == @etags.reverse[1..-1].map{|e| "/items/abc/versions/#{e}"}
           parsed_response['offset'].should == 1
           parsed_response['total'].should == 4
-        end
-
-        it "should not include JSONQuery in the Link header" do
-          json_query = Rack::Utils.escape('[1:4]')
-          response = @request.get(
-            "/items/abc/versions/_resolved/#{json_query}", VALID_TEST_AUTH)
-          response['Link'].should_not include(json_query)
         end
 
       end
@@ -1112,24 +906,6 @@ describe "A CloudKit::Service" do
 
     end
 
-    describe "on OPTIONS /:collection/_resolved" do
-
-      before(:each) do
-        @response = @request.request('OPTIONS', '/items/_resolved', VALID_TEST_AUTH)
-      end
-
-      it "should return a 200 status" do
-        @response.status.should == 200
-      end
-
-      it "should return a list of available methods" do
-        @response['Allow'].should_not be_nil
-        methods = @response['Allow'].split(', ')
-        methods.sort.should == ['GET', 'HEAD', 'OPTIONS']
-      end
-
-    end
-
     describe "on OPTIONS /:collection/:id" do
 
       before(:each) do
@@ -1152,24 +928,6 @@ describe "A CloudKit::Service" do
 
       before(:each) do
         @response = @request.request('OPTIONS', '/items/xyz/versions', VALID_TEST_AUTH)
-      end
-
-      it "should return a 200 status" do
-        @response.status.should == 200
-      end
-
-      it "should return a list of available methods" do
-        @response['Allow'].should_not be_nil
-        methods = @response['Allow'].split(', ')
-        methods.sort.should == ['GET', 'HEAD', 'OPTIONS']
-      end
-
-    end
-
-    describe "on OPTIONS /:collection/:id/versions/_resolved" do
-
-      before(:each) do
-        @response = @request.request('OPTIONS', '/items/xyz/versions/_resolved', VALID_TEST_AUTH)
       end
 
       it "should return a 200 status" do

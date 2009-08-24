@@ -103,26 +103,12 @@ module CloudKit
 
     def inject_link_headers(request, response)
       response['Link'] = versions_link_header(request) if request.uri.resource_uri?
-      response['Link'] = resolved_link_header(request) if request.uri.resource_collection_uri?
-      response['Link'] = index_link_header(request)    if request.uri.resolved_resource_collection_uri?
-      response['Link'] = resolved_link_header(request) if request.uri.version_collection_uri?
-      response['Link'] = index_link_header(request)    if request.uri.resolved_version_collection_uri?
+      # TODO rel canonical 
     end
 
     def versions_link_header(request)
       base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.uri.uri_without_json_query}"
       "<#{base_url}/versions>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/versions\""
-    end
-
-    def resolved_link_header(request)
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{request.uri.uri_without_json_query}"
-      "<#{base_url}/_resolved>; rel=\"http://joncrosby.me/cloudkit/1.0/rel/resolved\""
-    end
-
-    def index_link_header(request)
-      index_path = request.uri.uri_without_json_query.sub(/\/_resolved(\/)*$/, '')
-      base_url = "#{request.scheme}://#{request.env['HTTP_HOST']}#{index_path}"
-      "<#{base_url}>; rel=\"index\""
     end
 
     def auth_missing?(request)

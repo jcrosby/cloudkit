@@ -247,7 +247,7 @@ describe "An OAuthFilter" do
       response = get_access_token
       response.status.should == 201
       request_tokens = @store.get('/cloudkit_oauth_request_tokens').parsed_content
-      request_tokens['uris'].size.should == 0
+      request_tokens['total'].should == 0
     end
 
   end

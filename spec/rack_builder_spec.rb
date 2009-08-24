@@ -9,7 +9,7 @@ describe "Rack::Builder" do
     end
     response = Rack::MockRequest.new(app).get('/items')
     response.status.should == 200
-    documents = JSON.parse(response.body)['uris']
+    documents = JSON.parse(response.body)['documents']
     documents.should == []
   end
 
