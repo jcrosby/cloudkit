@@ -57,6 +57,8 @@ describe "A JSONQueryExpression" do
     path = "/items/" + Rack::Utils.escape('[0:10]')
     expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
     expression.array_slice_operator?.should be_true
+    path = "/items/" + Rack::Utils.escape('[1]')
+    expression.array_slice_operator?.should be_true
     path = "/items/" + Rack::Utils.escape('[=foo]')
     expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
     expression.array_slice_operator?.should be_false
@@ -76,6 +78,9 @@ describe "A JSONQueryExpression" do
     expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
     expression.has_trailing_slice_operator?.should be_true
     path = "/items/" + Rack::Utils.escape('[0:10]')
+    expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
+    expression.has_trailing_slice_operator?.should be_true
+    path = "/items/" + Rack::Utils.escape('[1]')
     expression = CloudKit::JSONQueryExpression.from_escaped_path(path)
     expression.has_trailing_slice_operator?.should be_true
     path = "/items/" + Rack::Utils.escape('[1:100][=foo]')

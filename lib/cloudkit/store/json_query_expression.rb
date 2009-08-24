@@ -21,7 +21,7 @@ module CloudKit
 
     def slice_expressions
       @slice_expressions ||= @parts.select do |part|
-        part.match(/^\[\d*:\d*\]$/)
+        part.match(/^\[((\d*:\d*)|(\d+))\]$/)
       end
     end
 

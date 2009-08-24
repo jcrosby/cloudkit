@@ -189,6 +189,12 @@ describe "A CloudKit::Service" do
         parsed_response['total'].should == 3
       end
 
+      it "should understand [index]" do
+        parsed_response = response_for_query("[1]")
+        parsed_response['total'].should == 2
+        parsed_response['documents'].map{|d| d['uri']}.should == ['/items/1']
+      end
+
       # The JSONQuery specs below mimic the full test suite from
       # http://github.com/jcrosby/jsonquery which is also vendored in this
       # project via Rhino.
