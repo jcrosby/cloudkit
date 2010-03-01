@@ -1,12 +1,15 @@
-require 'rubygems'
+begin
+  require File.expand_path('../../.bundle/environment', __FILE__)
+rescue LoadError
+  require 'rubygems'
+  require 'bundler'
+  Bundler.setup
+end
+
+Bundler.require
 require 'erb'
-require 'json'
 require 'digest/md5'
-require 'openid'
 require 'time'
-require 'uuid'
-require 'rack'
-require 'oauth'
 require 'oauth/consumer'
 require 'oauth/request_proxy/rack_request'
 require 'oauth/server'

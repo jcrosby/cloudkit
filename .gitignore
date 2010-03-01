@@ -2,3 +2,4 @@
 *.tdb
 *.tct
 .lock
+.bundle
