@@ -10,14 +10,14 @@ dependencies:
     version: ~> 2.1
     require: 
     - openid
-  uuid: 
-    group: 
-    - :default
-    version: = 2.0.1
   oauth: 
     group: 
     - :default
     version: ~> 0.3
+  uuid: 
+    group: 
+    - :default
+    version: = 2.0.1
   rspec: 
     group: 
     - :test
@@ -32,6 +32,10 @@ dependencies:
     group: 
     - :default
     version: ~> 1.1
+  sinatra: 
+    group: 
+    - :default
+    version: ~> 0.9
   bundler: 
     group: 
     - :test
@@ -43,21 +47,23 @@ specs:
     version: 1.2.2
 - rack: 
     version: 1.1.0
+- sinatra: 
+    version: 0.9.5
 - ruby-hmac: 
     version: 0.4.0
 - rspec: 
     version: 1.3.0
 - oauth: 
     version: 0.3.6
-- ruby-openid: 
-    version: 2.1.7
-- rake: 
-    version: 0.8.7
 - macaddr: 
     version: 1.0.0
 - uuid: 
     version: 2.0.1
-hash: cd0624dae366f9c71ed6d62e20934279642637e8
+- rake: 
+    version: 0.8.7
+- ruby-openid: 
+    version: 2.1.7
+hash: a7b9cd55c481fb4a61bc8bb40aef681fd8491a30
 sources: 
 - Rubygems: 
     uri: http://gemcutter.org
