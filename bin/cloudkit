@@ -3,4 +3,4 @@ $:.unshift(File.dirname(__FILE__) + '/../lib')
 require 'cloudkit'
 
 args = ARGV.dup
-CloudKit::Command.run(args)
+CloudKit::Command.new.run(args)
