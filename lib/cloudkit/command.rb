@@ -5,6 +5,8 @@ module CloudKit
     def run(args)
       return help unless command = args.first
       case command
+      when 'run'
+        run_app
       when 'help'
         help
       else
@@ -18,6 +20,10 @@ module CloudKit
       FileUtils.mkdir(destination_root)
       copy_contents(template_root, destination_root)
       Formatador.display_line("[bold]#{@app_name} was created[/]")
+    end
+
+    def run_app
+      `rackup config.ru`
     end
 
     def help
