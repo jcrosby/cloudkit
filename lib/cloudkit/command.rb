@@ -23,6 +23,12 @@ module CloudKit
     end
 
     def run_app
+      unless File.exist?('.bundle')
+        Formatador.display_line("[yellow][bold]No gem bundle found.[/]")
+        Formatador.display_line("[green]Bundling...[/]")
+        `bundle install`
+      end
+      Formatador.display_line("[green][bold]Starting app...[/]")
       `rackup config.ru`
     end
 
