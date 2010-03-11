@@ -7,7 +7,8 @@ gem 'ruby-openid', '~> 2.1', :require => 'openid'
 gem 'json',        '~> 1.1'
 gem 'sinatra',     '~> 0.9'
 gem 'formatador',  '0.0.10'
-gem 'bundler',     '~> 0.9.10'
+gem 'bundler',     '0.9.11'
+gem 'redis',       '0.1.2'
 
 group :test do
   gem 'rake'

@@ -14,14 +14,14 @@ dependencies:
     group: 
     - :test
     version: ">= 0"
-  uuid: 
-    group: 
-    - :default
-    version: = 2.0.1
   oauth: 
     group: 
     - :default
     version: ~> 0.3
+  uuid: 
+    group: 
+    - :default
+    version: = 2.0.1
   rspec: 
     group: 
     - :test
@@ -32,44 +32,50 @@ dependencies:
     group: 
     - :default
     version: ~> 1.1
-  sinatra: 
-    group: 
-    - :default
-    version: ~> 0.9
   json: 
     group: 
     - :default
     version: ~> 1.1
+  sinatra: 
+    group: 
+    - :default
+    version: ~> 0.9
   bundler: 
     group: 
     - :default
-    version: ~> 0.9.10
+    version: = 0.9.11
+  redis: 
+    group: 
+    - :default
+    version: = 0.1.2
 specs: 
-- bundler: 
-    version: 0.9.10
-- json: 
-    version: 1.2.2
-- rack: 
-    version: 1.1.0
-- sinatra: 
-    version: 0.9.6
-- ruby-hmac: 
-    version: 0.4.0
-- rspec: 
-    version: 1.3.0
-- oauth: 
-    version: 0.3.6
+- rake: 
+    version: 0.8.7
+- formatador: 
+    version: 0.0.10
+- ruby-openid: 
+    version: 2.1.7
 - macaddr: 
     version: 1.0.0
 - uuid: 
     version: 2.0.1
-- rake: 
-    version: 0.8.7
-- ruby-openid: 
-    version: 2.1.7
-- formatador: 
-    version: 0.0.10
-hash: fefb6834168dccb8d89ed4d2a0b1069ede171ba9
+- oauth: 
+    version: 0.3.6
+- rspec: 
+    version: 1.3.0
+- ruby-hmac: 
+    version: 0.4.0
+- rack: 
+    version: 1.1.0
+- json: 
+    version: 1.2.2
+- sinatra: 
+    version: 0.9.6
+- bundler: 
+    version: 0.9.11
+- redis: 
+    version: 0.1.2
+hash: 3b4f28ccabb42a231ad35d00b551c4dac6568985
 sources: 
 - Rubygems: 
     uri: http://gemcutter.org
