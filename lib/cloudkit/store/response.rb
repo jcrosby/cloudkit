@@ -16,6 +16,10 @@ module CloudKit
       meta[key]
     end
 
+    def to_i
+      @status
+    end
+
     # Set the header specified by key to value.
     def []=(key, value)
       meta[key] = value

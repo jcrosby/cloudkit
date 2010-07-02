@@ -1,3 +1,4 @@
+require 'uri'
 module CloudKit
 
   # A CloudKit::URI wraps a URI string, adding methods useful for routing
@@ -8,8 +9,8 @@ module CloudKit
     attr_reader :string
 
     # Create a new URI with the given string.
-    def initialize(string)
-      @string = string
+    def initialize(string, escape = true)
+      @string = escape ? ::URI.escape(::URI.unescape(string)) : string
     end
 
     # Return the resource collection URI fragment.

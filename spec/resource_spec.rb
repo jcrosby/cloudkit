@@ -82,7 +82,7 @@ describe "A Resource" do
 
     it "should flatten its json structure for querying" do
       hash = CloudKit.storage_adapter.query.first
-      hash.keys.include?('foo').should be_true
+      JSON(hash['json']).keys.include?('foo').should be_true
     end
 
     it "should know it is current" do
@@ -277,7 +277,7 @@ describe "A Resource" do
       it "should find with query parameters referencing JSON elements" do
         resources = CloudKit::Resource.all(
           :collection_reference => '/items',
-          :foo => 'bar')
+          :search => { :foo => 'bar' } )
         resources.size.should == 1
         resources.first.json.should == "{\"foo\":\"bar\"}"
       end

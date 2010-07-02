@@ -6,6 +6,10 @@ describe "A URI" do
     CloudKit::URI.new('/items/123').string.should == '/items/123'
   end
 
+  it "should encode urls with spaces in them" do
+    CloudKit::URI.new('/items/1 2 3').string.should == '/items/1%202%203'
+  end
+
   it "should know its parent resource collection" do
     ['/items', '/items/123', '/items/123/versions', '/items/123/versions/abc'].each { |uri|
       CloudKit::URI.new(uri).collection_uri_fragment.should == '/items'

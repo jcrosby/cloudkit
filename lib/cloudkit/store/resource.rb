@@ -39,7 +39,7 @@ module CloudKit
         'remote_user'          => escape(@remote_user),
         'collection_reference' => @collection_reference ||= @uri.collection_uri_fragment,
         'resource_reference'   => @resource_reference ||= @uri.cannonical_uri_string
-      }.merge(escape_values(parsed_json))
+      }
       reload
     end
 

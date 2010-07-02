@@ -1,15 +1,10 @@
-begin
-  require File.expand_path('../../.bundle/environment', __FILE__)
-rescue LoadError
-  require 'rubygems'
-  require 'bundler'
-  Bundler.setup
-end
-
-Bundler.require
+require 'openid'
+require 'formatador'
+require 'json/ext'
 require 'erb'
 require 'digest/md5'
 require 'time'
+require 'uuid'
 require 'oauth/consumer'
 require 'oauth/request_proxy/rack_request'
 require 'oauth/server'
@@ -20,6 +15,7 @@ require 'cloudkit/constants'
 require 'cloudkit/exceptions'
 require 'cloudkit/util'
 require 'cloudkit/uri'
+require 'cloudkit/store/mongo_store'
 require 'cloudkit/store/memory_table'
 require 'cloudkit/store/resource'
 require 'cloudkit/store/response'
@@ -39,7 +35,6 @@ require 'cloudkit/user_store'
 include CloudKit::Constants
 
 module CloudKit
-  VERSION = '0.11.2'
 
   # Sets up the storage adapter. Defaults to development-time
   # CloudKit::MemoryTable. Also supports Rufus Tokyo Table instances. See the

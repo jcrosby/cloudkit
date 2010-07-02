@@ -1,81 +1,48 @@
---- 
-dependencies: 
-  formatador: 
-    group: 
-    - :default
-    version: = 0.0.10
-  ruby-openid: 
-    group: 
-    - :default
-    version: ~> 2.1
-    require: 
-    - openid
-  rake: 
-    group: 
-    - :test
-    version: ">= 0"
-  oauth: 
-    group: 
-    - :default
-    version: ~> 0.3
-  uuid: 
-    group: 
-    - :default
-    version: = 2.0.1
-  rspec: 
-    group: 
-    - :test
-    version: ~> 1.3
-    require: 
-    - spec
-  rack: 
-    group: 
-    - :default
-    version: ~> 1.1
-  json: 
-    group: 
-    - :default
-    version: ~> 1.1
-  sinatra: 
-    group: 
-    - :default
-    version: ~> 0.9
-  bundler: 
-    group: 
-    - :default
-    version: = 0.9.11
-  redis: 
-    group: 
-    - :default
-    version: = 0.1.2
-specs: 
-- rake: 
-    version: 0.8.7
-- formatador: 
-    version: 0.0.10
-- ruby-openid: 
-    version: 2.1.7
-- macaddr: 
-    version: 1.0.0
-- uuid: 
-    version: 2.0.1
-- oauth: 
-    version: 0.3.6
-- rspec: 
-    version: 1.3.0
-- ruby-hmac: 
-    version: 0.4.0
-- rack: 
-    version: 1.1.0
-- json: 
-    version: 1.2.2
-- sinatra: 
-    version: 0.9.6
-- bundler: 
-    version: 0.9.11
-- redis: 
-    version: 0.1.2
-hash: 3b4f28ccabb42a231ad35d00b551c4dac6568985
-sources: 
-- Rubygems: 
-    uri: http://gemcutter.org
+PATH
+  remote: .
+  specs:
+    cloudkit (0.12.0.pre)
+      bson (~> 1.1.2)
+      bson_ext (~> 1.1.2)
+      formatador (= 0.0.10)
+      json (~> 1.2.0)
+      mongo (~> 1.1.2)
+      oauth (~> 0.3)
+      rack (~> 1.1)
+      ruby-openid (~> 2.1)
+      uuid (= 2.0.1)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    bson (1.1.2)
+    bson_ext (1.1.2)
+    formatador (0.0.10)
+    json (1.2.4)
+    macaddr (1.0.0)
+    mongo (1.1.2)
+      bson (>= 1.1.1)
+    oauth (0.4.3)
+    rack (1.2.1)
+    rake (0.8.7)
+    rspec (1.3.1)
+    ruby-openid (2.1.8)
+    uuid (2.0.1)
+      macaddr (~> 1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bson (~> 1.1.2)
+  bson_ext (~> 1.1.2)
+  cloudkit!
+  formatador (= 0.0.10)
+  json (~> 1.2.0)
+  mongo (~> 1.1.2)
+  oauth (~> 0.3)
+  rack (~> 1.1)
+  rake
+  rspec (~> 1.3)
+  ruby-openid (~> 2.1)
+  uuid (= 2.0.1)

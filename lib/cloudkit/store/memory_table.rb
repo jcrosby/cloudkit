@@ -82,7 +82,13 @@ module CloudKit
     # Conditions are added using #add_condition.
     def run(table)
       table.keys.inject([]) do |result, key|
-        if @conditions.all? { |condition| table[key][condition[0]] == condition[2] }
+        if @conditions.all? do |condition| 
+            if condition[0] == 'search'
+              JSON(condition[2]).all? { |search_key, search_value| JSON(table[key]['json'])[search_key] == search_value }
+            else
+              table[key][condition[0]] == condition[2]
+            end
+          end
           result << table[key].merge(:pk => key)
         else
           result

@@ -1,15 +1,5 @@
-begin
-  require File.expand_path('../.bundle/environment', __FILE__)
-rescue LoadError
-  require 'rubygems'
-  require 'bundler'
-  Bundler.setup
-end
-
 require 'rake/clean'
 require 'spec/rake/spectask'
-
-Bundler.require(:default, :test)
 
 CLEAN.include 'doc/api'
 
