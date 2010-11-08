@@ -171,7 +171,11 @@ module CloudKit
 
     # Return the host and scheme
     def domain_root
-      "#{scheme}://#{@env['HTTP_HOST']}"
+      "#{scheme}://#{host}"
+    end
+
+    def host
+      @env['HTTP_HOST'] || "#{@env['SERVER_NAME']}:#{@env['SERVER_PORT']}"
     end
   end
 end
