@@ -29,7 +29,7 @@ EOD
   s.add_dependency 'uuid', '= 2.0.1'
   s.add_dependency 'oauth', '~> 0.3'
   s.add_dependency 'ruby-openid', '~> 2.1'
-  s.add_dependency 'json', '~> 1.2.0'
+  s.add_dependency 'json', '~> 1.4.6'
   s.add_dependency 'formatador',  '0.0.10'
   s.add_dependency 'mongo', '~> 1.1.2'
   s.add_dependency 'bson', '~> 1.1.2'
