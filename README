@@ -35,6 +35,17 @@ An explicit version of example 2, minus the default developer landing page:
   use CloudKit::Service, :collections => [:notes, :todos]
   run lambda {|env| [200, {'Content-Type' => 'text/html', 'Content-Length' => '5'}, ['HELLO']]}
 
+The same as above, using MongoDB:
+
+  require 'cloudkit'
+  CloudKit.setup_storage_adapter( CloudKit::MongoStore.new( { :hosts => [ ["localhost", 27017] ] } ) )
+  use Rack::Session::Pool
+  use CloudKit::OAuthFilter
+  use CloudKit::OpenIDFilter
+  use CloudKit::Service, :collections => [:notes, :todos]
+  run lambda {|env| [200, {'Content-Type' => 'text/html', 'Content-Length' => '5'}, ['HELLO']]}
+
+
 The same as above, using Tokyo Cabinet:
 
   require 'cloudkit'
