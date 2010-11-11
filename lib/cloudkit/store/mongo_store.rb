@@ -15,13 +15,14 @@ module CloudKit
     # @option options [String] :db_name (cloudkit) the name of the mongo db to use.
     # @option options [Array] :hosts ([ ['localhost', 27017] ]) the array of arrays listing the [ host, port ] to connect to
     # @option options [Hash] :custom_indexes a Hash of Arrays of values that will be passed to create_index, keyed on the collection name
-    # @option options [Hash] :sage_write_options ({{ :fsync => true, :w => (@hosts.length > 1) ? 2 : 1, :wtimeout => 25000 }) a Hash to be passed into Mongo write operations
+    # @option options [Hash] :safe_write_options ({{ :fsync => (@hosts.length > 1) ? false : true, :w => (@hosts.length > 1) ? 2 : 1, :wtimeout => 25000 }) a Hash to be passed into Mongo write operations
     #
     def initialize(options = {})
       @db_name = options.delete(:db_name) { |key|  'cloudkit' }
       @collection_name = options.delete(:collection_name) { |key| 'collections' }
       @hosts = options.delete(:hosts) { |key| [ ['localhost',27017] ] }
-      @safe_write_options = options.delete(:safe_write_options) { |key| { :fsync => true, :w => (@hosts.length > 1) ? 2 : 1, :wtimeout => 25000 } }
+      many_hosts = (@hosts.length > 1) ? true : false
+      @safe_write_options = options.delete(:safe_write_options) { |key| { :fsync => (many_hosts ? false : true), :w => (many_hosts ? 2 : 1), :wtimeout => 25000 } }
       @custom_indexes = options.delete(:custom_indexes) { |key| Hash.new }
       @connection = Mongo::Connection.multi(@hosts, options)
 
