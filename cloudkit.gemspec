@@ -17,7 +17,7 @@ EOD
   s.email             = "jon@joncrosby.me"
   s.homepage          = "http://getcloudkit.com"
 
-  s.files             = Dir["#{dir}/lib/**/*.rb"] + Dir["#{dir}/examples/**/*"] + Dir["#{dir}/doc/**/*"]
+  s.files             = Dir["#{dir}/lib/**/*.rb"] + Dir["#{dir}/examples/**/*"] + Dir["#{dir}/doc/**/*"] + %w{README CHANGES COPYING TODO Gemfile Rakefile}
   s.require_paths     = ["lib"]
   s.test_files        = Dir["#{dir}/spec/**/*.rb"]
 
@@ -25,13 +25,17 @@ EOD
 
   s.rubyforge_project = "cloudkit"
 
-  s.add_dependency 'rack', '~> 1.1'
-  s.add_dependency 'uuid', '= 2.0.1'
-  s.add_dependency 'oauth', '~> 0.3'
-  s.add_dependency 'ruby-openid', '~> 2.1'
-  s.add_dependency 'json', '~> 1.4.6'
-  s.add_dependency 'formatador',  '0.0.10'
-  s.add_dependency 'mongo', '~> 1.1.2'
-  s.add_dependency 'bson', '~> 1.1.2'
-  s.add_dependency 'bson_ext', '~> 1.1.2'
+  s.add_runtime_dependency 'rack', '~> 1.1'
+  s.add_runtime_dependency 'uuid', '= 2.0.1'
+  s.add_runtime_dependency 'oauth', '~> 0.3'
+  s.add_runtime_dependency 'ruby-openid', '~> 2.1'
+  s.add_runtime_dependency 'json', '~> 1.4.6'
+  s.add_runtime_dependency 'formatador',  '0.0.10'
+  s.add_runtime_dependency 'mongo', '~> 1.1.2'
+  s.add_runtime_dependency 'bson', '~> 1.1.2'
+  s.add_runtime_dependency 'bson_ext', '~> 1.1.2'
+
+  s.add_development_dependency 'rake', '~>0.8.7'
+  s.add_development_dependency 'rspec', '~> 2.1.0'
+
 end

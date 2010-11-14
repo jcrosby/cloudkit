@@ -1,20 +1,15 @@
 require 'rake/clean'
-require 'spec/rake/spectask'
+
+require 'rspec/core'
+require 'rspec/core/rake_task'
 
 CLEAN.include 'doc/api'
 
 task :default => :spec
 
-desc "Run all examples (or a specific spec with TASK=xxxx)"
-Spec::Rake::SpecTask.new('spec') do |t|
-  t.spec_opts  = ["-c"]
-  t.spec_files = begin
-    if ENV["TASK"] 
-      ENV["TASK"].split(',').map { |task| "spec/**/#{task}_spec.rb" }
-    else
-      FileList['spec/**/*_spec.rb']
-    end
-  end
+desc "Run all specs in spec directory"
+RSpec::Core::RakeTask.new do |task|
+  task.rspec_opts = ["-c"]
 end
 
 desc 'Generate rdoc'
