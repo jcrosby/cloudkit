@@ -36,5 +36,22 @@ describe "A MongoStore" do
     end
   end
 
+  describe "when initialized without options" do
+    it "should have the right safe_write_options" do
+      @table.safe_write_options.should == { :fsync => true, :w => 1, :wtimeout => 25000 }
+    end
+  end
+
+  describe "when initialized with a non default :fsync" do
+    before do
+      @table = CloudKit::MongoStore.new(:safe_write_options => { :fsync => false })
+    end
+
+    it "should have the right safe_write_options" do
+      @table.safe_write_options.should == { :fsync => false, :w => 1, :wtimeout => 25000 }
+    end
+  end
+
+
 end
 

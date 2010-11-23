@@ -4,7 +4,7 @@ require 'bson'
 module CloudKit
   class MongoStore
 
-    attr_reader :db
+    attr_reader :db, :safe_write_options
 
     # Creates a MongoStore, setting up the db and internal meta_collection if necessary
     #
@@ -22,7 +22,7 @@ module CloudKit
       @collection_name = options.delete(:collection_name) { |key| 'collections' }
       @hosts = options.delete(:hosts) { |key| [ ['localhost',27017] ] }
       many_hosts = (@hosts.length > 1) ? true : false
-      @safe_write_options = options.delete(:safe_write_options) { |key| { :fsync => (many_hosts ? false : true), :w => (many_hosts ? 2 : 1), :wtimeout => 25000 } }
+      @safe_write_options = { :fsync => (many_hosts ? false : true), :w => (many_hosts ? 2 : 1), :wtimeout => 25000 }.merge(options.delete(:safe_write_options) { |k| {} })
       @custom_indexes = options.delete(:custom_indexes) { |key| Hash.new }
       @connection = Mongo::Connection.multi(@hosts, options)
 
