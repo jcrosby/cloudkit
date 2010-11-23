@@ -4,7 +4,7 @@ PATH
     cloudkit (0.12.0.pre1)
       bson (~> 1.1.2)
       bson_ext (~> 1.1.2)
-      formatador (= 0.0.10)
+      formatador (~> 0.0.10)
       json (~> 1.4.6)
       mongo (~> 1.1.2)
       oauth (~> 0.3)
@@ -45,7 +45,7 @@ DEPENDENCIES
   bson (~> 1.1.2)
   bson_ext (~> 1.1.2)
   cloudkit!
-  formatador (= 0.0.10)
+  formatador (~> 0.0.10)
   json (~> 1.4.6)
   mongo (~> 1.1.2)
   oauth (~> 0.3)
