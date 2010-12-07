@@ -36,6 +36,8 @@ include CloudKit::Constants
 
 module CloudKit
 
+  class InvalidRecord < RuntimeError; end
+
   # Sets up the storage adapter. Defaults to development-time
   # CloudKit::MemoryTable. Also supports Rufus Tokyo Table instances. See the
   # examples directory for Cabinet and Tyrant Table examples.

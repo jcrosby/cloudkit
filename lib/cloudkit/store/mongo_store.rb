@@ -170,7 +170,7 @@ module CloudKit
 
         record
       else
-        nil
+        raise CloudKit::InvalidRecord.new("pk (#{pk.to_s}) bad or Invalid Record: #{record.inspect}")
       end
     end
 

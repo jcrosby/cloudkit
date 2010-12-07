@@ -23,9 +23,10 @@ module CloudKit
     def []=(key, record)
       if valid?(record)
         @keys << key unless @hash[key]
-        return @hash[key] = record
+        @hash[key] = record
+      else
+        raise CloudKit::InvalidRecord.new(record.inspect)
       end
-      nil
     end
 
     # Retrieve the hash record for a given key.

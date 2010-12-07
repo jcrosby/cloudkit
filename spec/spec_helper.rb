@@ -33,18 +33,21 @@ end
 
 shared_examples_for "a CloudKit storage adapter" do
   it "which should reject non-hash records" do
-    @table['a'] = 1
-    @table['a'].should be_nil
+    expect {
+      @table['a'] = 1
+    }.to 
   end
 
   it "which should reject non-string record keys" do
-    @table['a'] = {:foo => 'bar'}
-    @table['a'].should be_nil
+    expect {
+      @table['a'] = {:foo => 'bar'}
+    }.to raise_error(CloudKit::InvalidRecord)
   end
 
   it "which should reject non-string record values" do
-    @table['a'] = {'foo' => 1}
-    @table['a'].should be_nil
+    expect {
+      @table['a'] = {'foo' => 1}
+    }.to raise_error(CloudKit::InvalidRecord)
   end
 
   it "which should get and set values for table keys like a hash" do
