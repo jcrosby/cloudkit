@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/spec_helper'
+require 'spec_helper'
 include CloudKit::Util
 
 describe "CloudKit::Util" do

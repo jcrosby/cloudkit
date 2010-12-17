@@ -1,6 +1,9 @@
 $:.unshift File.expand_path(File.dirname(__FILE__)) + '/../lib'
 require 'cloudkit'
 require 'rexml/document'
+require 'rack/test'
+
+require 'support/fixtures'
 
 TEST_REMOTE_USER = '/cloudkit_users/abcdef'.freeze
 VALID_TEST_AUTH = {CLOUDKIT_AUTH_KEY => TEST_REMOTE_USER}.freeze
@@ -17,17 +20,84 @@ def app_headers(content)
   {'Content-Type' => 'text/html', 'Content-Length' => content.length.to_s}
 end
 
-module Rack
-  class Config
-    def initialize(app, &block)
-      @app = app
-      @block = block
-    end
+#module Rack
+#  class Config
+#    def initialize(app, &block)
+#      @app = app
+#      @block = block
+#    end
+#
+#    def call(env)
+#      @block.call(env)
+#      @app.call(env)
+#    end
+#  end
+#end
 
-    def call(env)
-      @block.call(env)
-      @app.call(env)
+RSpec.configure do |conf|
+  conf.include Rack::Test::Methods
+
+  def app
+    CloudKit.setup_storage_adapter
+    Rack::Builder.app do |builder|
+      expose *CloudKit::Fixtures.collections
     end
+    #CloudKit::Server.app
+  end
+
+  def json_body
+    JSON.parse(subject.body)
+  end
+
+  #conf.before(:each) do
+  #  CloudKit.storage_adapter.clear
+  #end
+
+end
+
+shared_examples_for "it was successful" do
+  its(:status) { should satisfy { |status| [200, 201].include?(status)} }
+end
+
+shared_examples_for "it should have the proper update response structure" do
+
+  it "should have the right structure" do
+    json_body.keys.sort.should == ["etag", "last_modified", "ok", "uri"]
+    json_body["ok"].should == true
+    json_body["etag"].should_not be_empty
+    json_body["uri"].should_not be_empty
+    json_body["last_modified"].should_not be_empty
+  end
+end
+
+shared_examples_for "it should have the proper creation response structure" do
+
+  it_should_behave_like "it should have the proper update response structure"
+
+  its(:headers) { should include("Location") }
+end
+
+shared_examples_for "it has uris" do
+
+  it "should have an items object" do
+    json_body.should include('uris')
+  end
+
+  it "should have at least one uri" do
+    json_body['uris'].should have_at_least(1).uri
+  end
+end
+
+shared_examples_for "it's response is json encoded" do
+
+  it "has the correct Content-Type header" do
+    subject.headers["Content-Type"].should == "application/json"
+  end
+
+  it "body should be parsable JSON" do
+    expect {
+      json_body
+    }.to_not raise_exception(JSON::ParserError)
   end
 end
 
