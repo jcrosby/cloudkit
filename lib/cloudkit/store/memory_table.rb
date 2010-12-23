@@ -85,7 +85,23 @@ module CloudKit
       table.keys.inject([]) do |result, key|
         if @conditions.all? do |condition| 
             if condition[0] == 'search'
-              JSON(condition[2]).all? { |search_key, search_value| JSON(table[key]['json'])[search_key] == search_value }
+              JSON.parse(condition[2]).all? do |search_key, search_value|
+                target = JSON.parse(table[key]['json'])
+                search_key.split('.').each do |sub|
+                  case target
+                  when Hash
+                    target = target[sub]
+                  when Array
+                    target = target.map { |item| item[sub] }.compact.flatten
+                  end
+                end
+                case target
+                when Array
+                  target.any? { |item| item == search_value }
+                else
+                  target == search_value
+                end
+              end
             else
               table[key][condition[0]] == condition[2]
             end
@@ -94,6 +110,15 @@ module CloudKit
         else
           result
         end
+      end
+    end
+
+    def locate_targets(term,targets)
+      case targets
+      when Hash
+        targets = [targets[term]]
+      when Array
+        targets = targets.select { |item| item.has_key?(term) }.map 
       end
     end
 

@@ -181,4 +181,35 @@ shared_examples_for "a CloudKit storage adapter" do
       {'foo' => 'baz', 'color' => 'blue', :pk => 'b'}]
   end
 
+  context "with a json sub document" do
+    it "should be able to search for items using a json query" do
+      @table['a'] = {'foo' => 'bar', 'json' => {'letter' => 'a'}.to_json}
+      @table['b'] = {'foo' => 'bar', 'json' => {'letter' => 'b'}.to_json}
+      @table.query { |q|
+        q.add_condition('search', :eql, {'letter' => 'a'}.to_json )
+      }.should == [{"json" => "{\"letter\":\"a\"}", "foo" => "bar", :pk => "a"}]
+    end
+
+    it "should query for items nested in hashes in sub arrays" do
+      @table['white'] = { 'json' => { 'name' => 'white', 'composition' => [{'red' => '255'},{'blue' => '255'},{'green' => '255'}] }.to_json }
+      @table['black'] = { 'json' => { 'name' => 'black', 'composition' => [{'red' => '0'},{'blue' => '0'},{'green' => '0'}] }.to_json }
+      @table['red'] = { 'json' => { 'name' => 'red', 'composition' => [{'red' => '255'},{'blue' => '0'},{'green' => '0'}] }.to_json }
+      @table['green'] = { 'json' => { 'name' => 'green', 'composition' => [{'red' => '0'},{'blue' => '0'},{'green' => '255'}] }.to_json }
+      @table['blue'] = { 'json' => { 'name' => 'blue', 'composition' => [{'red' => '0'},{'blue' => '255'},{'green' => '0'}] }.to_json }
+      @table.query { |q|
+        q.add_condition('search',:eql,{'composition.red' => '0'}.to_json)
+      }.should == [{"json"=>"{\"name\":\"black\",\"composition\":[{\"red\":\"0\"},{\"blue\":\"0\"},{\"green\":\"0\"}]}", :pk=>"black"},
+                   {"json"=>"{\"name\":\"green\",\"composition\":[{\"red\":\"0\"},{\"blue\":\"0\"},{\"green\":\"255\"}]}", :pk=>"green"},
+                   {"json"=>"{\"name\":\"blue\",\"composition\":[{\"red\":\"0\"},{\"blue\":\"255\"},{\"green\":\"0\"}]}", :pk=>"blue"}]
+    end
+
+    it "should query for items nested in hashes in sub arrays in hashes in sub arrays" do
+      @table["one"] = {'json' => { 'services' => [ {'nodes' => [ {'name' => 'one'},{'name' => 'two'} ] } ] }.to_json }
+      @table["two"] = {'json' => { 'services' => [ {'nodes' => [ {'name' => 'three'},{'name' => 'four'} ] } ] }.to_json }
+      @table.query { |q|
+        q.add_condition('search', :eql, {'services.nodes.name' => 'three'}.to_json)
+      }.should == [{:pk=>"two", "json"=>"{\"services\":[{\"nodes\":[{\"name\":\"three\"},{\"name\":\"four\"}]}]}"}]
+    end
+  end
+
 end
