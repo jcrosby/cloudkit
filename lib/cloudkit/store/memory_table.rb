@@ -92,7 +92,7 @@ module CloudKit
                   when Hash
                     target = target[sub]
                   when Array
-                    target = target.map { |item| item[sub] }.compact.flatten
+                    target = target.map { |item| item[sub] if item.is_a?(Hash) }.compact.flatten
                   end
                 end
                 case target

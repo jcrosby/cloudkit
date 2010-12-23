@@ -206,6 +206,7 @@ shared_examples_for "a CloudKit storage adapter" do
     it "should query for items nested in hashes in sub arrays in hashes in sub arrays" do
       @table["one"] = {'json' => { 'services' => [ {'nodes' => [ {'name' => 'one'},{'name' => 'two'} ] } ] }.to_json }
       @table["two"] = {'json' => { 'services' => [ {'nodes' => [ {'name' => 'three'},{'name' => 'four'} ] } ] }.to_json }
+      @table["three"] = {'json' => { 'services' => [ {'nodes' => [ 0 ,'bang' ] } ] }.to_json }
       @table.query { |q|
         q.add_condition('search', :eql, {'services.nodes.name' => 'three'}.to_json)
       }.should == [{:pk=>"two", "json"=>"{\"services\":[{\"nodes\":[{\"name\":\"three\"},{\"name\":\"four\"}]}]}"}]
