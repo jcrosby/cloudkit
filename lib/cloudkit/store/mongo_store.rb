@@ -416,7 +416,6 @@ module CloudKit
         if condition[0] == 'search'
           search_conditions = JSON(condition[2])
           search_conditions.each do |key, value|
-            debugger
             mongo_query = elem_matcherize(key, value)
             mongo_query["json.#{mongo_query.keys.first}"] = mongo_query.delete(mongo_query.keys.first)
             fquery.update(mongo_query)
