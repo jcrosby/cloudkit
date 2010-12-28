@@ -60,7 +60,7 @@ module CloudKit
       q.run(self)
     end
 
-    protected 
+    protected
 
     def valid?(record)
       return false unless record.is_a?(Hash)
@@ -78,29 +78,50 @@ module CloudKit
       @conditions = []
     end
 
+    def element_matcher(search, conditions, document)
+      search_path = search.split('.')
+      key         = search_path.shift
+      doc_key     = (key && key[-2..-1] == '[]') ? key[0..-3] : key
+
+      if key
+        new_document = case document
+                       when Hash
+                         document[doc_key]
+                       when Array
+                         document.map {|t| t[doc_key] if t.is_a?(Hash) }.compact.flatten
+                       end
+
+        element_matcher(search_path.join('.'), conditions, new_document)
+      elsif search_path.empty?
+        case document
+        when Array
+          document.any? do |item|
+            element_matcher(search, conditions, item)
+          end
+        when Hash
+          case conditions
+          when Hash
+            conditions.all? {|c_k, c_v| document[c_k] == c_v }
+          else
+            document[key] == conditions
+          end
+        else
+          document == conditions
+        end
+      end
+    end
+
     # Run a query against the provided table using the conditions stored in this
     # MemoryQuery instance. Returns all records that match all conditions.
     # Conditions are added using #add_condition.
     def run(table)
       table.keys.inject([]) do |result, key|
-        if @conditions.all? do |condition| 
+        if @conditions.all? do |condition|
             if condition[0] == 'search'
               JSON.parse(condition[2]).all? do |search_key, search_value|
                 target = JSON.parse(table[key]['json'])
-                search_key.split('.').each do |sub|
-                  case target
-                  when Hash
-                    target = target[sub]
-                  when Array
-                    target = target.map { |item| item[sub] if item.is_a?(Hash) }.compact.flatten
-                  end
-                end
-                case target
-                when Array
-                  target.any? { |item| item == search_value }
-                else
-                  target == search_value
-                end
+
+                element_matcher(search_key, search_value, target)
               end
             else
               table[key][condition[0]] == condition[2]
@@ -118,7 +139,7 @@ module CloudKit
       when Hash
         targets = [targets[term]]
       when Array
-        targets = targets.select { |item| item.has_key?(term) }.map 
+        targets = targets.select { |item| item.has_key?(term) }.map
       end
     end
 

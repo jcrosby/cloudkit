@@ -38,5 +38,6 @@ EOD
   s.add_development_dependency 'rake', '~>0.8.7'
   s.add_development_dependency 'rspec', '~> 2.2.0'
   s.add_development_dependency 'rack-test'
+  s.add_development_dependency 'ruby-debug'
 
 end

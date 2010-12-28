@@ -388,6 +388,24 @@ module CloudKit
       @conditions = []
     end
 
+    def elem_matcherize(search, conditions)
+      search_path = search.split('.')
+      bracketed_element = search_path.detect {|p| p[-2..-1] == '[]' }
+
+      if bracketed_element
+        key = search_path.slice!(0..search_path.index(bracketed_element)).join('.')
+      else
+        key = search_path.slice!(0..-1).join('.')
+      end
+      doc_key = (key && key[-2..-1] == '[]') ? key[0..-3] : key
+
+      if key != doc_key
+        { doc_key => { '$elemMatch' => search_path.empty? ? conditions : elem_matcherize(search_path.join('.'), conditions) } }
+      elsif key == doc_key
+        { doc_key => search_path.empty? ? conditions : elem_matcherize(search_path.join('.'), conditions) }
+      end
+    end
+
     # Runs the query
     # Usually called only by Cloudkit::MongoStore.query
     #
@@ -398,7 +416,10 @@ module CloudKit
         if condition[0] == 'search'
           search_conditions = JSON(condition[2])
           search_conditions.each do |key, value|
-            fquery.update("json.#{key}" => value)
+            debugger
+            mongo_query = elem_matcherize(key, value)
+            mongo_query["json.#{mongo_query.keys.first}"] = mongo_query.delete(mongo_query.keys.first)
+            fquery.update(mongo_query)
           end
           fquery
         else

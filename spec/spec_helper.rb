@@ -105,7 +105,7 @@ shared_examples_for "a CloudKit storage adapter" do
   it "which should reject non-hash records" do
     expect {
       @table['a'] = 1
-    }.to 
+    }.to
   end
 
   it "which should reject non-string record keys" do
@@ -210,6 +210,15 @@ shared_examples_for "a CloudKit storage adapter" do
       @table.query { |q|
         q.add_condition('search', :eql, {'services.nodes.name' => 'three'}.to_json)
       }.should == [{:pk=>"two", "json"=>"{\"services\":[{\"nodes\":[{\"name\":\"three\"},{\"name\":\"four\"}]}]}"}]
+    end
+
+    it "should query for a full sub item match" do
+      @table["one"] = {'json' => { 'services' => [ {'nodes' => [ {'name' => 'one', 'kind' => 'good'},{'name' => 'two','kind' => 'bad'} ] } ] }.to_json }
+      @table["two"] = {'json' => { 'services' => [ {'nodes' => [ {'name' => 'one', 'kind' => 'bad'},{'name' => 'four'} ] } ] }.to_json }
+      @table.query { |q|
+        q.add_condition("search", :eql, {"services[].nodes[]" => {"name" => "one", "kind" => "bad"}}.to_json)
+      }.map {|r| r.update("json" => JSON.parse(r["json"])) }.
+        should == [{:pk=>"two", "json"=>JSON.parse("{\"services\":[{\"nodes\":[{\"kind\":\"bad\",\"name\":\"one\"},{\"name\":\"four\"}]}]}")}]
     end
   end
 
