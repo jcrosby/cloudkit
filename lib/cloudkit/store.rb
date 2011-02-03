@@ -5,6 +5,17 @@ module CloudKit
     include ResponseHelpers
     include CloudKit::Util
 
+    def self.transaction
+      open('.lock', 'w+') do |f|
+        f.flock(File::LOCK_EX)
+        begin
+          yield
+        ensure
+          f.flock(File::LOCK_UN)
+        end
+      end
+    end
+
     # Initialize a new Store. All resources in a Store are automatically
     # versioned.
     #
@@ -111,14 +122,17 @@ module CloudKit
       return status_405(methods) unless methods.include?('DELETE')
       return invalid_entity_type unless @collections.include?(uri.collection_type)
       return etag_required       unless options[:etag]
-      resource = CloudKit::Resource.first(options.excluding(:etag).merge(:uri => uri.string))
-      return status_404 unless (resource && (resource.remote_user == options[:remote_user]))
-      return status_410 if resource.deleted?
-      return status_412 if resource.etag != options[:etag]
 
-      resource.delete
-      archived_resource = resource.previous_version
-      return json_meta_response(archived_resource.uri.string, archived_resource.etag, resource.last_modified)
+      self.class.transaction do
+        resource = CloudKit::Resource.first(options.excluding(:etag).merge(:uri => uri.string))
+        return status_404 unless (resource && (resource.remote_user == options[:remote_user]))
+        return status_410 if resource.deleted?
+        return status_412 if resource.etag != options[:etag]
+
+        resource.delete
+        archived_resource = resource.previous_version
+        return json_meta_response(archived_resource.uri.string, archived_resource.etag, resource.last_modified)
+      end
     end
 
     # Build a response containing the allowed methods for a given URI.
@@ -191,7 +205,7 @@ module CloudKit
       end
       result
     end
-    
+
     def storage_adapter
       CloudKit.storage_adapter
     end
@@ -283,13 +297,15 @@ module CloudKit
     # Update the resource at the specified URI. Requires the :etag option.
     def update_resource(uri, options)
       JSON.parse(options[:json]) rescue (return status_422)
-      resource = CloudKit::Resource.first(
-        options.excluding(:json, :etag).merge(:uri => uri.string))
-      return status_404    unless (resource && (resource.remote_user == options[:remote_user]))
-      return etag_required unless options[:etag]
-      return status_412    unless options[:etag] == resource.etag
-      resource.update(options[:json])
-      return json_meta_response(uri.string, resource.etag, resource.last_modified)
+      self.class.transaction do
+        resource = CloudKit::Resource.first(
+          options.excluding(:json, :etag).merge(:uri => uri.string))
+        return status_404    unless (resource && (resource.remote_user == options[:remote_user]))
+        return etag_required unless options[:etag]
+        return status_412    unless options[:etag] == resource.etag
+        resource.update(options[:json])
+        return json_meta_response(uri.string, resource.etag, resource.last_modified)
+      end
     end
 
     # Bundle a collection of results as a list of URIs for the response.

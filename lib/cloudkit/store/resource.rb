@@ -49,13 +49,11 @@ module CloudKit
     # modify resources that are not current.
     def update(json, remote_user=nil)
       raise HistoricalIntegrityViolation unless current?
-      transaction do
-        record = CloudKit.storage_adapter[@id]
-        record['uri'] = "#{@uri.string}/versions/#{@etag}"
-        record['archived'] = escape(true)
-        CloudKit.storage_adapter[@id] = record
-        self.class.create(@uri, json, remote_user || @remote_user)
-      end
+      record = CloudKit.storage_adapter[@id]
+      record['uri'] = "#{@uri.string}/versions/#{@etag}"
+      record['archived'] = escape(true)
+      CloudKit.storage_adapter[@id] = record
+      self.class.create(@uri, json, remote_user || @remote_user)
       reload
     end
 
@@ -65,16 +63,14 @@ module CloudKit
     # are not current.
     def delete
       raise HistoricalIntegrityViolation unless current?
-      transaction do
-        original_uri = @uri
-        record = CloudKit.storage_adapter[@id]
-        record['uri'] = "#{@uri.string}/versions/#{@etag}"
-        record['archived'] = escape(true)
-        @uri = wrap_uri(record['uri'])
-        @archived = unescape(record['archived'])
-        CloudKit.storage_adapter[@id] = record
-        self.class.new(original_uri, @json, @remote_user, {:deleted => true}).save
-      end
+      original_uri = @uri
+      record = CloudKit.storage_adapter[@id]
+      record['uri'] = "#{@uri.string}/versions/#{@etag}"
+      record['archived'] = escape(true)
+      @uri = wrap_uri(record['uri'])
+      @archived = unescape(record['archived'])
+      CloudKit.storage_adapter[@id] = record
+      self.class.new(original_uri, @json, @remote_user, {:deleted => true}).save
       reload
     end
 
@@ -253,17 +249,6 @@ module CloudKit
 
     def escape_values(hash)
       hash.inject({}) { |memo, pair| memo.merge({pair[0] => escape(pair[1])}) }
-    end
-
-    def transaction
-      open('.lock', 'w+') do |f|
-        f.flock(File::LOCK_EX)
-        begin 
-          yield
-        ensure
-          f.flock(File::LOCK_UN)
-        end
-      end
     end
   end
 end
