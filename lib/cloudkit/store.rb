@@ -101,10 +101,12 @@ module CloudKit
       return status_405(methods) unless methods.include?('PUT')
       return invalid_entity_type unless @collections.include?(uri.collection_type)
       return data_required       unless options[:json]
-      current_resource = resource(uri, options.excluding(:json, :etag, :remote_user))
-      return update_resource(uri, options) if current_resource.status == 200
-      return current_resource if current_resource.status == 410
-      create_resource(uri, options)
+      self.class.transaction do
+        current_resource = resource(uri, options.excluding(:json, :etag, :remote_user))
+        return update_resource(uri, options) if current_resource.status == 200
+        return current_resource if current_resource.status == 410
+        create_resource(uri, options)
+      end
     end
 
     # Create a resource in a given collection.
@@ -297,15 +299,13 @@ module CloudKit
     # Update the resource at the specified URI. Requires the :etag option.
     def update_resource(uri, options)
       JSON.parse(options[:json]) rescue (return status_422)
-      self.class.transaction do
-        resource = CloudKit::Resource.first(
-          options.excluding(:json, :etag).merge(:uri => uri.string))
-        return status_404    unless (resource && (resource.remote_user == options[:remote_user]))
-        return etag_required unless options[:etag]
-        return status_412    unless options[:etag] == resource.etag
-        resource.update(options[:json])
-        return json_meta_response(uri.string, resource.etag, resource.last_modified)
-      end
+      resource = CloudKit::Resource.first(
+        options.excluding(:json, :etag).merge(:uri => uri.string))
+      return status_404    unless (resource && (resource.remote_user == options[:remote_user]))
+      return etag_required unless options[:etag]
+      return status_412    unless options[:etag] == resource.etag
+      resource.update(options[:json])
+      return json_meta_response(uri.string, resource.etag, resource.last_modified)
     end
 
     # Bundle a collection of results as a list of URIs for the response.
