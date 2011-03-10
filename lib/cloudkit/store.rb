@@ -12,11 +12,14 @@ module CloudKit
     # FIXME: Move this into the storage adaptor so it works across multiple
     #        application instances
     #
+    # For 'safety' sake we're going to lock at the collection level for now.
+    # FIXME: revisit ^^
+    #
     # @param [CloudKit::URI] uri the uri to lock on
     # @param [Symbol] operation the operation being performed
     def self.transaction(uri, operation)
       # generate a unique filename from the uri
-      fname = File.join(Dir.tmpdir,".gatekeeper_lock#{uri.current_resource_uri.gsub('/','.')}")
+      fname = File.join(Dir.tmpdir,".gatekeeper_lock.#{uri.components[0]}")
       # determine the lock type.
       # reads (aka get/head/options) locks are shared so multiple gets can happen at once
       # destructive/altering operations (like put, post, delete) are exclusive 
