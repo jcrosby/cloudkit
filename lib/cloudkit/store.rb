@@ -1,3 +1,5 @@
+require 'tmpdir'
+
 module CloudKit
 
   # A functional storage interface with HTTP semantics and pluggable adapters.
@@ -5,9 +7,32 @@ module CloudKit
     include ResponseHelpers
     include CloudKit::Util
 
-    def self.transaction
-      open('.lock', 'w+') do |f|
-        f.flock(File::LOCK_EX)
+    # Locks operations around the URI so that the store returns consistent data
+    #
+    # FIXME: Move this into the storage adaptor so it works across multiple
+    #        application instances
+    #
+    # @param [CloudKit::URI] uri the uri to lock on
+    # @param [Symbol] operation the operation being performed
+    def self.transaction(uri, operation)
+      # generate a unique filename from the uri
+      fname = File.join(Dir.tmpdir,".gatekeeper_lock#{uri.current_resource_uri.gsub('/','.')}")
+      # determine the lock type.
+      # reads (aka get/head/options) locks are shared so multiple gets can happen at once
+      # destructive/altering operations (like put, post, delete) are exclusive 
+      # locks
+      lock_type = case operation
+                  when :get, :options, :head
+                    File::LOCK_SH
+                  when :put, :post, :delete
+                    File::LOCK_EX
+                  else
+                    File::LOCK_EX
+                  end
+
+      #Do the locking around the block
+      open(fname,File::RDWR|File::CREAT) do |f|
+        f.flock(lock_type)
         begin
           yield
         ensure
@@ -67,13 +92,15 @@ module CloudKit
     def get(uri, options={})
       return invalid_entity_type                        if !valid_collection_type?(uri.collection_type)
       return meta                                       if uri.meta_uri?
-      return resource_collection(uri, options)          if uri.resource_collection_uri?
-      return resolved_resource_collection(uri, options) if uri.resolved_resource_collection_uri?
-      return resource(uri, options)                     if uri.resource_uri?
-      return version_collection(uri, options)           if uri.version_collection_uri?
-      return resolved_version_collection(uri, options)  if uri.resolved_version_collection_uri?
-      return resource_version(uri, options)             if uri.resource_version_uri?
-      status_404
+      self.class.transaction(uri, :get) do
+        return resource_collection(uri, options)          if uri.resource_collection_uri?
+        return resolved_resource_collection(uri, options) if uri.resolved_resource_collection_uri?
+        return resource(uri, options)                     if uri.resource_uri?
+        return version_collection(uri, options)           if uri.version_collection_uri?
+        return resolved_version_collection(uri, options)  if uri.resolved_version_collection_uri?
+        return resource_version(uri, options)             if uri.resource_version_uri?
+        status_404
+      end
     end
 
     # Retrieve the same items as the get method, minus the content/body. Using
@@ -83,13 +110,16 @@ module CloudKit
     def head(uri, options={})
       return invalid_entity_type unless @collections.include?(uri.collection_type)
       if uri.resource_uri? || uri.resource_version_uri?
-        # ETag and Last-Modified are already stored for single items, so a slight
-        # optimization can be made for HEAD requests.
-        result = CloudKit::Resource.first(options.merge(:uri => uri.string))
-        return status_404.head unless result
-        return status_410.head if result.deleted?
-        return response(200, '', result.etag, result.last_modified)
+        self.class.transaction(uri, :head) do
+          # ETag and Last-Modified are already stored for single items, so a slight
+          # optimization can be made for HEAD requests.
+          result = CloudKit::Resource.first(options.merge(:uri => uri.string))
+          return status_404.head unless result
+          return status_410.head if result.deleted?
+          return response(200, '', result.etag, result.last_modified)
+        end
       else
+        #Since this calls get we don't need to lock as get handles that already
         get(uri, options).head
       end
     end
@@ -101,7 +131,7 @@ module CloudKit
       return status_405(methods) unless methods.include?('PUT')
       return invalid_entity_type unless @collections.include?(uri.collection_type)
       return data_required       unless options[:json]
-      self.class.transaction do
+      self.class.transaction(uri, :put) do
         current_resource = resource(uri, options.excluding(:json, :etag, :remote_user))
         return update_resource(uri, options) if current_resource.status == 200
         return current_resource if current_resource.status == 410
@@ -115,7 +145,9 @@ module CloudKit
       return status_405(methods) unless methods.include?('POST')
       return invalid_entity_type unless @collections.include?(uri.collection_type)
       return data_required       unless options[:json]
-      create_resource(uri, options)
+      self.class.transaction(uri, :post) do
+        create_resource(uri, options)
+      end
     end
 
     # Delete the resource specified by the URI. Requires the :etag option.
@@ -125,7 +157,7 @@ module CloudKit
       return invalid_entity_type unless @collections.include?(uri.collection_type)
       return etag_required       unless options[:etag]
 
-      self.class.transaction do
+      self.class.transaction(uri, :delete) do
         resource = CloudKit::Resource.first(options.excluding(:etag).merge(:uri => uri.string))
         return status_404 unless (resource && (resource.remote_user == options[:remote_user]))
         return status_410 if resource.deleted?
@@ -138,6 +170,7 @@ module CloudKit
     end
 
     # Build a response containing the allowed methods for a given URI.
+    # probably doesn't need a transaction
     def options(uri)
       methods = methods_for_uri(uri)
       allow(methods)
