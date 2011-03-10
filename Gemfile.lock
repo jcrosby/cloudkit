@@ -1,12 +1,12 @@
 PATH
   remote: .
   specs:
-    cloudkit (0.12.0.pre10)
+    cloudkit (0.12.1)
       bson (~> 1.1.2)
       bson_ext (~> 1.1.2)
       formatador (~> 0.0.10)
       json (~> 1.4.6)
-      mongo (~> 1.1.2)
+      mongo (= 1.1.2)
       oauth (~> 0.3)
       rack (~> 1.1)
       ruby-openid (~> 2.1)
@@ -15,17 +15,17 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    bson (1.1.2)
-    bson_ext (1.1.2)
+    bson (1.1.5)
+    bson_ext (1.1.5)
     columnize (0.3.2)
     diff-lcs (1.1.2)
-    formatador (0.0.10)
+    formatador (0.0.16)
     json (1.4.6)
     linecache (0.43)
     macaddr (1.0.0)
     mongo (1.1.2)
       bson (>= 1.1.1)
-    oauth (0.4.3)
+    oauth (0.4.4)
     rack (1.2.1)
     rack-test (0.5.6)
       rack (>= 1.0)
@@ -51,17 +51,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bson (~> 1.1.2)
-  bson_ext (~> 1.1.2)
   cloudkit!
-  formatador (~> 0.0.10)
-  json (~> 1.4.6)
-  mongo (~> 1.1.2)
-  oauth (~> 0.3)
-  rack (~> 1.1)
   rack-test
   rake (~> 0.8.7)
   rspec (~> 2.2.0)
   ruby-debug
   ruby-openid (~> 2.1)
-  uuid (= 2.0.1)

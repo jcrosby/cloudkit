@@ -31,7 +31,7 @@ EOD
   s.add_runtime_dependency 'ruby-openid', '~> 2.1'
   s.add_runtime_dependency 'json', '~> 1.4.6'
   s.add_runtime_dependency 'formatador',  '~>0.0.10'
-  s.add_runtime_dependency 'mongo', '~> 1.1.2'
+  s.add_runtime_dependency 'mongo', '= 1.1.2'
   s.add_runtime_dependency 'bson', '~> 1.1.2'
   s.add_runtime_dependency 'bson_ext', '~> 1.1.2'
 

@@ -1,3 +1,3 @@
 module CloudKit
-  VERSION = '0.12.0.pre10'
+  VERSION = '0.12.1'
 end
